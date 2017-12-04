@@ -580,6 +580,8 @@ struct REF_STATE {
     double *heat_capacity;
     /*double *thermal_conductivity;*/
     double *gravity;
+    // DJB EBA
+    double *dis;
     /*double *Tadi;*/
 };
 

@@ -61,6 +61,10 @@ void mat_prop_allocate(struct All_variables *E)
     /* reference profile of heat capacity */
     E->refstate.heat_capacity = (double *) malloc((noz+1)*sizeof(double));
 
+    // DJB EBA
+    /* dissipation scaling */
+    E->refstate.dis = (double *) malloc((noz+1)*sizeof(double));
+
     /* reference profile of thermal conductivity */
     /*E->refstate.thermal_conductivity = (double *) malloc((noz+1)*sizeof(double));*/
 
@@ -101,13 +105,13 @@ void reference_state(struct All_variables *E)
     }
 
     if(E->parallel.me == 0) {
-      fprintf(stderr, "   nz     radius      depth    rho              layer\n");
+      fprintf(stderr, "   nz     radius      depth        rho        dis     layer\n"); // DJB EBA
     }
     if(E->parallel.me < E->parallel.nprocz)
         for(i=1; i<=E->lmesh.noz; i++) {
-            fprintf(stderr, "%6d %11f %11f %11e %5i\n",
+            fprintf(stderr, "%6d %11f %11f %11f %11f %5i\n",
                     i+E->lmesh.nzs-1, E->sx[1][3][i], 1-E->sx[1][3][i],
-                    E->refstate.rho[i],layers_r(E,E->sx[1][3][i]));
+                    E->refstate.rho[i],E->refstate.dis[i],layers_r(E,E->sx[1][3][i])); // DJB EBA
         }
 
     return;
@@ -119,7 +123,7 @@ static void read_refstate(struct All_variables *E)
     FILE *fp;
     int i;
     char buffer[255];
-    double not_used1, not_used2, not_used3;
+    double not_used1, not_used2; // DJB EBA
 
     fp = fopen(E->refstate.filename, "r");
     if(fp == NULL) {
@@ -140,9 +144,9 @@ static void read_refstate(struct All_variables *E)
                   &(E->refstate.gravity[i]),
                   &(E->refstate.thermal_expansivity[i]),
                   &(E->refstate.heat_capacity[i]),
+                  &(E->refstate.dis[i], // DJB EBA
                   &not_used1,
-                  &not_used2,
-                  &not_used3) != 7) {
+                  &not_used2) != 7) {
             fprintf(stderr,"Error while reading file '%s'\n", E->refstate.filename);
             exit(8);
         }
@@ -175,6 +179,7 @@ static void adams_williamson_eos(struct All_variables *E)
 	E->refstate.gravity[i] = 1;
 	E->refstate.thermal_expansivity[i] = 1;
 	E->refstate.heat_capacity[i] = 1;
+        E->refstate.dis[i] = 1; // DJB EBA
 	/*E->refstate.thermal_conductivity[i] = 1;*/
 	/*E->refstate.Tadi[i] = (E->control.adiabaticT0 + E->control.surface_temp) * exp(E->control.disptn_number * z) - E->control.surface_temp;*/
     }
@@ -261,6 +266,7 @@ static void murnaghan_eos(struct All_variables *E)
 	E->refstate.rho[i] = rho[j];
 	E->refstate.gravity[i] = 1;
 	E->refstate.heat_capacity[i] = 1;
+        E->refstate.dis[i] = 1; // DJB EBA
 
         ks = pow(rho[j]/rho[gnoz], k0p);
 	E->refstate.thermal_expansivity[i] = rho[j] / ks;

@@ -780,8 +780,8 @@ static void process_visc_heating(struct All_variables *E, int m,
                                  double *heating)
 {
     void strain_rate_2_inv();
-    int e, i;
-    double visc, temp;
+    int e, ez, i; // DJB EBA
+    double visc, temp, matprop; // DJB EBA
     float *strain_sqr;
     const int vpts = VPOINTS3D;
 
@@ -793,11 +793,16 @@ static void process_visc_heating(struct All_variables *E, int m,
     strain_rate_2_inv(E, m, strain_sqr, 0);
 
     for(e=1; e<=E->lmesh.nel; e++) {
+        /* DJB EBA */
+        ez = (e - 1) % E->lmesh.elz + 1;
+        matprop = 0.5
+            * (E->refstate.dis[ez] +
+               E->refstate.dis[ez + 1]);
         visc = 0.0;
         for(i = 1; i <= vpts; i++)
             visc += E->EVi[m][(e-1)*vpts + i];
 
-        heating[e] = temp * visc * strain_sqr[e];
+        heating[e] = matprop * temp * visc * strain_sqr[e]; // DJB EBA
     }
 
     free(strain_sqr);
@@ -816,9 +821,11 @@ static void process_adi_heating(struct All_variables *E, int m,
     temp2 = E->control.disptn_number / ends;
     for(e=1; e<=E->lmesh.nel; e++) {
         ez = (e - 1) % E->lmesh.elz + 1;
-        matprop = 0.125
+        matprop = 0.0625 // DJB EBA
             * (E->refstate.thermal_expansivity[ez] +
                E->refstate.thermal_expansivity[ez + 1])
+            * (E->refstate.dis[ez] + // DJB EBA
+               E->refstate.dis[ez + 1])
             * (E->refstate.rho[ez] + E->refstate.rho[ez + 1])
             * (E->refstate.gravity[ez] + E->refstate.gravity[ez + 1]);
 
@@ -852,9 +859,11 @@ static void latent_heating(struct All_variables *E, int m,
 
     for(e=1; e<=E->lmesh.nel; e++) {
         ez = (e - 1) % E->lmesh.elz + 1;
-        matprop = 0.125
+        matprop = 0.0625 // DJB EBA
             * (E->refstate.thermal_expansivity[ez] +
                E->refstate.thermal_expansivity[ez + 1])
+            * (E->refstate.dis[ez] + // DJB EBA
+               E->refstate.dis[ez + 1])
             * (E->refstate.rho[ez] + E->refstate.rho[ez + 1])
             * (E->refstate.gravity[ez] + E->refstate.gravity[ez + 1]);
 
