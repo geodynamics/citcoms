@@ -58,23 +58,28 @@ None of these changes have been implemented in the new code yet
 
 #### Slab and lithosphere assimilation (grep for 'DJB SLAB')
 1. lith\_age\_depth\_function
-2. lith\_age\_exponent
-3. lith\_age\_min
-4. lith\_age\_stencil\_value
-5. slab\_assim
-6. slab\_assim\_file
-7. sten\_temp output
+1. lith\_age\_exponent
+1. lith\_age\_min
+1. lith\_age\_stencil\_value
+1. slab\_assim
+1. slab\_assim\_file
+1. sten\_temp output
     
 #### Composition (grep for 'DJB COMP')
 1. hybrid_method
-2. increased memory for tracer arrays
+1. increased memory for tracer arrays
 
 #### Viscosity structures (grep for 'DJB VISC')
 1. case 20, used in Flament et al. (2013, 2014)
-2. case 21, used in Flament et al. (2014), model TC8
-3. case 22, used in Flament et al. (2014), model TC7
-4. case 23, used in Flament et al. (2014), model TC9
-5. case 24, used in Zhang et al. (2010) and Bower et al. (2013)
+1. case 21, used in Flament et al. (2014), model TC8
+1. case 22, used in Flament et al. (2014), model TC7
+1. case 23, used in Flament et al. (2014), model TC9
+1. case 24, used in Zhang et al. (2010) and Bower et al. (2013)
+1. case 25, used by Flament for Extendend-Boussinesq (EBA) models
+1. case 26, used by Flament for EBA models
+1. case 27, used by Flament for EBA models
+1. case 28, used by Flament for EBA models
+1. case 29, used by Flament for EBA models *(see issue)*
 
 #### Output time (grep for 'DJB TIME')
 1. output time modification [NOT IMPLEMENTED, ONLY PLACEHOLDERS]
