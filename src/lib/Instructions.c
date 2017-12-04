@@ -1603,7 +1603,9 @@ static void output_parse_optional(struct  All_variables *E)
     E->output.comp_el = 0;
     E->output.comp_nd = 0;
     E->output.heating = 0;
-    E->output.sten_temp = 0; // DJB SLAB
+    E->output.temp_sph = 0; // DJB OUT
+    E->output.comp_sph = 0; // DJB OUT
+    E->output.sten_temp = 0; // DJB SLAB DJB OUT
 
     while(1) {
         /* get next field */
@@ -1653,6 +1655,11 @@ static void output_parse_optional(struct  All_variables *E)
                 fprintf(E->fp, "Total temperature contrast = %f K\n", E->data.ref_temperature);
             }
         }
+        // DJB OUT
+        else if(strcmp(prev, "comp_sph")==0)
+            E->output.comp_sph = 1;
+        else if(strcmp(prev, "temp_sph")==0)
+            E->output.temp_sph = 1;
         else if(strcmp(prev, "tracer")==0)
             E->output.tracer = 1;
         else if(strcmp(prev, "comp_el")==0)

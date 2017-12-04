@@ -671,9 +671,12 @@ struct Output {
     int tracer;       /* whether to output tracer coordinate */
     int comp_el;      /* whether to output composition at elements */
     int comp_nd;      /* whether to output composition at nodes */
-    /* DJB SLAB */
+    /* DJB SLAB DJB OUT*/
     int sten_temp;    /* whether to output slab temp stencil */
-    
+    /* DJB OUT */
+    int temp_sph;     /* whether to output spherical harmonics for temperature */
+    int comp_sph;     /* whether to output spherical harmonics for composition */
+ 
     int heating;      /* whether to output heating terms at elements */
 
 

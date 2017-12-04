@@ -49,10 +49,12 @@ void output_surf_botm(struct All_variables *, int);
 void output_geoid(struct All_variables *, int);
 void output_stress(struct All_variables *, int);
 void output_horiz_avg(struct All_variables *, int);
-void output_sten_temp(struct All_variables *, int); // DJB SLAB
+void output_sten_temp(struct All_variables *, int); // DJB SLAB DJB OUT
 void output_tracer(struct All_variables *, int);
 void output_pressure(struct All_variables *, int);
 void output_heating(struct All_variables *, int);
+void output_temp_sph(struct All_variables *, int); // DJB OUT
+void output_comp_sph(struct All_variables *, int); // DJB OUT
 
 extern void parallel_process_termination();
 extern void heat_flux(struct All_variables *);
@@ -150,6 +152,12 @@ void output(struct All_variables *E, int cycles)
 
   if (E->output.seismic)
       output_seismic(E, cycles);
+
+  if (E->output.comp_sph && E->composition.on) // DJB OUT
+      output_comp_sph(E, cycles);
+
+  if (E->output.temp_sph) // DJB OUT
+      output_temp_sph(E, cycles);
 
   if(E->output.tracer && E->control.tracer)
       output_tracer(E, cycles);
@@ -824,6 +832,121 @@ void output_heating(struct All_variables *E, int cycles)
     return;
 }
 
+// DJB OUT
+/* used template from debug_sphere_expansion */
+void output_temp_sph(struct All_variables *E, int cycles)
+{
+    /* expand temperature field (which should be a sph. harm. load) */
+    int m, i, j, k, p, node;
+    int ll, mm;
+    float *TT[NCS], *sph_harm[2];
+    char output_file[255];
+    FILE *fp1;
+
+    for(m=1;m<=E->sphere.caps_per_proc;m++)
+        TT[m] = (float *) malloc ((E->lmesh.nsf+1)*sizeof(float));
+
+    /* sin coeff */
+    sph_harm[0] = (float*)malloc(E->sphere.hindice*sizeof(float));
+    /* cos coeff */
+    sph_harm[1] = (float*)malloc(E->sphere.hindice*sizeof(float));
+
+    if(E->parallel.me < E->parallel.nprocz) {
+        sprintf(output_file,"%s.temp_sph.%d.%d", E->control.data_file,
+                E->parallel.me, cycles);
+        fp1=fopen(output_file,"w");
+    }    
+
+    for(k=1;k<=E->lmesh.noz;k++)  {
+        for(m=1;m<=E->sphere.caps_per_proc;m++)
+            for(i=1;i<=E->lmesh.noy;i++)
+                for(j=1;j<=E->lmesh.nox;j++)  {
+                    node= k + (j-1)*E->lmesh.noz + (i-1)*E->lmesh.nox*E->lmesh.noz;
+                    p = j + (i-1)*E->lmesh.nox;
+                    TT[m][p] = E->T[m][node];
+                }
+
+        /* expand TT into spherical harmonics */
+        sphere_expansion(E, TT, sph_harm[0], sph_harm[1]);
+
+        /* only the first nprocz CPU needs output */
+        if(E->parallel.me < E->parallel.nprocz) {
+            for (ll=0;ll<=E->output.llmax;ll++)
+                for (mm=0; mm<=ll; mm++)   {
+                    p = E->sphere.hindex[ll][mm];
+                    fprintf(fp1, "T expanded layer=%d ll=%d mm=%d -- %12g %12g\n",
+                            k+E->lmesh.nzs-1, ll, mm,
+                            sph_harm[0][p], sph_harm[1][p]);
+                }
+        }
+    }
+
+    if(E->parallel.me < E->parallel.nprocz) {
+        fclose(fp1);
+    }
+
+    return;
+}
+
+// DJB OUT
+/* used template from debug_sphere_expansion */
+/* TODO:i this only outputs the last tracer flavour in the array */
+void output_comp_sph(struct All_variables *E, int cycles)
+{
+    /* expand composition field (which should be a sph. harm. load) */
+    int m, i, j, k, p, t, node;
+    int ll, mm;
+    float *CC[NCS], *sph_harm[2];
+    char output_file[255];
+    FILE *fp1;
+
+    for(m=1;m<=E->sphere.caps_per_proc;m++)
+        CC[m] = (float *) malloc ((E->lmesh.nsf+1)*sizeof(float));
+
+    /* sin coeff */
+    sph_harm[0] = (float*)malloc(E->sphere.hindice*sizeof(float));
+    /* cos coeff */
+    sph_harm[1] = (float*)malloc(E->sphere.hindice*sizeof(float));
+
+    if(E->parallel.me < E->parallel.nprocz) {
+        sprintf(output_file,"%s.comp_sph.%d.%d", E->control.data_file,
+                E->parallel.me, cycles);
+        fp1=fopen(output_file,"w");
+    }
+
+    for(k=1;k<=E->lmesh.noz;k++)  {
+        for(m=1;m<=E->sphere.caps_per_proc;m++)
+            for(i=1;i<=E->lmesh.noy;i++)
+                for(j=1;j<=E->lmesh.nox;j++)  {
+                    node= k + (j-1)*E->lmesh.noz + (i-1)*E->lmesh.nox*E->lmesh.noz;
+                    p = j + (i-1)*E->lmesh.nox;
+                    for(t=0;t<E->composition.ncomp;t++) {
+                       /* FIXME: only the last composition is stored */ 
+                       CC[m][p] = E->composition.comp_node[m][t][node];
+                    }
+                }
+
+        /* expand TT into spherical harmonics */
+        sphere_expansion(E, CC, sph_harm[0], sph_harm[1]);
+
+        /* only the first nprocz CPU needs output */
+        if(E->parallel.me < E->parallel.nprocz) {
+            for (ll=0;ll<=E->output.llmax;ll++)
+                for (mm=0; mm<=ll; mm++)   {
+                    p = E->sphere.hindex[ll][mm];
+                    fprintf(fp1, "C expanded layer=%d ll=%d mm=%d -- %12g %12g\n",
+                            k+E->lmesh.nzs-1, ll, mm,
+                            sph_harm[0][p], sph_harm[1][p]);
+                }
+        }
+    }
+
+    if(E->parallel.me < E->parallel.nprocz) {
+        fclose(fp1);
+    }
+
+    return;
+}
 
 void output_time(struct All_variables *E, int cycles)
 {
