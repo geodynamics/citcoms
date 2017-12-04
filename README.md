@@ -70,8 +70,9 @@ None of these changes have been implemented in the new code yet
 1. sten\_temp output
     
 #### Composition (grep for 'DJB COMP')
-1. hybrid_method
+1. hybrid\_method
 1. increased memory for tracer arrays
+1. turn off tracer warnings using itracer\_warnings in input cfg file
 
 #### Viscosity structures (grep for 'DJB VISC')
 1. case 20, used in Flament et al. (2013, 2014)
@@ -87,22 +88,21 @@ None of these changes have been implemented in the new code yet
 
 #### Output time (grep for 'DJB TIME')
 1. output time by Myr as well as/rather than number of time steps
-     - modifications made in main time loop in bin/Citcom.c
-     - needs testing
-1. exit code when 0 Ma reached (TODO)
+    - modifications made in main time loop in bin/Citcom.c
+    - needs testing
+1. exit time loop for negative ages (\<1 Ma)
+    - exit\_at\_present
 
 ### Code features NOT implemented
 
 1. internal velocity bcs (I don't think these are used by anyone anyway)
-2. outputs of heating terms, divv
-3. tracer density for elements and nodes output (added by Ting, see svn r52 through r55)
-4. buoyancy restart for dynamic topography (exclude buoyancy) (see svn r85)
-5. time exit routine (added by Ting, see svn r57)
-6. composition and temperature spherical harmonics
-7. anything from Rakib (see Rakib's code in above section)
-8. reverse gravity acceleraton (added by Ting, see svn r76) for SBI
+1. outputs of heating terms, divv
+1. tracer density for elements and nodes output (added by Ting, see svn r52 through r55)
+1. buoyancy restart for dynamic topography (exclude buoyancy) (see svn r85)
+1. composition and temperature spherical harmonics
+1. anything from Rakib (see Rakib's code in above section)
+1. reverse gravity acceleraton (added by Ting, see svn r76) for SBI
    note that this appears to have been subsequently removed in r88?
-9. turn off itracer_warnings
 
 ### Log of features implemented from legacy code
 1. Adv\_diff -> COMPLETE
