@@ -144,7 +144,7 @@ static void read_refstate(struct All_variables *E)
                   &(E->refstate.gravity[i]),
                   &(E->refstate.thermal_expansivity[i]),
                   &(E->refstate.heat_capacity[i]),
-                  &(E->refstate.dis[i], // DJB EBA
+                  &(E->refstate.dis[i]), // DJB EBA
                   &not_used1,
                   &not_used2) != 7) {
             fprintf(stderr,"Error while reading file '%s'\n", E->refstate.filename);
