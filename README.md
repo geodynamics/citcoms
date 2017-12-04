@@ -63,17 +63,17 @@ None of these changes have been implemented in the new code yet
 #### Slab and lithosphere assimilation (grep for 'DJB SLAB')
 1. ```lith_age_depth_function``` (bool)
 1. ```lith_age_exponent``` (double)
-1. lith\_age\_min (double)
-1. lith\_age\_stencil\_value (double)
-1. slab\_assim (bool)
-1. slab\_assim\_file (char)
-1. sten\_temp as an output option (char)
+1. ```lith_age_min``` (double)
+1. ```lith_age_stencil_value``` (double)
+1. ```slab_assim``` (bool)
+1. ```slab_assim_file``` (char)
+1. ```sten_temp``` as an output option (char)
     
 #### Composition (grep for 'DJB COMP')
-1. hybrid\_method (bool)
+1. ```hybrid_method``` (bool)
 1. increase memory for tracer arrays (icushion parameter)
 1. user note: you should turn off tracer warnings using:
-    ```itracer\_warnings=off```
+    ```itracer_warnings=off```
    in input cfg file
 
 #### Viscosity structures (grep for 'DJB VISC')
