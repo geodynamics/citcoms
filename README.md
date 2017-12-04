@@ -61,8 +61,8 @@ None of these changes have been implemented in the new code yet
 ### Code features implemented
 
 #### Slab and lithosphere assimilation (grep for 'DJB SLAB')
-1. lith\_age\_depth\_function (bool)
-1. lith\_age\_exponent (double)
+1. ```lith_age_depth_function``` (bool)
+1. ```lith_age_exponent``` (double)
 1. lith\_age\_min (double)
 1. lith\_age\_stencil\_value (double)
 1. slab\_assim (bool)
