@@ -561,6 +561,7 @@ struct CONTROL {
     int total_v_solver_calls;
 
     int record_every_Myr; // DJB TIME
+    int exit_at_present; // DJB TIME
     int checkpoint_frequency;
     int record_every;
     int record_all_until;

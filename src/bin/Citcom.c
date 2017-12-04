@@ -210,7 +210,8 @@ int main(argc,argv)
     (E->next_buoyancy_field)(E);
     /* */
 
-    /* DJB TIME here can add ability to exit time loop when zero age reached */
+    /* original condition to exit the time loop */
+    /* Note DJB TIME amendment further below */
     if(((E->advection.total_timesteps < E->advection.max_total_timesteps) &&
 	(E->advection.timesteps < E->advection.max_timesteps)) ||
        (E->advection.total_timesteps < E->advection.min_timesteps) )
@@ -248,6 +249,11 @@ int main(argc,argv)
                 last_age_in_MY = age_in_MY; // update
             }
         }
+    }
+
+    /* DJB TIME now an additional condition to exit the loop */
+    if( (E->control.exit_at_present) && (E->data.timedir >= 0) && (age_in_MY<-1.0) ){
+        E->control.keep_going = 0;
     }
 
 

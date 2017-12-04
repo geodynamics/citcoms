@@ -639,6 +639,7 @@ void read_initial_settings(struct All_variables *E)
   input_boolean("use_cbf_topo",&(E->control.use_cbf_topo),"off",m); /* make default on later XXX TWB */
 
   input_int("storage_spacing_Myr",&(E->control.record_every_Myr),"0",m); // DJB TIME
+  input_boolean("exit_at_present",&(E->control.exit_at_present),"0",m); // DJB TIME
   input_int("storage_spacing",&(E->control.record_every),"10",m);
   input_int("checkpointFrequency",&(E->control.checkpoint_frequency),"100",m);
   input_int("cpu_limits_in_seconds",&(E->control.record_all_until),"5",m);
