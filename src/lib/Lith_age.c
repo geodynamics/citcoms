@@ -50,7 +50,7 @@ void lith_age_input(struct All_variables *E)
   E->control.slab_assim = 0; // DJB SLAB
 
   input_int("lith_age",&(E->control.lith_age),"0",m);
-  input_int("slab_assim",&(E->control.slab_assim),"0",m); // DJB SLAB
+  input_bool("slab_assim",&(E->control.slab_assim),"0",m); // DJB SLAB
 
 #ifdef USE_GGRD
   input_int("ggrd_age_control",&(E->control.ggrd.age_control),"0",m); /* if > 0, will use top  E->control.ggrd.mat_control layers and assign a prefactor for the viscosity */
@@ -64,7 +64,7 @@ void lith_age_input(struct All_variables *E)
     input_string("lith_age_file",E->control.lith_age_file,"",m);
     input_float("lith_age_depth",&(E->control.lith_age_depth),"0.0471",m);
     /* DJB SLAB */
-    input_int("lith_age_depth_function",&(E->control.lith_age_depth_function),"0",m);
+    input_bool("lith_age_depth_function",&(E->control.lith_age_depth_function),"0",m);
     input_float("lith_age_exponent",&(E->control.lith_age_exponent),"0",m);
     input_float("lith_age_min",&(E->control.lith_age_min),"0",m);
     input_float("lith_age_stencil_value",&(E->control.lith_age_stencil_value),"-999",m);
