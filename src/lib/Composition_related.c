@@ -67,7 +67,7 @@ void composition_input(struct All_variables *E)
         } */
 
         /* DJB COMP */
-        input_bool("hybrid_method",&(E->composition.hybrid_method),"0",m);
+        input_boolean("hybrid_method",&(E->composition.hybrid_method),"0",m);
 
         if (E->composition.ibuoy_type==0)
             E->composition.ncomp = E->trace.nflavors;
