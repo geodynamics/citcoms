@@ -1,0 +1,216 @@
+------------------------------------------------------------------------
+r88 | danb | 2014-11-27 20:53:55 +0100 (Thu, 27 Nov 2014) | 1 line
+
+initial allocation of memory for tracer arrays is still less-than-ideal, but increasing icushion is a quick fix to ensure that reading tracers in from a file does not crash the code
+------------------------------------------------------------------------
+r84 | tyang | 2014-11-21 19:40:31 +0100 (Fri, 21 Nov 2014) | 2 lines
+
+Compiling flag removed.
+
+------------------------------------------------------------------------
+r83 | tyang | 2014-11-21 19:37:15 +0100 (Fri, 21 Nov 2014) | 2 lines
+
+Move the location of the brace.
+
+------------------------------------------------------------------------
+r80 | danb | 2014-11-20 03:40:45 +0100 (Thu, 20 Nov 2014) | 1 line
+
+adding curly brackets for clarity - does not change code function
+------------------------------------------------------------------------
+r79 | danb | 2014-11-19 22:09:50 +0100 (Wed, 19 Nov 2014) | 1 line
+
+ability to exclude sources of buoyancy above a user-specified znode.  Feature request by NF.
+------------------------------------------------------------------------
+r78 | danb | 2014-04-01 06:22:27 +0200 (Tue, 01 Apr 2014) | 1 line
+
+temp_sph and comp_sph are now separate outputs and should be specified in the output_optional field of the CitcomS input cfg file
+------------------------------------------------------------------------
+r77 | danb | 2014-03-13 22:55:25 +0100 (Thu, 13 Mar 2014) | 1 line
+
+modified version of Tracer_setup.py with improved memory management to ensure that the code does not crash when many millions of tracers are read in with different flavours
+------------------------------------------------------------------------
+r76 | tyang | 2014-03-12 19:53:03 +0100 (Wed, 12 Mar 2014) | 4 lines
+
+Reverse gravity acceleration when calculating body forces for negative gravacc cases.
+What you need for performing SBI (simple backward integration) is just reversing the plate reconstruction files and gravacc in *.cfg files.
+Normal cases with positive gravacc is not affected.
+
+------------------------------------------------------------------------
+r75 | danb | 2014-02-19 20:24:26 +0100 (Wed, 19 Feb 2014) | 1 line
+
+commenting out testing
+------------------------------------------------------------------------
+r74 | danb | 2014-02-19 19:51:55 +0100 (Wed, 19 Feb 2014) | 1 line
+
+fixing compiler errors
+------------------------------------------------------------------------
+r73 | danb | 2014-02-19 19:38:05 +0100 (Wed, 19 Feb 2014) | 1 line
+
+minimum age/depth constraint
+------------------------------------------------------------------------
+r72 | danb | 2014-02-19 18:45:40 +0100 (Wed, 19 Feb 2014) | 1 line
+
+improving logic and fixing a bug
+------------------------------------------------------------------------
+r71 | danb | 2014-02-19 17:38:19 +0100 (Wed, 19 Feb 2014) | 1 line
+
+fixing various compiler errors
+------------------------------------------------------------------------
+r70 | danb | 2014-02-19 06:59:19 +0100 (Wed, 19 Feb 2014) | 1 line
+
+making lithosphere assimilation depth a function of age.  Will finish in the next day or so (wont work at present so dont update)
+------------------------------------------------------------------------
+r69 | danb | 2014-02-13 00:03:37 +0100 (Thu, 13 Feb 2014) | 1 line
+
+cosmetic changes - no difference to functionality.  Some testing comments
+------------------------------------------------------------------------
+r68 | danb | 2014-02-05 06:42:14 +0100 (Wed, 05 Feb 2014) | 1 line
+
+switching to doubles
+------------------------------------------------------------------------
+r67 | danb | 2014-01-29 20:07:46 +0100 (Wed, 29 Jan 2014) | 1 line
+
+bug fix for thermal boundary conditions at the top and bottom surface
+------------------------------------------------------------------------
+r66 | danb | 2014-01-24 22:33:27 +0100 (Fri, 24 Jan 2014) | 1 line
+
+commented out case structure which is not required for slab assimilation.  Might help to speed up performance (marginally)
+------------------------------------------------------------------------
+r65 | danb | 2014-01-24 22:28:49 +0100 (Fri, 24 Jan 2014) | 1 line
+
+reversed previous changes now testing is complete.  This version is more streamlined
+------------------------------------------------------------------------
+r64 | danb | 2014-01-24 05:56:49 +0100 (Fri, 24 Jan 2014) | 1 line
+
+Rearranged Lith_age.c so it is almost identical to Mike's original implementation except for LOGICAL && instead of BITWISE & operators
+------------------------------------------------------------------------
+r63 | nflament | 2014-01-20 02:27:48 +0100 (Mon, 20 Jan 2014) | 1 line
+
+Added more comments and references for cases 20-23
+------------------------------------------------------------------------
+r62 | danb | 2014-01-18 02:31:34 +0100 (Sat, 18 Jan 2014) | 1 line
+
+added Zhang et al. (2010) rheology, although note this is somewhat hard-coded
+------------------------------------------------------------------------
+r61 | danb | 2014-01-18 02:15:20 +0100 (Sat, 18 Jan 2014) | 1 line
+
+commonly used viscosity structures for data assimilation work are now in the 20s
+------------------------------------------------------------------------
+r60 | danb | 2014-01-17 20:47:36 +0100 (Fri, 17 Jan 2014) | 1 line
+
+implemented hybrid_method switch  Code compiles and seems to work fine, but others should run some of their own tests to make sure the behavior is as expect and consistent with previous runs
+------------------------------------------------------------------------
+r59 | danb | 2013-12-17 18:22:44 +0100 (Tue, 17 Dec 2013) | 1 line
+
+removing 'intvbc' flag because it wasn't doing anything
+------------------------------------------------------------------------
+r58 | danb | 2013-12-16 22:27:05 +0100 (Mon, 16 Dec 2013) | 1 line
+
+bug fix for lith_age.c to fix lithosphere assimilation for non-deforming regions
+------------------------------------------------------------------------
+r57 | tyang | 2013-12-04 21:34:31 +0100 (Wed, 04 Dec 2013) | 2 lines
+
+Add the ability of exiting the run when the age is larger than -1 Ma, i.e. 1 Myrs after today. It will help save time and memory. This is quite ugly now for (i) it modified output_time instead of the main loop in Citcom.c. This is hard for me because the time loop in Citcom.c has been replaced by its pyre counterpart. (ii) You should go to Instruction.c to manually set E->control.ExitAtPresent=0 if you want to disable this function. 
+
+------------------------------------------------------------------------
+r56 | danb | 2013-11-21 01:10:52 +0100 (Thu, 21 Nov 2013) | 1 line
+
+Bug fix for no assimilation regions reported by NF.  This bug has existed since r37, although only affecting no assimilation regions.
+------------------------------------------------------------------------
+r55 | tyang | 2013-11-14 19:11:12 +0100 (Thu, 14 Nov 2013) | 3 lines
+
+fix the minor error in calculating the average element volume when more than 1 CPU exists in the z direction.
+Now the tracer density at each nodes represent the number of tracers in a small block which center on the nodes and have volumes equal to the average volume of all the elements.
+
+------------------------------------------------------------------------
+r54 | danb | 2013-11-14 18:25:46 +0100 (Thu, 14 Nov 2013) | 1 line
+
+adding Tings other two files that are necessary for plotting the density of tracers
+------------------------------------------------------------------------
+r53 | danb | 2013-11-06 22:00:31 +0100 (Wed, 06 Nov 2013) | 1 line
+
+dep eggs
+------------------------------------------------------------------------
+r52 | tyang | 2013-10-29 23:17:31 +0100 (Tue, 29 Oct 2013) | 8 lines
+
+add the function of outputing tracer density.
+This may help tracking the evolution of tracer distribution.
+The two varians below should also added in Struct trace in tracer_defs.h, 
+  /* tracer density */
+    double *dens_el[13];
+    double *dens_node[13];
+
+
+------------------------------------------------------------------------
+r51 | danb | 2013-10-07 19:44:23 +0200 (Mon, 07 Oct 2013) | 1 line
+
+changed algorithm for reading in ivbcs.  Previously the velocity values were interpolated between ages but now the value is taken from the nearest age.
+------------------------------------------------------------------------
+r50 | danb | 2013-09-27 02:26:10 +0200 (Fri, 27 Sep 2013) | 1 line
+
+more debugging
+------------------------------------------------------------------------
+r49 | danb | 2013-09-24 22:18:38 +0200 (Tue, 24 Sep 2013) | 1 line
+
+some debugging and tweaks for multigrid
+------------------------------------------------------------------------
+r48 | danb | 2013-09-20 18:29:14 +0200 (Fri, 20 Sep 2013) | 1 line
+
+tweak for ivel suggested by Eh Tan
+------------------------------------------------------------------------
+r46 | danb | 2013-07-23 18:59:31 +0200 (Tue, 23 Jul 2013) | 1 line
+
+more necessary files
+------------------------------------------------------------------------
+r45 | danb | 2013-07-21 00:42:33 +0200 (Sun, 21 Jul 2013) | 1 line
+
+debugging
+------------------------------------------------------------------------
+r44 | danb | 2013-07-20 23:08:32 +0200 (Sat, 20 Jul 2013) | 1 line
+
+bug fix for negative ages - which are basically never an issue anyway
+------------------------------------------------------------------------
+r43 | danb | 2013-07-20 04:43:59 +0200 (Sat, 20 Jul 2013) | 1 line
+
+two more bc files
+------------------------------------------------------------------------
+r42 | danb | 2013-07-19 23:53:11 +0200 (Fri, 19 Jul 2013) | 1 line
+
+file that is sometimes required
+------------------------------------------------------------------------
+r41 | danb | 2013-07-19 23:25:29 +0200 (Fri, 19 Jul 2013) | 1 line
+
+ivels for full solver
+------------------------------------------------------------------------
+r40 | danb | 2013-07-19 06:26:35 +0200 (Fri, 19 Jul 2013) | 1 line
+
+Don't need this file
+------------------------------------------------------------------------
+r39 | danb | 2013-07-19 06:04:41 +0200 (Fri, 19 Jul 2013) | 1 line
+
+removed drho which is only relevant for high-k structures
+------------------------------------------------------------------------
+r38 | danb | 2013-07-19 05:53:57 +0200 (Fri, 19 Jul 2013) | 1 line
+
+small correction
+------------------------------------------------------------------------
+r37 | danb | 2013-07-19 05:43:06 +0200 (Fri, 19 Jul 2013) | 1 line
+
+updating patch files
+------------------------------------------------------------------------
+r35 | danb | 2013-07-19 04:35:12 +0200 (Fri, 19 Jul 2013) | 1 line
+
+changed top level to CitcomS
+------------------------------------------------------------------------
+r34 | danb | 2013-07-19 04:32:55 +0200 (Fri, 19 Jul 2013) | 1 line
+
+moved module beneath top level
+------------------------------------------------------------------------
+r33 | danb | 2013-07-19 04:32:33 +0200 (Fri, 19 Jul 2013) | 1 line
+
+moved some files
+------------------------------------------------------------------------
+r32 | danb | 2013-07-19 04:31:33 +0200 (Fri, 19 Jul 2013) | 1 line
+
+top level CitcomS
+------------------------------------------------------------------------
