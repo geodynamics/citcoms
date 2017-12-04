@@ -71,7 +71,7 @@ int main(argc,argv)
   /* DJB TIME */
   double age_in_MY; // initialised below
   double last_age_in_MY; // initialised below
-  bool dim_output=0; // initialised
+  int dim_output=0; // initialised
 
   struct All_variables *E;
   MPI_Comm world;
@@ -255,7 +255,7 @@ int main(argc,argv)
       if ( ((E->monitor.solution_cycles % E->output.write_q_files)==0) || dim_output) // DJB TIME
 	heat_flux(E);
 
-    if ( ((E->monitor.solution_cycles % E->control.record_every)==0) || dim_output { // DJB TIME
+    if ( ((E->monitor.solution_cycles % E->control.record_every)==0) || dim_output) { // DJB TIME
 	(E->problem_output)(E, E->monitor.solution_cycles);
     }
 
