@@ -86,7 +86,10 @@ None of these changes have been implemented in the new code yet
 1. case 29, used by Flament for EBA models *(see issue)*
 
 #### Output time (grep for 'DJB TIME')
-1. output time modification [NOT IMPLEMENTED, ONLY PLACEHOLDERS]
+1. output time by Myr as well as/rather than number of time steps
+     - modifications made in main time loop in bin/Citcom.c
+     - needs testing
+1. exit code when 0 Ma reached (TODO)
 
 ### Code features NOT implemented
 
