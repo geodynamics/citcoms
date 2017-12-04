@@ -61,18 +61,20 @@ None of these changes have been implemented in the new code yet
 ### Code features implemented
 
 #### Slab and lithosphere assimilation (grep for 'DJB SLAB')
-1. lith\_age\_depth\_function
-1. lith\_age\_exponent
-1. lith\_age\_min
-1. lith\_age\_stencil\_value
-1. slab\_assim
-1. slab\_assim\_file
-1. sten\_temp output
+1. lith\_age\_depth\_function (bool)
+1. lith\_age\_exponent (double)
+1. lith\_age\_min (double)
+1. lith\_age\_stencil\_value (double)
+1. slab\_assim (bool)
+1. slab\_assim\_file (char)
+1. sten\_temp as an output option (char)
     
 #### Composition (grep for 'DJB COMP')
-1. hybrid\_method
-1. increased memory for tracer arrays
-1. turn off tracer warnings using itracer\_warnings in input cfg file
+1. hybrid\_method (bool)
+1. increase memory for tracer arrays (icushion parameter)
+1. user note: you should turn off tracer warnings using:
+    ```itracer\_warnings=off```
+   in input cfg file
 
 #### Viscosity structures (grep for 'DJB VISC')
 1. case 20, used in Flament et al. (2013, 2014)
@@ -85,6 +87,10 @@ None of these changes have been implemented in the new code yet
 1. case 27, used by Flament for EBA models
 1. case 28, used by Flament for EBA models
 1. case 29, used by Flament for EBA models *(see issue)*
+1. case 112, used by Hassan presumably for plume models(?)
+1. case 113, used by Hassan presumably for plume models(?)
+1. case 117, used by Hassan presumably for plume models(?)
+1. case 118, used by Hassan presumably for plume models(?)
 
 #### Output time (grep for 'DJB TIME')
 1. output time by Myr as well as/rather than number of time steps
@@ -100,7 +106,6 @@ None of these changes have been implemented in the new code yet
 1. tracer density for elements and nodes output (added by Ting, see svn r52 through r55)
 1. buoyancy restart for dynamic topography (exclude buoyancy) (see svn r85)
 1. composition and temperature spherical harmonics
-1. anything from Rakib (see Rakib's code in above section)
 1. reverse gravity acceleraton (added by Ting, see svn r76) for SBI
    note that this appears to have been subsequently removed in r88?
 
