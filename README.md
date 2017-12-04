@@ -108,10 +108,10 @@ None of these changes have been implemented in the new code yet
 1. Full_read_input_from_file -> ivels (TODO)
 1. Full\_solver.c -> COMPLETE
 1. global\_defs.h -> dyn topo restarts, ivels (TODO)
-1. Instructions.c -> outputs, heating terms, divv
+1. Instructions.c -> outputs, heating terms, divv (TODO)
 1. Lith\_age.c -> COMPLETE
 1. output.c -> various outputs, and time exit routine (check with Nico) (TODO)
-1. Pan\_problem.c -> dyn topo
+1. Pan\_problem.c -> dyn topo (TODO)
 1. Problem\_related.c -> ivels (TODO)
 1. Regional\_bcs.c -> ivels (TODO)
 1. Regional\_lith\_age\_read\_files -> COMPLETE
