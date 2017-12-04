@@ -98,6 +98,7 @@ None of these changes have been implemented in the new code yet
 6. composition and temperature spherical harmonics
 7. anything from Rakib (see Rakib's code in above section)
 8. reverse gravity acceleraton (added by Ting, see svn r76) for SBI
+   note that this appears to have been subsequently removed in r88?
 9. turn off itracer_warnings
 
 ### Log of features implemented from legacy code
