@@ -68,6 +68,11 @@ int main(argc,argv)
   int cpu_total_seconds,k,need_init_sol;
   double CPU_time0(),time,initial_time,start_time;
 
+  /* DJB TIME */
+  double age_in_MY; // initialised below
+  double last_age_in_MY; // initialised below
+  bool dim_output=0; // initialised
+
   struct All_variables *E;
   MPI_Comm world;
 
@@ -186,7 +191,9 @@ int main(argc,argv)
     output_checkpoint(E);
 
 
- 
+  /* DJB TIME */
+  age_in_MY = E->control.start_age; // initialise
+  last_age_in_MY = E->control.start_age; // initialise
 
   /* this section advances the time step;
    * replaced by CitcomS.Controller.march() in Pyre. */
@@ -203,7 +210,7 @@ int main(argc,argv)
     (E->next_buoyancy_field)(E);
     /* */
 
-
+    /* DJB TIME here can add ability to exit time loop when zero age reached */
     if(((E->advection.total_timesteps < E->advection.max_total_timesteps) &&
 	(E->advection.timesteps < E->advection.max_timesteps)) ||
        (E->advection.total_timesteps < E->advection.min_timesteps) )
@@ -225,14 +232,30 @@ int main(argc,argv)
       tracer_advection(E);
     general_stokes_solver(E);
 
+    /* DJB TIME flag for dimensional time output */
+    if(E->control.record_every_Myr!=0){
+        if (E->data.timedir >= 0) { /* forward convection */
+            age_in_MY = E->control.start_age - E->monitor.elapsed_time*E->data.scalet;
+            if( (last_age_in_MY-age_in_MY) > E->control.record_every_Myr ){
+                dim_output = 1; // update
+                last_age_in_MY = age_in_MY; // update
+            }        
+        }
+        else { /* backward convection */
+            age_in_MY = E->control.start_age + E->monitor.elapsed_time*E->data.scalet;
+            if( (age_in_MY-last_age_in_MY) > E->control.record_every_Myr ){
+                dim_output = 1; // update
+                last_age_in_MY = age_in_MY; // update
+            }
+        }
+    }
+
+
     if(E->output.write_q_files)
-      if ((E->monitor.solution_cycles % E->output.write_q_files)==0)
+      if ( ((E->monitor.solution_cycles % E->output.write_q_files)==0) || dim_output) // DJB TIME
 	heat_flux(E);
-    /* DJB TIME */
-    /* to add a flag here to switch between non-dimensional and
-       dimensional output.  Use Rakib's modification to pyre for 
-       guidance */
-    if ((E->monitor.solution_cycles % E->control.record_every)==0) {
+
+    if ( ((E->monitor.solution_cycles % E->control.record_every)==0) || dim_output { // DJB TIME
 	(E->problem_output)(E, E->monitor.solution_cycles);
     }
 
@@ -242,10 +265,16 @@ int main(argc,argv)
     /* print checkpoint every checkpoint_frequency, unless we have restarted,
        then, we would like to avoid overwriting 
     */
-    if ( ((E->monitor.solution_cycles % E->control.checkpoint_frequency)==0) &&
+    if ( (((E->monitor.solution_cycles % E->control.checkpoint_frequency)==0) || dim_output) && // DJB TIME
 	 ((!E->control.restart) || (E->monitor.solution_cycles != E->monitor.solution_cycles_init))){
 	output_checkpoint(E);
     }
+
+    // DJB TIME
+    /* must now set dim_output back to zero to prevent output until
+       output condition is triggered again using statement above */
+    dim_output = 0;
+
     /* updating time-dependent material group
      * if mat_control is 0, the material group has already been
      * initialized in initial_conditions() */
