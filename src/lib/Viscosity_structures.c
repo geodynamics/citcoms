@@ -1301,6 +1301,223 @@ void visc_from_T(E,EEta,propogate)
         parallel_process_termination();
         break;
 
+
+    /* DJB VISC from Rakib */
+    case 112: 
+        /*   
+         * if(layer==3): factor = vRef * 0.5 * math.pow(10, (4*zzz/(router-rinner)-0.5))
+         * else        : factor = vRef*v0[idx];
+         *
+         * eta = N_0(r) * factor * exp(E/(T+T_0) - E/(0.5+T_0)) 
+           where T is normalized to be within 0...1
+         */
+        for(m=1;m<=E->sphere.caps_per_proc;m++)
+            for(i=1;i<=nel;i++)   {
+                l = E->mat[m][i] - 1; 
+
+                if(E->control.mat_control) /* switch moved up here TWB */
+                  tempa = E->viscosity.N0[l] * E->VIP[m][i];
+                else 
+                  tempa = E->viscosity.N0[l];
+
+                for(kk=1;kk<=ends;kk++) {
+                  TT[kk] = E->T[m][E->ien[m][i].node[kk]];
+                  zz[kk] = (1.-E->sx[m][3][E->ien[m][i].node[kk]]);
+                }    
+
+                for(jj=1;jj<=vpts;jj++) {
+                    temp=0.0;
+                    zzz=0.0;
+                    for(kk=1;kk<=ends;kk++)   {
+                      TT[kk]=max(TT[kk],zero);
+                      temp += min(TT[kk],one) * E->N.vpt[GNVINDEX(kk,jj)];
+                      zzz += zz[kk] * E->N.vpt[GNVINDEX(kk,jj)];
+                    }
+
+                    if(l==3) {
+                         tempa = 0.5 * pow(10, (4*zzz/(E->sphere.ro-E->sphere.ri)-0.5));
+                     }
+
+                    EEta[m][ (i-1)*vpts + jj ] = tempa*
+                      exp( E->viscosity.E[l]/(temp+E->viscosity.T[l])
+                           - E->viscosity.E[l]/(0.5 +E->viscosity.T[l]) );
+                }
+            }
+        break;
+
+    /* DJB VISC from Rakib */
+    case 113:
+        {
+        double Zmax = 10.5;
+        double Zmin = 2.25;
+        double Zavg = (Zmax-Zmin)/2.;
+        double l3Const = 0.85;
+        double l012Const = 2.5;
+        /* Z = [0.5..7] (Linear increase in LM viscosity with depth, otherwise 0)
+         * eta = N_0(r) * v0[idx] * exp((E+Z)/(T+T_0) - (E+max(Z))/(0.7+T_0)) 
+         * where T is normalized to be within 0...1
+         */
+        for(m=1;m<=E->sphere.caps_per_proc;m++)
+            for(i=1;i<=nel;i++)   {
+                l = E->mat[m][i] - 1;
+
+                if(E->control.mat_control) /* switch moved up here TWB */
+                  tempa = E->viscosity.N0[l] * E->VIP[m][i];
+                else
+                  tempa = E->viscosity.N0[l];
+
+                for(kk=1;kk<=ends;kk++) {
+                  TT[kk] = E->T[m][E->ien[m][i].node[kk]];
+                  zz[kk] = (1.-E->sx[m][3][E->ien[m][i].node[kk]]);
+                }
+
+                for(jj=1;jj<=vpts;jj++) {
+                    temp=0.0;
+                    zzz=0.0;
+                    for(kk=1;kk<=ends;kk++)   {
+                      TT[kk]=max(TT[kk],zero);
+                      temp += min(TT[kk],one) * E->N.vpt[GNVINDEX(kk,jj)];
+                      zzz += zz[kk] * E->N.vpt[GNVINDEX(kk,jj)];
+                    }
+
+                    if(l==3) {
+                        double Zr = 0.;
+                        double result = 0;
+
+                        Zr = Zmin + (Zmax-Zmin)*(zzz-E->viscosity.zbase_layer[l-1])/(E->viscosity.zbase_layer[l]-E->viscosity.zbase_layer[l-1]);
+
+                        result =
+                                  exp( (E->viscosity.E[l]+Zr) /(temp+E->viscosity.T[l])
+                                  - (E->viscosity.E[l]+Zmax)/(l3Const +E->viscosity.T[l]) );
+
+                        //if(zzz>0.44) result = max(min(result, 100),5); /* clip visc near the ltbl */
+                        if(zzz>0.43) result = max(min(result, 100),20); /*  clip visc near the ltbl */
+
+                        EEta[m][ (i-1)*vpts + jj ] = result;
+                     }
+                     else{
+                        EEta[m][ (i-1)*vpts + jj ] =
+                                  exp( E->viscosity.E[l]/(temp+E->viscosity.T[l])
+                                  - (E->viscosity.E[l]+Zavg)/(l012Const +E->viscosity.T[l]) );
+                     }
+                }
+            }
+        }
+        break;
+
+    /* DJB VISC from Rakib */
+    case 117:
+        {
+            double result = 0;
+        /*
+         * This is similar to rheol 7
+         * vRef*v0[idx] * math.exp( (vE[idx] + (vZ[idx]*(ir)))/(t[i] + vT[idx]) - \
+         *                                  (vE[idx] + (vZ[idx]*(max(r))))/(1 + vT[idx]) ) )
+         */
+        for(m=1;m<=E->sphere.caps_per_proc;m++)
+            for(i=1;i<=nel;i++)   {
+                l = E->mat[m][i] - 1;
+
+                if(E->control.mat_control) /* switch moved up here TWB */
+                  tempa = E->viscosity.N0[l] * E->VIP[m][i];
+                else
+                  tempa = E->viscosity.N0[l];
+
+                for(kk=1;kk<=ends;kk++) {
+                  TT[kk] = E->T[m][E->ien[m][i].node[kk]];
+                  zz[kk] = (1.-E->sx[m][3][E->ien[m][i].node[kk]]);
+                }
+
+                for(jj=1;jj<=vpts;jj++) {
+                    temp=0.0;
+                    zzz=0.0;
+                    for(kk=1;kk<=ends;kk++)   {
+                      TT[kk]=max(TT[kk],zero);
+                      temp += min(TT[kk],one) * E->N.vpt[GNVINDEX(kk,jj)];
+                      zzz += zz[kk] * E->N.vpt[GNVINDEX(kk,jj)];
+                    }
+
+
+                    result = E->viscosity.N0[l] *
+                             exp( ( E->viscosity.E[l] + E->viscosity.Z[l]*zzz ) / (temp + E->viscosity.T[l])
+                                  - ( E->viscosity.E[l] + E->viscosity.Z[l]*(E->sphere.ro - E->sphere.ri) ) / (1 + E->viscosity.T[l]) );
+
+                    //if(zzz>0.43) result = max(min(result, 100),20); /* clip visc near the ltbl */
+
+                    //if(zzz>0.43) result = max(result, 1); /*  clip visc near the ltbl */
+                    if(zzz<0.06) result = min(result, 1); /*  clip visc near the utbl */
+
+                    EEta[m][ (i-1)*vpts + jj ] = result;
+                 }
+            }
+        }
+        break;
+
+    /* DJB VISC from Rakib */
+    case 118:
+        {
+            double result = 0;
+        /*
+         * This is similar to rheol 7
+         * vRef*v0[idx] * math.exp( (vE[idx] + (vZ[idx]*(ir)))/(t[i] + vT[idx]) - \
+         *                                  (vE[idx] + (vZ[idx]*(max(r))))/(1 + vT[idx]) ) )
+         */
+        for(m=1;m<=E->sphere.caps_per_proc;m++)
+            for(i=1;i<=nel;i++)   {
+                l = E->mat[m][i] - 1;
+
+                if(E->control.mat_control) /* switch moved up here TWB */
+                  tempa = E->viscosity.N0[l] * E->VIP[m][i];
+                else
+                  tempa = E->viscosity.N0[l];
+
+                for(kk=1;kk<=ends;kk++) {
+                  TT[kk] = E->T[m][E->ien[m][i].node[kk]];
+                  zz[kk] = (1.-E->sx[m][3][E->ien[m][i].node[kk]]);
+                }
+
+                for(jj=1;jj<=vpts;jj++) {
+                    temp=0.0;
+                    zzz=0.0;
+                    for(kk=1;kk<=ends;kk++)   {
+                      TT[kk]=max(TT[kk],zero);
+                      temp += min(TT[kk],one) * E->N.vpt[GNVINDEX(kk,jj)];
+                      zzz += zz[kk] * E->N.vpt[GNVINDEX(kk,jj)];
+                    }
+
+
+                    result = E->viscosity.N0[l] *
+                             exp( ( E->viscosity.E[l] + E->viscosity.Z[l]*zzz ) / (temp + E->viscosity.T[l])
+                                  - ( E->viscosity.E[l] + E->viscosity.Z[l]*(E->sphere.ro - E->sphere.ri) ) / (1 + E->viscosity.T[l]) );
+
+                    //if(zzz>0.43) result = max(min(result, 100),20); /* clip visc near the ltbl */
+
+                    //if(zzz>0.43) result = max(result, 1); /*  clip visc near the ltbl */
+
+#if 0
+                    if(zzz<0.06) result = min(result, 1); /*  clip visc near the utbl  - has no effect */
+                    
+                    if(zzz<0.015) {
+                        result = 1. - zzz/0.015; /*   clip visc near the utbl to 21 for warmup runs */
+                    }
+                    else if((zzz>=0.015) && (zzz<0.045)) {
+                        result = 0.1; /*   clip visc near the utbl to 21 for warmup runs */
+                    }
+#endif
+
+#if 0
+                    if(zzz<0.075){
+                        result = 1. - zzz*zzz/0.075; /*   clip visc near the utbl to 21 for warmup runs*/
+                    }
+#endif
+
+                    EEta[m][ (i-1)*vpts + jj ] = result;
+                 }
+            }
+        }
+        break;
+
+
     default:
         /* unknown option */
         fprintf(stderr, "Invalid value of 'rheol=%d'\n", E->viscosity.RHEOL);
