@@ -87,9 +87,10 @@ None of these changes have been implemented in the new code yet
 
 #### Output time (grep for 'DJB TIME')
 1. output time by Myr as well as/rather than number of time steps
-     - modifications made in main time loop in bin/Citcom.c
-     - needs testing
-1. exit code when 0 Ma reached (TODO)
+    - modifications made in main time loop in bin/Citcom.c
+    - needs testing
+1. exit time loop for negative ages (\<1 Ma)
+    - exit\_at\_present
 
 ### Code features NOT implemented
 
@@ -97,12 +98,11 @@ None of these changes have been implemented in the new code yet
 2. outputs of heating terms, divv
 3. tracer density for elements and nodes output (added by Ting, see svn r52 through r55)
 4. buoyancy restart for dynamic topography (exclude buoyancy) (see svn r85)
-5. time exit routine (added by Ting, see svn r57)
 6. composition and temperature spherical harmonics
 7. anything from Rakib (see Rakib's code in above section)
 8. reverse gravity acceleraton (added by Ting, see svn r76) for SBI
    note that this appears to have been subsequently removed in r88?
-9. turn off itracer_warnings
+9. turn off itracer\_warnings
 
 ### Log of features implemented from legacy code
 1. Adv\_diff -> COMPLETE
