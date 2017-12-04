@@ -97,27 +97,27 @@ None of these changes have been implemented in the new code yet
 9. turn off itracer_warnings
 
 ### Log of features implemented from legacy code
-1. Adv\_diff -> done
-BC_util -> ivels
-Composition_related.c -> tracer density
-composition_related.h -> tracer density
-Convection.c -> done
-Element_calculations -> buoy restart for dyn topo
-Full_boundary_conditions -> ivels
-Full_lith_age_read_files -> done
-Full_read_input_from_file -> ivels
-Full_solver.c -> done
-global_defs.h -> dyn topo restarts, ivels
-Instructions.c -> outputs, heating terms, divv
-Lith_age.c -> done
-output.c -> various outputs, and time exit routine (check with Nico)
-Pan_problem.c -> dyn topo
-Problem_related.c -> ivels
-Regional_bcs.c -> ivels
-Regional_lith_age_read_files -> done
-Regional_read_input_files -> ivels
-Regional_solver -> done
-solver.h -> done
-Stokes_flow_incom -> divv calculation for output
-tracer_defs.h -> output tracer density
-Viscosity_structure.c -> done
+1. Adv\_diff -> COMPLETE
+1. BC\_util -> ivels (TODO)
+1. Composition\_related.c -> tracer density (TODO)
+1. composition\_related.h -> tracer density (TODO)
+1. Convection.c -> COMPLETE
+1. Element\_calculations -> buoy restart for dyn topo (TODO)
+1. Full\_boundary\_conditions -> ivels (TODO)
+1. Full\_lith\_age\_read\_files -> COMPLETE
+1. Full_read_input_from_file -> ivels (TODO)
+1. Full\_solver.c -> COMPLETE
+1. global\_defs.h -> dyn topo restarts, ivels (TODO)
+1. Instructions.c -> outputs, heating terms, divv
+1. Lith\_age.c -> COMPLETE
+1. output.c -> various outputs, and time exit routine (check with Nico) (TODO)
+1. Pan\_problem.c -> dyn topo
+1. Problem\_related.c -> ivels (TODO)
+1. Regional\_bcs.c -> ivels (TODO)
+1. Regional\_lith\_age\_read\_files -> COMPLETE
+1. Regional\_read\_input\_files -> ivels (TODO)
+1. Regional\_solver -> COMPLETE
+1. solver.h -> COMPLETE
+1. Stokes\_flow\_incom -> divv calculation for output (TODO)
+1. tracer\_defs.h -> output tracer density (TODO)
+1. Viscosity\_structure.c -> COMPLETE
