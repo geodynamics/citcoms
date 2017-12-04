@@ -16,9 +16,13 @@ Then, to install CitcomS v3.1.1 with data assimilation go into the src/ director
 
 [Yes OK, for the step above you do need a python distribution, but this is only to run the commands that configure and make Citcoms.  Python is not actually used for running the code]
 
-Example input and output configuration files are provided in inputeg/
+Example input and output configuration files are provided in:
 
-This example is a good one to try and run first: src/examples/Full
+```inputeg/```
+
+This example is a good one to try and run first:
+
+```src/examples/Full```
 
 You will need to setup your job submission script.  See a slurm example in jobsubmit/  Please add your own submission scripts to the same directory so we have more examples
 
