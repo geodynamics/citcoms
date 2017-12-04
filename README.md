@@ -94,10 +94,13 @@ None of these changes have been implemented in the new code yet
 
 #### Output time (grep for 'DJB TIME')
 1. output time by Myr as well as/rather than number of time steps
+    - ```record_every_Myr``` (int)
     - modifications made in main time loop in bin/Citcom.c
     - needs testing
 1. exit time loop for negative ages (\<1 Ma)
-    - exit\_at\_present
+    - ```exit_at_present``` (bool)
+    - modifications made in main time loop in bin/Citcom.c
+    - needs testing
 
 ### Code features NOT implemented
 
