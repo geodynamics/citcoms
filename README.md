@@ -26,7 +26,57 @@ This example is a good one to try and run first:
 
 You will need to setup your job submission script.  See a slurm example in jobsubmit/  Please add your own submission scripts to the same directory so we have more examples
 
-For currently implemented features, scroll down below.
+## Features that are implemented
+
+### Slab and lithosphere assimilation (grep for 'DJB SLAB')
+1. ```lith_age_depth_function``` (bool)
+1. ```lith_age_exponent``` (double)
+1. ```lith_age_min``` (double)
+1. ```lith_age_stencil_value``` (double)
+1. ```slab_assim``` (bool)
+1. ```slab_assim_file``` (char)
+1. ```sten_temp``` as an output option (char)
+
+### Composition (grep for 'DJB COMP')
+1. ```hybrid_method``` (bool)
+1. increased memory for tracer arrays (icushion parameter)
+1. turn off tracer warnings using ```itracer_warnings=off``` in input cfg file
+
+### Viscosity structures (grep for 'DJB VISC')
+1. case 20, used in Flament et al. (2013, 2014)
+1. case 21, used in Flament et al. (2014), model TC8
+1. case 22, used in Flament et al. (2014), model TC7
+1. case 23, used in Flament et al. (2014), model TC9
+1. case 24, used in Zhang et al. (2010) and Bower et al. (2013)
+1. case 25, used by Flament for Extendend-Boussinesq (EBA) models
+1. case 26, used by Flament for EBA models
+1. case 27, used by Flament for EBA models
+1. case 28, used by Flament for EBA models
+1. case 29, used by Flament for EBA models *(see issue)*
+1. case 112, used by Hassan presumably for plume models(?)
+1. case 113, used by Hassan presumably for plume models(?)
+1. case 117, used by Hassan presumably for plume models(?)
+1. case 118, used by Hassan presumably for plume models(?)
+
+### Output time (grep for 'DJB TIME')
+1. output data in regular increments of age (Myr) as well as/rather than number of time steps
+    - ```storage_spacing_Myr``` (int)
+    - if you only want to output data by age (Ma), you should set ```storage_spacing``` to a large integer value in order to suppress the regular time outputs
+    - both ```storage_spacing_Myr``` and ```storage_spacing``` can be used together, in which case data is output whenever either one of these output criteria is satisfied.
+1. exit time loop when the model reaches negative ages (currently hard-coded to be <-1 Ma)
+    - ```exit_at_present``` (bool)
+    
+### Extended-Boussinesq modifications (grep for 'DJB EBA')
+1. depth-dependent scaling for the dissipation number
+   this effectively scales the adiabatic, viscous, and latent heating
+   and can be useful to avoid large heating in certain radial parts
+   of the domain, notably the surface when velocity bcs are imposed.
+
+### Output (grep for 'DJB OUT')
+1. Composition and temperature spherical harmonics as an output option (char).  See issue, since output for comp only occurs for the last comp field.
+    - ```comp_sph```
+    - ```temp_sph```
+    - ```sten_temp```
 
 ## Dan's work area follows
 
@@ -54,59 +104,6 @@ See diff/ directory for complete record
     - perhaps not related to Rakib's work
 1. Viscosity\_structures.c
     - some new viscosity structures (case 112, 113, 117, 118) (COMPLETE)
-
-### Code features implemented
-
-#### Slab and lithosphere assimilation (grep for 'DJB SLAB')
-1. ```lith_age_depth_function``` (bool)
-1. ```lith_age_exponent``` (double)
-1. ```lith_age_min``` (double)
-1. ```lith_age_stencil_value``` (double)
-1. ```slab_assim``` (bool)
-1. ```slab_assim_file``` (char)
-1. ```sten_temp``` as an output option (char)
-    
-#### Composition (grep for 'DJB COMP')
-1. ```hybrid_method``` (bool)
-1. increase memory for tracer arrays (icushion parameter)
-1. user note: you should turn off tracer warnings using:
-    ```itracer_warnings=off```
-   in input cfg file
-
-#### Viscosity structures (grep for 'DJB VISC')
-1. case 20, used in Flament et al. (2013, 2014)
-1. case 21, used in Flament et al. (2014), model TC8
-1. case 22, used in Flament et al. (2014), model TC7
-1. case 23, used in Flament et al. (2014), model TC9
-1. case 24, used in Zhang et al. (2010) and Bower et al. (2013)
-1. case 25, used by Flament for Extendend-Boussinesq (EBA) models
-1. case 26, used by Flament for EBA models
-1. case 27, used by Flament for EBA models
-1. case 28, used by Flament for EBA models
-1. case 29, used by Flament for EBA models *(see issue)*
-1. case 112, used by Hassan presumably for plume models(?)
-1. case 113, used by Hassan presumably for plume models(?)
-1. case 117, used by Hassan presumably for plume models(?)
-1. case 118, used by Hassan presumably for plume models(?)
-
-#### Output time (grep for 'DJB TIME')
-1. output data in regular increments of age (Myr) as well as/rather than number of time steps
-    - ```storage_spacing_Myr``` (int)
-    - if you only want to output data by age (Ma), you should set ```storage_spacing``` to a large integer value in order to suppress the regular time outputs
-    - both ```storage_spacing_Myr``` and ```storage_spacing``` can be used together, in which case data is output whenever either one of these output criteria is satisfied.
-1. exit time loop when the model reaches negative ages (currently hard-coded to be <-1 Ma)
-    - ```exit_at_present``` (bool)
-    
-#### Extended-Boussinesq modifications (grep for 'DJB EBA')
-1. depth-dependent scaling for the dissipation number
-   this effectively scales the adiabatic, viscous, and latent heating
-   and can be useful to avoid large heating in certain radial parts
-   of the domain, notably the surface when velocity bcs are imposed.
-
-#### Output (grep for 'DJB OUT')
-1. Composition and temperature spherical harmonics as an output option (char).  See issue, since output for comp only occurs for the last comp field.
-    - ```comp_sph```
-    - ```temp_sph```
 
 ### Code features NOT implemented
 
