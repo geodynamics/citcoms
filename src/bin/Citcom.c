@@ -69,8 +69,8 @@ int main(argc,argv)
   double CPU_time0(),time,initial_time,start_time;
 
   /* DJB TIME */
-  double age_in_MY; // initialised below
-  double last_age_in_MY; // initialised below
+  double age_Ma; // initialised below
+  double target_age_Ma; // initialised below
   int dim_output=0; // initialised
 
   struct All_variables *E;
@@ -192,8 +192,13 @@ int main(argc,argv)
 
 
   /* DJB TIME */
-  age_in_MY = E->control.start_age; // initialise
-  last_age_in_MY = E->control.start_age; // initialise
+  age_Ma = E->control.start_age; // initialise
+  if (E->data.timedir >=0) {
+      target_age_Ma = E->control.start_age - E->control.record_every_Myr;
+  }
+  else{
+      target_age_Ma = E->control.start_age + E->control.record_every_Myr;
+  }
 
   /* this section advances the time step;
    * replaced by CitcomS.Controller.march() in Pyre. */
@@ -236,23 +241,23 @@ int main(argc,argv)
     /* DJB TIME flag for dimensional time output */
     if(E->control.record_every_Myr!=0){
         if (E->data.timedir >= 0) { /* forward convection */
-            age_in_MY = E->control.start_age - E->monitor.elapsed_time*E->data.scalet;
-            if( (last_age_in_MY-age_in_MY) > E->control.record_every_Myr ){
+            age_Ma = E->control.start_age - E->monitor.elapsed_time*E->data.scalet;
+            if( (target_age_Ma-age_Ma) >= 0 ){
                 dim_output = 1; // update
-                last_age_in_MY = age_in_MY; // update
+                target_age_Ma -= E->control.record_every_Myr; // update
             }        
         }
         else { /* backward convection */
-            age_in_MY = E->control.start_age + E->monitor.elapsed_time*E->data.scalet;
-            if( (age_in_MY-last_age_in_MY) > E->control.record_every_Myr ){
+            age_Ma = E->control.start_age + E->monitor.elapsed_time*E->data.scalet;
+            if( (age_Ma-target_age_Ma) >= 0 ){
                 dim_output = 1; // update
-                last_age_in_MY = age_in_MY; // update
+                target_age_Ma += E->control.record_every_Myr; // update
             }
         }
     }
 
     /* DJB TIME now an additional condition to exit the loop */
-    if( (E->control.exit_at_present) && (E->data.timedir >= 0) && (age_in_MY<-1.0) ){
+    if( (E->control.exit_at_present) && (E->data.timedir >= 0) && (age_Ma<-1.0) ){
         E->control.keep_going = 0;
     }
 
@@ -309,6 +314,12 @@ int main(argc,argv)
       fprintf(E->fp,"CPU total = %g & CPU = %g for step %d time = %.4e dt = %.4e  maxT = %.4e sub_iteration%d\n",CPU_time0()-start_time,CPU_time0()-time,E->monitor.solution_cycles,E->monitor.elapsed_time,E->advection.timestep,E->monitor.T_interior,E->advection.last_sub_iterations);
 
       time = CPU_time0();
+
+      /* DJB TIME */
+      if(E->control.record_every_Myr!=0){
+        fprintf(E->fp, "Current age = %g Ma\n", age_Ma);
+      }
+
     }
 
   }
