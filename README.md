@@ -93,10 +93,8 @@ See diff/ directory for complete record
 1. output data in regular increments of age (Myr) as well as/rather than number of time steps
     - ```storage_spacing_Myr``` (int)
     - if you only want to output data by age (Ma), you should set ```storage_spacing``` to a large integer value
-1. exit time loop for negative ages (\<1 Ma)
+1. exit time loop for negative ages (<-1 Ma)
     - ```exit_at_present``` (bool)
-    - modifications made in main time loop in bin/Citcom.c
-    - needs testing
     
 #### Extended-Boussinesq modifications (grep for 'DJB EBA')
 1. depth-dependent scaling for the dissipation number
