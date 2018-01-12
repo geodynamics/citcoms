@@ -28,6 +28,8 @@ You will need to setup your job submission script.  See a slurm example in jobsu
 
 ## Features that are implemented
 
+A data assimilation manual is hosted in an svn repository located at ```https://svn.gps.caltech.edu/repos/docs/data_assimilation```.  This manual contains information about the parameters that are used, both for the convection code and also the pre- and post-processing scripts.  Access to the svn can be requested.
+
 ### Slab and lithosphere assimilation (grep for 'DJB SLAB')
 1. ```lith_age_depth_function``` (bool)
 1. ```lith_age_exponent``` (double)
