@@ -90,10 +90,9 @@ See diff/ directory for complete record
 1. case 118, used by Hassan presumably for plume models(?)
 
 #### Output time (grep for 'DJB TIME')
-1. output time by Myr as well as/rather than number of time steps
-    - ```record_every_Myr``` (int)
-    - modifications made in main time loop in bin/Citcom.c
-    - needs testing
+1. output data in regular increments of age (Myr) as well as/rather than number of time steps
+    - ```storage_spacing_Myr``` (int)
+    - if you only want to output data by age (Ma), you should set ```storage_spacing``` to a large integer value
 1. exit time loop for negative ages (\<1 Ma)
     - ```exit_at_present``` (bool)
     - modifications made in main time loop in bin/Citcom.c
