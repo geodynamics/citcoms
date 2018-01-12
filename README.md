@@ -92,8 +92,9 @@ See diff/ directory for complete record
 #### Output time (grep for 'DJB TIME')
 1. output data in regular increments of age (Myr) as well as/rather than number of time steps
     - ```storage_spacing_Myr``` (int)
-    - if you only want to output data by age (Ma), you should set ```storage_spacing``` to a large integer value
-1. exit time loop for negative ages (<-1 Ma)
+    - if you only want to output data by age (Ma), you should set ```storage_spacing``` to a large integer value in order to suppress the regular time outputs
+    - both ```storage_spacing_Myr``` and ```storage_spacing``` can be used together, in which case data is output whenever either one of these output criteria is satisfied.
+1. exit time loop when the model reaches negative ages (currently hard-coded to be <-1 Ma)
     - ```exit_at_present``` (bool)
     
 #### Extended-Boussinesq modifications (grep for 'DJB EBA')
