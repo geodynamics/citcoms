@@ -1,0 +1,9 @@
+gld254.cfg is the "old" style input file used with the pyre version of CitcomS.  Nico sent me this file (15/09/17)
+
+pid8741.cfg is the pid output from the old pyre input
+
+gld254.input is the "new" style input file to use with the C-only version of the code.
+
+Dan created gld254.input by transferring the input parameters from gld254.cfg and pid8741.cfg to the new parameter names and formats.  However, this needs checking, as there might be some parameters/values that I missed.  It's good to use pid8741.cfg as a record of the original input data for the pyre version of the code because the pid file will contain a more complete list of parameters and values (including the defaults used by the code that may not be specified in the cfg file).
+
+Please commit corrections to "gld254.input" as required.
