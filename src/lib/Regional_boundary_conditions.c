@@ -101,7 +101,16 @@ void regional_velocity_boundary_conditions(E)
         horizontal_bc(E,E->sphere.cap[j].VB,noz,2,E->control.VBYtopval,SBY,1,lv,j);
         }
 
-
+      /* DJB ULVZ */
+      /* extra BC for an open top box, e.g. Bower et al. (2011) */
+      else if(E->mesh.topvbc == 3) {
+        horizontal_bc(E,E->sphere.cap[j].VB,noz,1,0.0,VBX,1,lv,j);
+        horizontal_bc(E,E->sphere.cap[j].VB,noz,3,0.0,VBZ,0,lv,j);
+        horizontal_bc(E,E->sphere.cap[j].VB,noz,2,0.0,VBY,1,lv,j);
+        horizontal_bc(E,E->sphere.cap[j].VB,noz,1,E->control.VBXtopval,SBX,0,lv,j);
+        horizontal_bc(E,E->sphere.cap[j].VB,noz,3,0.0,SBZ,1,lv,j);
+        horizontal_bc(E,E->sphere.cap[j].VB,noz,2,E->control.VBYtopval,SBY,0,lv,j);
+        }
 
       if(E->mesh.botvbc == 0) {
         horizontal_bc(E,E->sphere.cap[j].VB,1,1,0.0,VBX,0,lv,j);

@@ -528,7 +528,9 @@ static void add_perturbations_at_all_layers(struct All_variables *E)
                             f1 = (E->sx[m][2][node] - E->control.fi_min) * flen;
                             r1 = E->sx[m][3][node];
 
-                            E->T[m][node] += con * cos(ll*t1) * cos(mm*f1)
+                            /*E->T[m][node] += con * cos(ll*t1) * cos(mm*f1)*/
+                            /* DJB ULVZ */
+                            E->T[m][node] += con * sin(mm*f1)
                                 * sin((r1-E->sphere.ri) * rlen);
                         }
         }

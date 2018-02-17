@@ -392,6 +392,13 @@ static void compute_elemental_composition_absolute_method(struct All_variables *
     /* This needs to be `manually' changed for the total volume */
     /*  occupied by your tracers */
     domain_volume = 1e-2;
+    /* DJB ULVZ */
+    /* domain_volume = 1.245595e-06; */ /* 32 km */
+    /* domain_volume = 9.320717e-07; */ /* 24 km */
+    /* domain_volume = 6.199668e-07; */ /* 16 km */
+    /* domain_volume = 3.092773e-07; */ /* 8 km */
+    /* domain_volume = 1.544550e-07; */ /* 4 km */
+    /* domain_volume = 7.719077e-08; */ /* 2 km */
 
     for (j=1; j<=E->sphere.caps_per_proc; j++) {
         for (e=1; e<=E->lmesh.nel; e++) {
