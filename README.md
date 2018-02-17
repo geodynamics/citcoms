@@ -80,6 +80,12 @@ A data assimilation manual is hosted in an svn repository located at ```https://
     - ```temp_sph```
     - ```sten_temp```
 
+### Ultra-low velocity zone (grep for 'DJB ULVZ")
+1. Modifications to enable ULVZ modelling as in Bower et al. (2011), so that Dan can work using just one version of CitcomS.  These amendments will not affect the data assimilation in any way.
+    - domain volumes for absolute tracer method for different initial ULVZ volumes
+    - permeable domain for regional models
+    - sine perturbation for initial temperature
+
 ## Dan's work area follows
 
 ### Rakib's code
