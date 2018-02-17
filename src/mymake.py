@@ -3,6 +3,7 @@
 import subprocess
 
 # generate configure and run
+subprocess.call( ['make','clean'] )
 subprocess.call( ['libtoolize','--force'] )
 subprocess.call( ['aclocal'] )
 subprocess.call( ['autoheader'] )
