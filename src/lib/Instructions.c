@@ -1591,10 +1591,10 @@ static void output_parse_optional(struct  All_variables *E)
        the entry in the pid output */
     strcpy(output_optional, E->output.optional);
 
-    len = strlen(output.optional);
+    len = strlen(output_optional);
     /* fprintf(stderr, "### length of optional is %d\n", len); */
     pos = 0;
-    next = output.optional;
+    next = output_optional;
 
     E->output.connectivity = 0;
     E->output.stress = 0;
