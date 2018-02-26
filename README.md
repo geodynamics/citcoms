@@ -79,6 +79,7 @@ A data assimilation manual is hosted in an svn repository located at ```https://
     - ```comp_sph```
     - ```temp_sph```
     - ```sten_temp```
+1. Fixed pid file output for lith_age_min, z_interface, and output_optional
 
 ### Ultra-low velocity zone (grep for 'DJB ULVZ")
 1. Modifications to enable ULVZ modelling as in Bower et al. (2011), so that Dan can work using just one version of CitcomS.  These amendments will not affect the data assimilation in any way.
