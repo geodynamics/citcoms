@@ -97,8 +97,8 @@ void lith_age_init(struct All_variables *E)
 
   if (E->parallel.me == 0 ) fprintf(stderr,"INSIDE lith_age_init\n");
 
-  /* DJB SLAB */
-  E->control.lith_age_min=E->control.lith_age_min/E->data.scalet;
+  /* DJB SLAB, DJB OUT */
+  E->control.lith_age_min_nondim=E->control.lith_age_min/E->data.scalet;
   E->control.lith_age_stencil_value_nondim=E->control.lith_age_stencil_value/E->data.scalet;
 
   E->age_t=(float*) malloc((gnox*gnoy+1)*sizeof(float));
@@ -171,8 +171,8 @@ void lith_age_construct_tic(struct All_variables *E)
 	    { /* if closer than (lith_age_depth) from top */
               /* DJB SLAB */
               /* must be greater than lith_age_min */
-              if(E->age_t[nodeg] <= E->control.lith_age_min)
-                  temp = (E->sphere.ro-r1) *0.5 /sqrt(E->control.lith_age_min);
+              if(E->age_t[nodeg] <= E->control.lith_age_min_nondim)
+                  temp = (E->sphere.ro-r1) *0.5 /sqrt(E->control.lith_age_min_nondim);
               else
 	          temp = (E->sphere.ro-r1) *0.5 /sqrt(E->age_t[nodeg]);
 	      E->T[m][node] = E->control.mantle_temp * erf(temp);
@@ -325,7 +325,7 @@ static void get_lith_age_depth(struct All_variables *E)
         if( age_t >= E->control.lith_age_stencil_value_nondim) {
 
           /* minimum age, which correlates to a minimum depth constraint */
-          age_t = max( age_t, E->control.lith_age_min );
+          age_t = max( age_t, E->control.lith_age_min_nondim );
 
           if( E->control.lith_age_depth_function)
             /* from Turcotte and Schubert */
@@ -411,8 +411,8 @@ void lith_age_conform_tbc(struct All_variables *E)
 	      if( ((E->sx[m][1][node]<=ttt2) && (E->sx[m][3][node]>=E->sphere.ro-E->control.depth_bound_adj)) || ((E->sx[m][1][node]>=ttt3) && (E->sx[m][3][node]>=E->sphere.ro-E->control.depth_bound_adj)) ) {
 		/* if < (width) from x bounds AND (depth) from top */
                 // DJB SLAB
-                if(E->age_t[nodeg] <= E->control.lith_age_min)
-                   temp = (E->sphere.ro-r1) *0.5 /sqrt(E->control.lith_age_min);
+                if(E->age_t[nodeg] <= E->control.lith_age_min_nondim)
+                   temp = (E->sphere.ro-r1) *0.5 /sqrt(E->control.lith_age_min_nondim);
                 else
                    temp = (E->sphere.ro-r1) *0.5 /sqrt(E->age_t[nodeg]);
 		t0 = E->control.mantle_temp * erf(temp);
@@ -427,8 +427,8 @@ void lith_age_conform_tbc(struct All_variables *E)
 		/* if < (width) from y bounds AND (depth) from top */
                 /* keep the age the same */
                 // DJB SLAB
-                if(E->age_t[nodeg] <= E->control.lith_age_min)
-                    temp = (E->sphere.ro-r1) *0.5 /sqrt(E->control.lith_age_min);
+                if(E->age_t[nodeg] <= E->control.lith_age_min_nondim)
+                    temp = (E->sphere.ro-r1) *0.5 /sqrt(E->control.lith_age_min_nondim);
                 else
                     temp = (E->sphere.ro-r1) *0.5 /sqrt(E->age_t[nodeg]);
 		t0 = E->control.mantle_temp * erf(temp);

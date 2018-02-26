@@ -1584,11 +1584,17 @@ static void output_parse_optional(struct  All_variables *E)
 
     int pos, len;
     char *prev, *next;
+    // DJB OUT
+    char output_optional[1000]; // same length as E->output.optional
 
-    len = strlen(E->output.optional);
+    /* DJB operate on a copy of the string to avoid corrupting
+       the entry in the pid output */
+    strcpy(output_optional, E->output.optional);
+
+    len = strlen(output_optional);
     /* fprintf(stderr, "### length of optional is %d\n", len); */
     pos = 0;
-    next = E->output.optional;
+    next = output_optional;
 
     E->output.connectivity = 0;
     E->output.stress = 0;
@@ -2189,16 +2195,16 @@ void print_all_config_parameters(struct All_variables *E)
     fprintf(fp, "tracer_flavors=%d\n", E->trace.nflavors);
     fprintf(fp, "ic_method_for_flavors=%d\n", E->trace.ic_method_for_flavors);
     fprintf(fp, "z_interface=");
-    if(E->trace.nflavors > 0)
-    {
-      for(i=0; i<E->trace.nflavors-1;i++)
-        fprintf(fp, "%g,", E->trace.z_interface[i]);
-      fprintf(fp, "%g\n", E->trace.z_interface[E->trace.nflavors-1]);
+    // DJB OUT
+    if(E->trace.nflavors > 0){
+        fprintf(fp, "%g", E->trace.z_interface[0]);
+        if(E->trace.nflavors > 2){
+            for(i=1; i<E->trace.nflavors-1;i++){
+                fprintf(fp, ",%g", E->trace.z_interface[i]);
+            }
+        }
     }
-    else
-    {
-      fprintf(fp, "\n");
-    }
+    fprintf(fp, "\n");
     fprintf(fp, "itracer_warnings=%d\n", E->trace.itracer_warnings);
     fprintf(fp, "regular_grid_deltheta=%g\n", E->trace.deltheta[0]);
     fprintf(fp, "regular_grid_delphi=%g\n", E->trace.delphi[0]);
