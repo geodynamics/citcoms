@@ -1031,13 +1031,11 @@ static void read_tracer_file(struct All_variables *E)
     icheck=isum_tracers(E);
 
     if (icheck!=number_of_tracers) {
-        fprintf(E->trace.fpt,"WARNING(read_tracer_file) - tracers != number in file\n");
+        fprintf(E->trace.fpt,"ERROR(read_tracer_file) - tracers != number in file\n");
         fprintf(E->trace.fpt,"Tracers in system: %d\n", icheck);
         fprintf(E->trace.fpt,"Tracers in file: %d\n", number_of_tracers);
         fflush(E->trace.fpt);
-        /* DJB COMP */
-        /* sometimes a handful of tracers go missing */
-        /* exit(10); */
+        exit(10);
     }
 
     return;
