@@ -1584,11 +1584,17 @@ static void output_parse_optional(struct  All_variables *E)
 
     int pos, len;
     char *prev, *next;
+    // DJB OUT
+    char output_optional[1000]; // same length as E->output.optional
 
-    len = strlen(E->output.optional);
+    /* DJB operate on a copy of the string to avoid corrupting
+       the entry in the pid output */
+    strcpy(output_optional, E->output.optional);
+
+    len = strlen(output.optional);
     /* fprintf(stderr, "### length of optional is %d\n", len); */
     pos = 0;
-    next = E->output.optional;
+    next = output.optional;
 
     E->output.connectivity = 0;
     E->output.stress = 0;
@@ -2193,7 +2199,6 @@ void print_all_config_parameters(struct All_variables *E)
     {
       for(i=0; i<E->trace.nflavors-1;i++)
         fprintf(fp, "%g,", E->trace.z_interface[i]);
-      fprintf(fp, "%g\n", E->trace.z_interface[E->trace.nflavors-1]);
     }
     else
     {
