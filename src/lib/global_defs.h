@@ -501,6 +501,7 @@ struct CONTROL {
     float lith_age_stencil_value; // DJB SLAB
     float lith_age_stencil_value_nondim; // DJB SLAB
     float lith_age_min; // DJB SLAB
+    float lith_age_min_nondim; // DJB SLAB, DJB OUT
 
     int slab_assim; // DJB SLAB
 
