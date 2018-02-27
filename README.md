@@ -54,7 +54,6 @@ A data assimilation manual is hosted in an svn repository located at ```https://
 1. case 26, used by Flament for EBA models
 1. case 27, used by Flament for EBA models
 1. case 28, used by Flament for EBA models
-1. case 29, used by Flament for EBA models *(see issue)*
 1. case 112, used by Hassan presumably for plume models(?)
 1. case 113, used by Hassan presumably for plume models(?)
 1. case 117, used by Hassan presumably for plume models(?)
