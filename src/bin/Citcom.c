@@ -257,7 +257,7 @@ int main(argc,argv)
     }
 
     /* DJB TIME now an additional condition to exit the loop */
-    if( (E->control.exit_at_present) && (E->data.timedir >= 0) && (age_Ma<-1.0) ){
+    if( (E->control.exit_at_present) && (E->data.timedir >= 0) && (age_Ma<0.0) ){
         E->control.keep_going = 0;
     }
 
