@@ -172,7 +172,7 @@ void get_buoyancy(struct All_variables *E, double **buoy)
         /* debug indices */
         fprintf(stderr, "%d %d %d %d %d\n", m, i, nz, gz, E->mesh.noz);
 
-        if(gz <= E->control.exclude_buoyancy_above_znode){
+        if(gz <= E->control.remove_buoyancy_above_znode){
             buoy[m][i] =  temp * E->refstate.rho[nz]
 	      * E->refstate.thermal_expansivity[nz] * E->T[m][i];
         }
@@ -192,7 +192,7 @@ void get_buoyancy(struct All_variables *E, double **buoy)
                 /* DJB TOPO */
                 nz = ((i-1) % E->lmesh.noz) + 1; // local znode
                 gz = nz + E->lmesh.EZS[lev]; // global znode
-                if(gz <= E->control.exclude_buoyancy_above_znode){
+                if(gz <= E->control.remove_buoyancy_above_znode){
                     buoy[m][i] -= temp2 * E->composition.comp_node[m][j][i];
                 }
       }

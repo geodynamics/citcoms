@@ -443,8 +443,8 @@ void read_initial_settings(struct All_variables *E)
   input_int("botvbc",&(E->mesh.botvbc),"0",m);
 
   /* DJB TOPO */
-  input_int("exclude_buoy_above_znode",&(E->control.exclude_buoy_above_znode),&(E->mesh.noz),m);
-  fprintf(stderr,"%d",E->control.exclude_buoy_above_znode);
+  input_int("remove_buoyancy_above_znode",&(E->control.remove_buoyancy_above_znode),&(E->mesh.noz),m);
+  fprintf(stderr,"%d",E->control.remove_buoyancy_above_znode);
   /* 
 
   internal boundary conditions
@@ -2159,6 +2159,8 @@ void print_all_config_parameters(struct All_variables *E)
     fprintf(fp, "slab_assim=%d\n", E->control.slab_assim);
     fprintf(fp, "slab_assim_file=%s\n", E->control.slab_assim_file);
     /* end of DJB SLAB */
+    /* DJB TOPO */
+    fprintf(fp, "remove_buoyancy_above_znode=%d\n", E->control.remove_buoyancy_above_znode);
     fprintf(fp, "start_age=%g\n", E->control.start_age);
     fprintf(fp, "reset_startage=%d\n", E->control.reset_startage);
     fprintf(fp, "file_tbcs=%d\n", E->control.tbcs_file);
