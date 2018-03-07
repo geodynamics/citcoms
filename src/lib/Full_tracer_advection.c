@@ -2355,7 +2355,8 @@ static int icheck_bounds(struct All_variables *E,
     /*  Hopefully, this doesn't happen often, may be expensive                  */
 
     tiny=1e-15;
-    eps=1e-3;
+    // DJB DEBUG.  1e-6 is same as old code.
+    eps=1e-6;
 
     if (number_of_tries>3)
         {
@@ -2370,6 +2371,8 @@ static int icheck_bounds(struct All_variables *E,
             exit(10);
         }
 
+    /* DJB DEBUG: mext set of lines are much cleaner than previous code, but could perhaps give
+       a slightly different result? */
     if (fabs(rad1)<=tiny||fabs(rad2)<=tiny||fabs(rad3)<=tiny||fabs(rad4)<=tiny)
       {
 	if (fabs(rad1) <= tiny){
