@@ -73,7 +73,7 @@ A data assimilation manual is hosted in an svn repository located at ```https://
     - a depth-dependent scaling (typically between 0 and 1) is introduced to scale Di
     - this scales Di in the energy equation, i.e. the adiabatic, viscous, and latent heating terms
     - useful to avoid intense shear heating, e.g. when surface velocity bcs are imposed
-2. to accommodate (1) above, an extra column is added to the ```refstate_file```:
+2. Therefore, an extra column is added to the ```refstate_file```:
     - [column 1] rho
     - [column 2] gravity
     - [column 3] thermal expansion coefficient (alpha)
