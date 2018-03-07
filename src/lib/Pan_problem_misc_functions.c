@@ -150,7 +150,7 @@ void apply_side_sbc(struct All_variables *E)
 
 void get_buoyancy(struct All_variables *E, double **buoy)
 {
-    int i,j,m,n,nz,nxny;
+    int i,j,m,n,nz,nxny,gz; // DJB TOPO
     int lev = E->mesh.levmax;
     double temp,temp2,rfac,cost2;
     void remove_horiz_ave2(struct All_variables*, double**);
@@ -164,11 +164,21 @@ void get_buoyancy(struct All_variables *E, double **buoy)
     for(m=1;m<=E->sphere.caps_per_proc;m++)
       for(i=1;i<=E->lmesh.nno;i++) {
 	nz = ((i-1) % E->lmesh.noz) + 1;
+        gz = nz + E->lmesh.EZS[lev]; // global znode DJB TOPO
         /* We don't need to substract adiabatic T profile from T here,
          * since the horizontal average of buoy will be removed.
          */
-        buoy[m][i] =  temp * E->refstate.rho[nz]
-	  * E->refstate.thermal_expansivity[nz] * E->T[m][i];
+        /* DJB TOPO */
+        /* debug indices */
+        fprintf(stderr, "%d %d %d %d %d\n", m, i, nz, gz, E->mesh.noz);
+
+        if(gz <= E->control.exclude_buoyancy_above_znode){
+            buoy[m][i] =  temp * E->refstate.rho[nz]
+	      * E->refstate.thermal_expansivity[nz] * E->T[m][i];
+        }
+        else{
+            buoy[m][i] = 0.0; // do not include thermal buoyancy
+        }
       }
     
     /* chemical buoyancy */
@@ -179,7 +189,12 @@ void get_buoyancy(struct All_variables *E, double **buoy)
 	temp2 = E->composition.buoyancy_ratio[j] * temp;
             for(m=1;m<=E->sphere.caps_per_proc;m++)
 	      for(i=1;i<=E->lmesh.nno;i++)
-		buoy[m][i] -= temp2 * E->composition.comp_node[m][j][i];
+                /* DJB TOPO */
+                nz = ((i-1) % E->lmesh.noz) + 1; // local znode
+                gz = nz + E->lmesh.EZS[lev]; // global znode
+                if(gz <= E->control.exclude_buoyancy_above_znode){
+                    buoy[m][i] -= temp2 * E->composition.comp_node[m][j][i];
+                }
       }
     }
 #ifdef USE_GGRD

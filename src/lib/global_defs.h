@@ -505,6 +505,8 @@ struct CONTROL {
 
     int slab_assim; // DJB SLAB
 
+    int exclude_buoy_above_znode; // DJB TOPO
+
   int precise_strain_rate; /* use proper computation for strain-rates in whole domain, not just poles */
 
     int temperature_bound_adj;

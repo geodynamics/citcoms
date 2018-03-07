@@ -442,7 +442,9 @@ void read_initial_settings(struct All_variables *E)
   input_int("topvbc",&(E->mesh.topvbc),"0",m);
   input_int("botvbc",&(E->mesh.botvbc),"0",m);
 
-
+  /* DJB TOPO */
+  input_int("exclude_buoy_above_znode",&(E->control.exclude_buoy_above_znode),&(E->mesh.noz),m);
+  fprintf(stderr,"%d",E->control.exclude_buoy_above_znode);
   /* 
 
   internal boundary conditions
