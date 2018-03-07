@@ -54,17 +54,17 @@ A data assimilation manual is hosted in an svn repository located at ```https://
 1. case 26, used by Flament for EBA models
 1. case 27, used by Flament for EBA models
 1. case 28, used by Flament for EBA models
-1. case 112, used by Hassan presumably for plume models(?)
-1. case 113, used by Hassan presumably for plume models(?)
-1. case 117, used by Hassan presumably for plume models(?)
-1. case 118, used by Hassan presumably for plume models(?)
+1. case 112, used by Hassan
+1. case 113, used by Hassan
+1. case 117, used by Hassan
+1. case 118, used by Hassan
 
 ### Output time (grep for 'DJB TIME')
 1. output data in regular increments of age (Myr) as well as/rather than number of time steps
     - ```storage_spacing_Myr``` (int)
     - if you only want to output data by age (Ma), you should set ```storage_spacing``` to a large integer value in order to suppress the regular time outputs
     - both ```storage_spacing_Myr``` and ```storage_spacing``` can be used together, in which case data is output whenever either one of these output criteria is satisfied.
-1. exit time loop when the model reaches negative ages (currently hard-coded to be <-1 Ma)
+1. exit time loop when the model reaches negative ages (currently hard-coded to be <0 Ma)
     - ```exit_at_present``` (bool)
     
 ### Extended-Boussinesq modifications (grep for 'DJB EBA')
@@ -81,7 +81,7 @@ A data assimilation manual is hosted in an svn repository located at ```https://
 1. Fixed pid file output for lith_age_min, z_interface, and output_optional
 
 ### Ultra-low velocity zone (grep for 'DJB ULVZ")
-1. Modifications to enable ULVZ modelling as in Bower et al. (2011), so that Dan can work using just one version of CitcomS.  These amendments will not affect the data assimilation in any way.
+1. Modifications to enable ULVZ modelling as in Bower et al. (2011), so that Dan can work using just one version of CitcomS.  These amendments will not affect the data assimilation.
     - domain volumes for absolute tracer method for different initial ULVZ volumes
     - permeable domain for regional models
     - sine perturbation for initial temperature
