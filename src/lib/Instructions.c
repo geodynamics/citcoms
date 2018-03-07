@@ -443,8 +443,9 @@ void read_initial_settings(struct All_variables *E)
   input_int("botvbc",&(E->mesh.botvbc),"0",m);
 
   /* DJB TOPO */
-  input_int("remove_buoyancy_above_znode",&(E->control.remove_buoyancy_above_znode),&(E->mesh.noz),m);
-  fprintf(stderr,"%d",E->control.remove_buoyancy_above_znode);
+  /* 10000 >> E->mesh.noz to ensure all buoyancy is included by default */
+  input_int("remove_buoyancy_above_znode",&(E->control.remove_buoyancy_above_znode),"10000",m);
+
   /* 
 
   internal boundary conditions
