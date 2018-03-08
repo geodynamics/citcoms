@@ -169,9 +169,10 @@ void get_buoyancy(struct All_variables *E, double **buoy)
          * since the horizontal average of buoy will be removed.
          */
         /* DJB TOPO */
+        /* to compute dynamic topography we need to remove buoyancy above a certain znode (depth),
+           which corresponds to remove_buoyancy_above_znode */
         /* debug indices */
         //fprintf(stderr, "%d %d %d %d %d\n", m, i, nz, gz, E->control.remove_buoyancy_above_znode);
-
         if(gz <= E->control.remove_buoyancy_above_znode){
           buoy[m][i] =  temp * E->refstate.rho[nz]
 	    * E->refstate.thermal_expansivity[nz] * E->T[m][i];
