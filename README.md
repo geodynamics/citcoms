@@ -89,10 +89,10 @@ A data assimilation manual is hosted in an svn repository located at ```https://
 
 ### Topography (grep for 'DJB TOPO')
 1. Parameter to remove buoyancy above a given znode for computing dynamic topography
-    - ```remove_buoyancy_above_znode```
+    - ```remove_buoyancy_above_znode``` (int)
 
 ### Ultra-low velocity zone (grep for 'DJB ULVZ")
-1. Modifications to enable ULVZ modelling as in Bower et al. (2011), so that Dan can work using just one version of CitcomS.  These amendments will not affect the data assimilation.
+1. Modifications to enable ULVZ modelling as in Bower et al. (2011).  These amendments will not affect the data assimilation.
     - domain volumes for absolute tracer method for different initial ULVZ volumes
     - permeable domain for regional models
     - sine perturbation for initial temperature
@@ -129,7 +129,6 @@ See diff/ directory for complete record
 1. internal velocity bcs (I don't think these are used by anyone anyway)
 1. outputs of heating terms, divv
 1. tracer density for elements and nodes output (added by Ting, see svn r52 through r55)
-1. buoyancy restart for dynamic topography (exclude buoyancy) (see svn r85)
 1. reverse gravity acceleraton (added by Ting, see svn r76) for SBI
    note that this appears to have been subsequently removed in r88?
 
