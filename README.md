@@ -87,6 +87,10 @@ A data assimilation manual is hosted in an svn repository located at ```https://
     - ```sten_temp```
 1. Fixed pid file output for lith_age_min, z_interface, and output_optional
 
+### Topography (grep for 'DJB TOPO')
+1. Parameter to remove buoyancy above a given znode for computing dynamic topography
+    - ```remove_buoyancy_above_znode```
+
 ### Ultra-low velocity zone (grep for 'DJB ULVZ")
 1. Modifications to enable ULVZ modelling as in Bower et al. (2011), so that Dan can work using just one version of CitcomS.  These amendments will not affect the data assimilation.
     - domain volumes for absolute tracer method for different initial ULVZ volumes
@@ -135,16 +139,16 @@ See diff/ directory for complete record
 1. Composition\_related.c -> tracer density (TODO)
 1. composition\_related.h -> tracer density (TODO)
 1. Convection.c -> COMPLETE
-1. Element\_calculations -> buoy restart for dyn topo (TODO)
+1. Element\_calculations -> COMPLETE
 1. Full\_boundary\_conditions -> ivels (TODO)
 1. Full\_lith\_age\_read\_files -> COMPLETE
 1. Full_read_input_from_file -> ivels (TODO)
 1. Full\_solver.c -> COMPLETE
-1. global\_defs.h -> dyn topo restarts, ivels (TODO)
+1. global\_defs.h -> ivels (TODO)
 1. Instructions.c -> outputs, heating terms, divv (TODO)
 1. Lith\_age.c -> COMPLETE
 1. output.c -> various outputs (TODO)
-1. Pan\_problem.c -> dyn topo (TODO)
+1. Pan\_problem.c -> COMPLETE
 1. Problem\_related.c -> ivels (TODO)
 1. Regional\_bcs.c -> ivels (TODO)
 1. Regional\_lith\_age\_read\_files -> COMPLETE
