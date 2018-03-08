@@ -170,14 +170,13 @@ void get_buoyancy(struct All_variables *E, double **buoy)
          */
         /* DJB TOPO */
         /* debug indices */
-        fprintf(stderr, "%d %d %d %d %d\n", m, i, nz, gz, E->mesh.noz);
+        //fprintf(stderr, "%d %d %d %d %d\n", m, i, nz, gz, E->control.remove_buoyancy_above_znode);
 
         if(gz <= E->control.remove_buoyancy_above_znode){
-            buoy[m][i] =  temp * E->refstate.rho[nz]
-	      * E->refstate.thermal_expansivity[nz] * E->T[m][i];
-        }
-        else{
-            buoy[m][i] = 0.0; // do not include thermal buoyancy
+          buoy[m][i] =  temp * E->refstate.rho[nz]
+	    * E->refstate.thermal_expansivity[nz] * E->T[m][i];
+        }else{
+          buoy[m][i] = 0.0; // do not include thermal buoyancy
         }
       }
     
@@ -188,13 +187,14 @@ void get_buoyancy(struct All_variables *E, double **buoy)
 	/* TODO: how to scale chemical buoyancy wrt reference density? */
 	temp2 = E->composition.buoyancy_ratio[j] * temp;
             for(m=1;m<=E->sphere.caps_per_proc;m++)
-	      for(i=1;i<=E->lmesh.nno;i++)
+	      for(i=1;i<=E->lmesh.nno;i++){
                 /* DJB TOPO */
                 nz = ((i-1) % E->lmesh.noz) + 1; // local znode
                 gz = nz + E->lmesh.EZS[lev]; // global znode
                 if(gz <= E->control.remove_buoyancy_above_znode){
-                    buoy[m][i] -= temp2 * E->composition.comp_node[m][j][i];
+                  buoy[m][i] -= temp2 * E->composition.comp_node[m][j][i];
                 }
+              }
       }
     }
 #ifdef USE_GGRD
