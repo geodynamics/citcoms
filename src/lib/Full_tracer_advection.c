@@ -2356,7 +2356,7 @@ static int icheck_bounds(struct All_variables *E,
 
     tiny=1e-15;
     // DJB DEBUG.  1e-6 is same as old code.
-    eps=1e-6;
+    eps=1e-7;
 
     if (number_of_tries>3)
         {
