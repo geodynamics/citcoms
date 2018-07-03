@@ -178,7 +178,7 @@ void set_lith_age_for_t_and_tbc(struct All_variables *E, int merge)
   int nox, noy, noz, noxnoz;
   float radius, temp,depth_used,daf,age;
   if(E->parallel.me==0)
-    fprintf(stderr,"set T/TBC dependent T, merge: %i\n",merge);
+    fprintf(stderr,"set T/TBC dependent T, merge: %i lith_age_time: %i\n",merge,E->control.lith_age_time);
   
 #ifdef USE_GGRD
   if(E->control.ggrd.age_control){ /* only top processors have grids
@@ -309,17 +309,22 @@ void lith_age_update_tbc(struct All_variables *E)
 void lith_age_temperature_bound_adj(struct All_variables *E, int lv)
 {
   int j,node,i,k,m,nodeg;
-  float ttt2,ttt3,fff2,fff3,depth_used,age;
+  float ttt2,ttt3,fff2,fff3,depth_used,age,rad,min_rad,global_min_rad;
   int nox,noy,noz,noxnoz;
   if(E->parallel.me == 0)
-    fprintf(stderr,"lith_age_temperature_bound_adj, lat: %i, lev %i/%i\n",E->control.lith_age_time,lv,E->mesh.gridmax);
+    fprintf(stderr,"lith_age_temperature_bound_adj, lat: %i, lev %i/%i\n",
+	    E->control.lith_age_time,lv,E->mesh.gridmax);
 #ifdef USE_GGRD
   if(E->control.ggrd.age_control){
     if(!E->control.ggrd.vtop_control_init)
       myerror(E,"lith_age_temperature_bound_adj: error, ggrd age control was not initialized");
-    
-    if(E->parallel.me_loc[3] != E->parallel.nprocz-1)
-      return;			/* bail */
+    if(E->parallel.me_loc[3] != E->parallel.nprocz-1){
+      min_rad =0;
+      //MPI_Allreduce(&min_rad,&global_min_rad,1,MPI_FLOAT,MPI_MIN,E->parallel.world);
+      return;			/* bail but make sure we're not
+				   holding things up for the minimum
+				   computation */
+    }
   }
 #endif
   noy=E->lmesh.noy;nox=E->lmesh.nox;noz=E->lmesh.noz;
@@ -379,24 +384,22 @@ void lith_age_temperature_bound_adj(struct All_variables *E, int lv)
 	}
   } /* end E->control.temperature_bound_adj */
 
-  if (E->control.lith_age_time) {
+  if(E->control.lith_age_time) {
     /* general init */
     if(lv==E->mesh.gridmax)
-
+      min_rad = 1;
       for(m=1;m <= E->sphere.caps_per_proc;m++){
 	for(i=1;i <= noy;i++)
 	  for(j=1;j <= nox;j++){
-
 	    nodeg = E->lmesh.nxs - 1+j+(E->lmesh.nys+i-2)*E->mesh.nox;
 	    age = E->age_t[nodeg];
-
 	    for(k=1;k <= noz;k++){
-
 	      /* split this up into x-y-z- loop detailes to be able to
 		 access age_t */
 	      node=k+(j-1)*noz+(i-1)*noxnoz;	      
-	      if(in_lith_age_depth(E->sx[m][3][node],
+	      if(in_lith_age_depth((rad = E->sx[m][3][node]),
 				   age,&depth_used,E)){ /* if closer than (lith_age_depth) from top */
+		if(rad < min_rad)min_rad = rad;
 		E->node[m][node]=E->node[m][node] | TBX;
 		E->node[m][node]=E->node[m][node] & (~FBX);
 		E->node[m][node]=E->node[m][node] | TBY;
@@ -407,8 +410,13 @@ void lith_age_temperature_bound_adj(struct All_variables *E, int lv)
 	    }
 	  }
       }
+      /*  MPI_Allreduce(&min_rad,&global_min_rad,1,MPI_FLOAT,MPI_MIN,E->parallel.world); */
+      /*       if(E->parallel.me == 0) */
+      /* 	fprintf(stderr,"lith_age_temperature_bound_adj: assigned TBCs down to %.1f km\n", */
+      /* 		(1-global_min_rad)*6371);c */
+      
   } /* end E->control.lith_age_time */
-
+ 
   return;
 }
 

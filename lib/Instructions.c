@@ -171,7 +171,7 @@ void initial_mesh_solver_setup(struct All_variables *E)
     if(chatty)fprintf(stderr,"shape functions done\n");
 
     construct_elt_gs(E);
-
+    if(chatty)fprintf(stderr,"construct elt gs done\n");
 
     if(E->control.inv_gruneisen != 0)
         construct_elt_cs(E);
@@ -180,11 +180,10 @@ void initial_mesh_solver_setup(struct All_variables *E)
     /* construct_c3x3matrix(E); */
 
     mass_matrix(E);
-
+    if(chatty)fprintf(stderr,"mass matrix done\n");
     construct_surf_det (E);
     construct_bdry_det (E);
-
-    if(chatty)fprintf(stderr,"mass matrix, dets done\n");
+    if(chatty)fprintf(stderr,"dets done\n");
 
     set_sphere_harmonics (E);
 

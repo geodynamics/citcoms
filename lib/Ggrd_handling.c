@@ -102,8 +102,8 @@ void ggrd_init_tracer_flavors(struct All_variables *E)
   /* 
      are we global?
   */
-  if (E->parallel.nprocxy == 12){
-    /* use GMT's geographic boundary conditions */
+  if(E->sphere.caps == 12){
+    /* use GMT's global geographic boundary conditions */
     sprintf(gmt_bc,GGRD_GMT_GLOBAL_STRING);
   }else{			/* regional */
     sprintf(gmt_bc,"");
@@ -290,16 +290,16 @@ void ggrd_temp_init_general(struct All_variables *E,int is_geographic)
 	  /*
 	     get interpolated velocity anomaly
 	  */
-	  depth = (1-E->sx[m][3][node])*6371;
+	  depth = (1-E->sx[m][3][node])*GGRD_RADIUS_E_KM; /* depth positive in km */
+	  
 	  if(!ggrd_grdtrack_interpolate_rtp((double)E->sx[m][3][node],
 					    (double)E->sx[m][1][node],
 					    (double)E->sx[m][2][node],
 					    E->control.ggrd.temp.d,&tadd,
 					    FALSE,shift_to_pos_lon)){
-	    fprintf(stderr,"%g %g %g\n",E->sx[m][2][node]*57.29577951308232087,
-		    90-E->sx[m][1][node]*57.29577951308232087,depth);
-		    
-	    myerror(E,"ggrd_temp_init_general: interpolation error");
+	    fprintf(stderr,"ggrd_temp_init_general: interpolation error: lon: %g lat: %g depth: %g\n",
+		    E->sx[m][2][node]*GGRD_PIF,90-E->sx[m][1][node]* GGRD_PIF,depth);
+	    myerror(E,"exiting");
 	  }
 	  if(E->control.ggrd_tinit_nl_scale){ /* nonlinear scaling,
 						 downeighing negative
@@ -514,7 +514,7 @@ void ggrd_read_mat_from_file(struct All_variables *E, int is_geographic)
       fprintf(stderr,"ggrd_read_mat_from_file: assigning at age %g\n",age);
     if(timedep){
       if(!ggrd_interpol_time(age,&E->control.ggrd.time_hist,&i1,&i2,&f1,&f2))
-	myerror(E,"interpolation error");
+	myerror(E,"time interpolation error");
       interpolate = 1;
     }else{
       interpolate = 0;
@@ -746,7 +746,7 @@ void ggrd_read_ray_from_file(struct All_variables *E, int is_geographic)
     if(timedep){
       age = find_age_in_MY(E);
       if(!ggrd_interpol_time(age,&E->control.ggrd.time_hist,&i1,&i2,&f1,&f2))
-	myerror(E,"interpolation error");
+	myerror(E,"time interpolation error");
       interpolate = 1;
     }else{
       interpolate = 0;i1 = 0;
@@ -1140,7 +1140,7 @@ void ggrd_read_vtop_from_file(struct All_variables *E, int is_geographic)
 	}else{
 	  /*  */
 	  if(!ggrd_interpol_time(age,&E->control.ggrd.time_hist,&i1,&i2,&f1,&f2))
-	    myerror(E,"interpolation error");
+	    myerror(E,"time interpolation error");
 	  interpolate = 1;
 	  if(verbose){
 	    if(E->control.ggrd.time_hist.interpol_time_lin){
@@ -1525,7 +1525,8 @@ void ggrd_read_vtop_from_file(struct All_variables *E, int is_geographic)
   if(E->control.ggrd.age_control){
     E->control.ggrd.age_control_init = TRUE;
     if(E->monitor.solution_cycles > 1){
-      
+      /* redo boundary conditions */
+      lith_age_temperature_bound_adj(E,E->mesh.gridmax);
       set_lith_age_for_t_and_tbc(E,TRUE); /* reassign for T and TBC */
     }
   }

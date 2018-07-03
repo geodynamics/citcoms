@@ -92,18 +92,18 @@ void full_parallel_processor_setup(struct All_variables *E)
   E->parallel.me_loc[2] = ((((me - cap_id_surf*proc_per_cap - E->parallel.me_loc[3])/E->parallel.nprocz) - E->parallel.me_loc[1])/E->parallel.nprocx) % E->parallel.nprocy;
 
 
-/*
-the numbering of proc in each caps is as so (example for an xyz = 2x2x2 box):
-NOTE: This is different (in a way) than the numbering of the nodes:
-the nodeal number has the first oordinate as theta, which goes N-S and
-the second oordinate as fi, which goes E-W. Here we use R-L as the first
-oordinate and F-B
- 0 = lower  left front corner=[000]  4 = lower  left back corner=[010]
- 1 = upper  left front corner=[001]  5 = upper  left back corner=[011]
- 2 = lower right front corner=[100]  6 = lower right back corner=[110]
- 3 = upper right front corner=[101]  7 = upper right back corner=[111]
-[xyz] is x=E->parallel.me_loc[1],y=E->parallel.me_loc[2],z=E->parallel.me_loc[3]
-*/
+  /*
+    the numbering of proc in each caps is as so (example for an xyz = 2x2x2 box):
+    NOTE: This is different (in a way) than the numbering of the nodes:
+    the nodeal number has the first oordinate as theta, which goes N-S and
+    the second oordinate as fi, which goes E-W. Here we use R-L as the first
+    oordinate and F-B
+    0 = lower  left front corner=[000]  4 = lower  left back corner=[010]
+    1 = upper  left front corner=[001]  5 = upper  left back corner=[011]
+    2 = lower right front corner=[100]  6 = lower right back corner=[110]
+    3 = upper right front corner=[101]  7 = upper right back corner=[111]
+    [xyz] is x=E->parallel.me_loc[1],y=E->parallel.me_loc[2],z=E->parallel.me_loc[3]
+  */
 
   /* determine cap id for each cap in a given processor  */
   pid_surf = me/proc_per_cap; /* cap number (0~11) */
