@@ -10,7 +10,7 @@ e.g., in Bern I use:
 
 For reasons relating to compilers, the cluster and node setup, some mpi versions may be preferred for your particular cluster.  I was recommended by the Bern sys admin to use the intel compiler with openmpi.  You might also want to find out which openmpi is preferred on your cluster (and perhaps add this above, so we have complete documentation of what works and what doesn't).
 
-Then, to install CitcomS v3.1.1 with data assimilation go into the src/ directory and execute
+Then, to install CitcomS v3.3.1 with data assimilation go into the src/ directory and execute
 
 ```./mymake.py```
 
