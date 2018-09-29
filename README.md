@@ -2,15 +2,15 @@
 
 ## Installation
 
-This version of CitcomS only requires a valid MPI distribution (no more python / pyre).  Most clusters can load an MPI distribute using modules
+This version of CitcomS only requires a valid MPI distribution (no more python / pyre).  Most clusters can load an MPI distribute using `modules`
 
-e.g., in Bern I use:
+For example, at the University of Bern I use:
 
-```module load openmpi/1.10.2-intel```
+```module load iomkl/2018b```
 
-For reasons relating to compilers, the cluster and node setup, some mpi versions may be preferred for your particular cluster.  I was recommended by the Bern sys admin to use the intel compiler with openmpi.  You might also want to find out which openmpi is preferred on your cluster (and perhaps add this above, so we have complete documentation of what works and what doesn't).
+For reasons relating to compilers, the cluster and node setup, some mpi versions may be preferred for your particular cluster.
 
-Then, to install CitcomS v3.3.1 with data assimilation go into the src/ directory and execute
+To install CitcomS v3.3.1 with data assimilation go into the src/ directory and execute
 
 ```./mymake.py```
 
@@ -18,7 +18,7 @@ Then, to install CitcomS v3.3.1 with data assimilation go into the src/ director
 
 Example input and output configuration files are provided in:
 
-```inputeg/```
+```examples/```
 
 This example is a good one to try and run first:
 
@@ -28,7 +28,7 @@ You will need to setup your job submission script.  See a slurm example in jobsu
 
 ## Features that are implemented
 
-A data assimilation manual is hosted in an svn repository located at ```https://svn.gps.caltech.edu/repos/docs/data_assimilation```.  This manual contains information about the parameters that are used, both for the convection code and also the pre- and post-processing scripts.  Access to the svn can be requested.
+A data assimilation manual is hosted in an svn repository located at ```https://svn.gps.caltech.edu/repos/docs/data_assimilation```.  This manual contains information about the parameters that are used, both for the convection code and also the pre- and post-processing scripts.  Access to the svn can be requested.  Some options in the manual might be out-dated, so prioritise the options in this README.
 
 ### Slab and lithosphere assimilation (grep for 'DJB SLAB')
 1. ```lith_age_depth_function``` (bool)
