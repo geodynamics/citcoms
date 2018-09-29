@@ -10,11 +10,11 @@ For example, at the University of Bern I use:
 
 For reasons relating to compilers, the cluster and node setup, some mpi versions may be preferred for your particular cluster.
 
-To install CitcomS v3.3.1 with data assimilation go into the src/ directory and execute
+To install CitcomS v3.3.1 with data assimilation go to `src/` and execute
 
 ```./mymake.py```
 
-[Yes OK, for the step above you do need a python distribution, but this is only to run the commands that configure and make Citcoms.  Python is not actually used for running the code]
+For this step you need a python distribution, but this is only to run the commands that configure and make Citcoms.  Python is not actually used for running the code.  Note that the other directories with a prefix of `src_` relate to older versions of the code and should not be used.  They are kept for reference only.
 
 Example input and output configuration files are provided in:
 
