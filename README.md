@@ -26,6 +26,8 @@ This example is a good one to try and run first:
 
 You will need to setup your job submission script.  See a slurm example in jobsubmit/  Please add your own submission scripts to the same directory so we have more examples
 
+IMPORTANT: This code *only* implements assimilation in the CitcomS code.  There are other python scripts that generate the *input* data and these are stored in a different svn repository hosted at Caltech. 
+
 ## Features that are implemented
 
 A data assimilation manual is hosted in an svn repository located at ```https://svn.gps.caltech.edu/repos/docs/data_assimilation```.  This manual contains information about the parameters that are used, both for the convection code and also the pre- and post-processing scripts.  Access to the svn can be requested.  Some options in the manual might be out-dated, so prioritise the options in this README.
