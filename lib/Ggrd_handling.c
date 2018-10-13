@@ -217,6 +217,10 @@ void ggrd_temp_init_general(struct All_variables *E,int is_geographic)
   if(E->parallel.me == 0)
     fprintf(stderr,"ggrd_temp_init_general: using GMT grd files for temperatures, gmtflag: %s\n",
 	    gmt_string);
+  if(fabs(E->data.radius_km-GGRD_RADIUS_E_KM)>5){
+    fprintf(stderr,"ggrd_temp_init_general: WARNING: radius of planet (%g) different from ggrd default: %g\n",
+	    E->data.radius_km,GGRD_RADIUS_E_KM);
+  }
   /*
 
 
@@ -290,7 +294,7 @@ void ggrd_temp_init_general(struct All_variables *E,int is_geographic)
 	  /*
 	     get interpolated velocity anomaly
 	  */
-	  depth = (1-E->sx[m][3][node])*GGRD_RADIUS_E_KM; /* depth positive in km */
+	  depth = (1-E->sx[m][3][node])*E->data.radius_km ; /* depth positive in km */
 	  
 	  if(!ggrd_grdtrack_interpolate_rtp((double)E->sx[m][3][node],
 					    (double)E->sx[m][1][node],
