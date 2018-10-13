@@ -300,7 +300,8 @@ void ggrd_temp_init_general(struct All_variables *E,int is_geographic)
 					    (double)E->sx[m][1][node],
 					    (double)E->sx[m][2][node],
 					    E->control.ggrd.temp.d,&tadd,
-					    FALSE,shift_to_pos_lon)){
+					    FALSE,shift_to_pos_lon,
+					    E->data.radius_km)){
 	    fprintf(stderr,"ggrd_temp_init_general: interpolation error: lon: %g lat: %g depth: %g\n",
 		    E->sx[m][2][node]*GGRD_PIF,90-E->sx[m][1][node]* GGRD_PIF,depth);
 	    myerror(E,"exiting");
@@ -557,15 +558,17 @@ void ggrd_read_mat_from_file(struct All_variables *E, int is_geographic)
 		 material 
 	      */
 	      if(E->control.ggrd_mat_is_3d){
-		if(!ggrd_grdtrack_interpolate_rtp((double)rout[0],(double)rout[1],(double)rout[2],(E->control.ggrd.mat+i1),&indbl,
-						 FALSE,shift_to_pos_lon)){
+		if(!ggrd_grdtrack_interpolate_rtp((double)rout[0],(double)rout[1],(double)rout[2],
+						  (E->control.ggrd.mat+i1),&indbl,
+						  FALSE,shift_to_pos_lon,E->data.radius_km)){
 		  fprintf(stderr,"ggrd_read_mat_from_file: interpolation error at lon: %g lat: %g depth: %g\n",
 			  rout[2]*180/M_PI,90-rout[1]*180/M_PI,(1.0-rout[0]) * 6371.0);
 		  parallel_process_termination();
 		}
 
 	      }else{
-		if(!ggrd_grdtrack_interpolate_tp((double)rout[1],(double)rout[2],(E->control.ggrd.mat+i1),&indbl,
+		if(!ggrd_grdtrack_interpolate_tp((double)rout[1],(double)rout[2],
+						 (E->control.ggrd.mat+i1),&indbl,
 						 FALSE,shift_to_pos_lon)){
 		  fprintf(stderr,"ggrd_read_mat_from_file: interpolation error at lon: %g lat: %g\n",
 			  rout[2]*180/M_PI,90-rout[1]*180/M_PI);
@@ -577,7 +580,7 @@ void ggrd_read_mat_from_file(struct All_variables *E, int is_geographic)
 		if(E->control.ggrd_mat_is_3d){
 		  if(!ggrd_grdtrack_interpolate_rtp((double)rout[0],(double)rout[1],(double)rout[2],
 						   (E->control.ggrd.mat+i2),&indbl2,
-						   FALSE,shift_to_pos_lon)){
+						    FALSE,shift_to_pos_lon,E->data.radius_km)){
 		    fprintf(stderr,"ggrd_read_mat_from_file: interpolation error at lon: %g lat: %g depth: %g\n",
 			    rout[2]*180/M_PI,90-rout[1]*180/M_PI,(1.0-rout[0]) * 6371.0);
 		    parallel_process_termination();
