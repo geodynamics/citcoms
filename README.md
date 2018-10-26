@@ -153,7 +153,7 @@ See diff/ directory for complete record
 1. Problem\_related.c -> COMPLETE
 1. Regional\_boundary\_conditions.c -> COMPLETE
 1. Regional\_lith\_age\_read\_files -> COMPLETE
-1. Regional\_read\_input\_files -> ivels (TODO)
+1. Regional\_read\_input\_files -> COMPLETE
 1. Regional\_solver -> COMPLETE
 1. solver.h -> COMPLETE
 1. Stokes\_flow\_incom -> divv calculation for output (TODO)
