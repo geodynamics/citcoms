@@ -40,6 +40,8 @@ A data assimilation manual is hosted in an svn repository located at ```https://
 1. ```slab_assim``` (bool)
 1. ```slab_assim_file``` (char)
 1. ```sten_temp``` as an output option (char)
+1. ```internal_vbcs_file``` (bool)
+1. ```velocity_internal_file``` (char)
 
 ### Composition (grep for 'DJB COMP')
 1. ```hybrid_method``` (bool)
@@ -128,7 +130,6 @@ See diff/ directory for complete record
 
 ### Code features NOT implemented
 
-1. internal velocity bcs (I don't think these are used by anyone anyway)
 1. outputs of heating terms, divv
 1. tracer density for elements and nodes output (added by Ting, see svn r52 through r55)
 1. reverse gravity acceleraton (added by Ting, see svn r76) for SBI
