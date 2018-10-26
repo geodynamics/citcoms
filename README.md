@@ -136,7 +136,7 @@ See diff/ directory for complete record
 
 ### Log of features implemented from legacy code
 1. Adv\_diff -> COMPLETE
-1. BC\_util -> ivels (TODO)
+1. BC\_util -> COMPLETE
 1. Composition\_related.c -> tracer density (TODO)
 1. composition\_related.h -> tracer density (TODO)
 1. Convection.c -> COMPLETE
