@@ -2159,6 +2159,8 @@ void print_all_config_parameters(struct All_variables *E)
     fprintf(fp, "lith_age_stencil_value=%g\n", E->control.lith_age_stencil_value);
     fprintf(fp, "slab_assim=%d\n", E->control.slab_assim);
     fprintf(fp, "slab_assim_file=%s\n", E->control.slab_assim_file);
+    fprintf(fp, "internal_vbcs_file=%d\n", E->control.internal_vbcs_file);
+    fprintf(fp, "velocity_internal_file=%s\n", E->control.velocity_internal_file);
     /* end of DJB SLAB */
     /* DJB TOPO */
     fprintf(fp, "remove_buoyancy_above_znode=%d\n", E->control.remove_buoyancy_above_znode);

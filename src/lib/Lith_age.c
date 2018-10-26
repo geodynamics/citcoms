@@ -48,9 +48,11 @@ void lith_age_input(struct All_variables *E)
   E->control.temperature_bound_adj = 0;
 
   E->control.slab_assim = 0; // DJB SLAB
+  E->control.internal_vbcs_file = 0; // DJB SLAB
 
   input_int("lith_age",&(E->control.lith_age),"0",m);
   input_boolean("slab_assim",&(E->control.slab_assim),"0",m); // DJB SLAB
+  input_boolean*("internal_vbcs_file",&(E->control.internal_vbcs_file),"0",m); // DJB SLAB
 
 #ifdef USE_GGRD
   input_int("ggrd_age_control",&(E->control.ggrd.age_control),"0",m); /* if > 0, will use top  E->control.ggrd.mat_control layers and assign a prefactor for the viscosity */
@@ -79,6 +81,11 @@ void lith_age_input(struct All_variables *E)
   // DJB SLAB
   if (E->control.slab_assim) {
     input_string("slab_assim_file",E->control.slab_assim_file,"",m);
+  }
+
+  // DJB SLAB
+  if (E->control.internal_vbcs_file) {
+    input_string("velocity_internal_file",E->control.velocity_internal_file,"",m);
   }
 
   return;
