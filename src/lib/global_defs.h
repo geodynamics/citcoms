@@ -260,6 +260,7 @@ struct CAP    {
     float *VB[4];
     double *slab_temp; // DJB SLAB
     double *slab_sten; // DJB SLAB
+    int *slab_sten2; // DJB SLAB, stencil (flags) for velo
     float *V[4];
     float *Vprev[4];
     };
@@ -536,6 +537,7 @@ struct CONTROL {
 
     int side_sbcs;
     int vbcs_file;
+    int internal_vbcs_file; // DJB SLAB
     int tbcs_file;
     int mat_control;
     int mineral_physics_model;
