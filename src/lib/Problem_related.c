@@ -95,6 +95,21 @@ void read_slab_temperature_from_file(E)
 }
 
 /*=======================================================================
+  read slab velocity from files
+=========================================================================*/
+/* DJB SLAB */
+
+void read_internal_velocity_from_file(E)
+     struct All_variables *E; 
+{
+      if( E->parallel.me == 0)
+               fprintf(stderr, "\nINSIDE read_internal_velocity_from_file just before call with 7,1 \n");
+
+    (E->solver.read_input_files_for_timesteps)(E,7,1); /* read velocity and stencil (7) and output(1) */
+    return;
+}
+
+/*=======================================================================
   Open restart file to get initial elapsed time, or calculate the right value
 =========================================================================*/
 
