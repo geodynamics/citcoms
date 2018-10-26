@@ -557,6 +557,7 @@ struct CONTROL {
     int check_pressure_convergence;
     int force_iteration;
     char velocity_boundary_file[1000];
+    char velocity_internal_file[1000]; // DJB SLAB
     char temperature_boundary_file[1000];
     char mat_file[1000];
     char lith_age_file[1000];
