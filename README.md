@@ -151,7 +151,7 @@ See diff/ directory for complete record
 1. output.c -> various outputs (TODO)
 1. Pan\_problem.c -> COMPLETE
 1. Problem\_related.c -> COMPLETE
-1. Regional\_bcs.c -> ivels (TODO)
+1. Regional\_boundary\_conditions.c -> COMPLETE
 1. Regional\_lith\_age\_read\_files -> COMPLETE
 1. Regional\_read\_input\_files -> ivels (TODO)
 1. Regional\_solver -> COMPLETE

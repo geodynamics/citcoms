@@ -43,6 +43,7 @@ static void velocity_refl_vert_bc();
 static void temperature_refl_vert_bc();
 void read_temperature_boundary_from_file(struct All_variables *);
 void read_velocity_boundary_from_file(struct All_variables *);
+void internal_velocity_bc(); // DJB SLAB
 
 /* ========================================== */
 
@@ -137,8 +138,15 @@ void regional_velocity_boundary_conditions(E)
       if(E->control.side_sbcs)
 	apply_side_sbc(E);
       /*  */
-      /* 
-	 
+
+      /* If any imposed internal velocity structure it goes here */
+      /* DJB SLAB */
+      if(E->control.internal_vbcs_file) {
+        /* internal velocity boundary condition */
+        internal_velocity_bc(E);
+      }
+ 
+      /*
       apply stress or velocity boundary conditions, read from file
       settings are to be implemented in those routines (will only do
       anything at present, if E->mesh.toplayerbc != 0
