@@ -41,6 +41,7 @@ static void velocity_apply_periodic_bcs();
 static void temperature_apply_periodic_bcs();
 void read_temperature_boundary_from_file(struct All_variables *);
 void read_velocity_boundary_from_file(struct All_variables *);
+void internal_velocity_bc(); // DJB SLAB
 
 /* ========================================== */
 
@@ -119,6 +120,12 @@ void full_velocity_boundary_conditions(E)
 
       if(E->control.side_sbcs)
 	apply_side_sbc(E);
+
+      /* DJB SLAB */
+      if(E->control.internal_vbcs_file) {
+        /* internal velocity boundary condition */
+        internal_velocity_bc(E);
+      }
 
 /* if(E->control.verbose) { */
 /*  for (j=1;j<=E->sphere.caps_per_proc;j++) */
