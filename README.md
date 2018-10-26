@@ -143,14 +143,14 @@ See diff/ directory for complete record
 1. Element\_calculations -> COMPLETE
 1. Full\_boundary\_conditions -> COMPLETE
 1. Full\_lith\_age\_read\_files -> COMPLETE
-1. Full_read_input_from_file -> ivels (COMPLETE)
+1. Full_read_input_from_file -> COMPLETE
 1. Full\_solver.c -> COMPLETE
-1. global\_defs.h -> ivels (TODO)
+1. global\_defs.h -> TODO
 1. Instructions.c -> outputs, heating terms, divv (TODO)
 1. Lith\_age.c -> COMPLETE
 1. output.c -> various outputs (TODO)
 1. Pan\_problem.c -> COMPLETE
-1. Problem\_related.c -> ivels (TODO)
+1. Problem\_related.c -> COMPLETE
 1. Regional\_bcs.c -> ivels (TODO)
 1. Regional\_lith\_age\_read\_files -> COMPLETE
 1. Regional\_read\_input\_files -> ivels (TODO)
