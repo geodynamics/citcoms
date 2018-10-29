@@ -2,6 +2,8 @@
 
 ## Installation
 
+### Quick start for a cluster
+
 This version of CitcomS only requires a valid MPI distribution (no more python / pyre).  Most clusters can load an MPI distribute using `modules`
 
 For example, at the University of Bern I use:
@@ -27,6 +29,12 @@ This example is a good one to try and run first:
 You will need to setup your job submission script.  See a slurm example in jobsubmit/  Please add your own submission scripts to the same directory so we have more examples
 
 IMPORTANT: This code *only* implements assimilation in the CitcomS code.  There are other python scripts that generate the *input* data and these are stored in a different svn repository hosted at Caltech. 
+
+### Quick start for Mac OSX
+
+```sudo port install openmpi```
+```sudo port select --set mpi openmpi-mp-fortran```
+```sudo port install hdf5 +openmpi```
 
 ## Features that are implemented
 
