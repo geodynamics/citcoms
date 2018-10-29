@@ -44,6 +44,10 @@ Install Open MPI and HDF5 (later is probably optional):
 
 ```sudo port install hdf5 +openmpi```
 
+For valgrind (memory leak checker):
+
+```sudo port install valgrind-devel +openmpi```
+
 To run a uniprocessor job:
 
 ```mpirun -np 1 CitcomSRegional input.sample```
