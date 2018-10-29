@@ -32,7 +32,11 @@ IMPORTANT: This code *only* implements assimilation in the CitcomS code.  There 
 
 ### Quick start for Mac OSX
 
-Install Open MPI and HDF5 (later is probably optional)
+Install build tools:
+
+```sudo port install automake autoconf libtool```
+
+Install Open MPI and HDF5 (later is probably optional):
 
 ```sudo port install openmpi```
 
