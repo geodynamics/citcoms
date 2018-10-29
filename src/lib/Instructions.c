@@ -973,6 +973,7 @@ void allocate_common_vars(E)
   /* DJB SLAB */
   E->sphere.cap[j].slab_temp = (double *) malloc((nno+1)*sizeof(double));
   E->sphere.cap[j].slab_sten = (double *) malloc((nno+1)*sizeof(double));
+  E->sphere.cap[j].slab_sten2 = (double *) malloc((nno+1)*sizeof(double));
 
   E->slice.tpg[j]      = (float *)malloc((nsf+2)*sizeof(float));
   E->slice.tpgb[j]     = (float *)malloc((nsf+2)*sizeof(float));
