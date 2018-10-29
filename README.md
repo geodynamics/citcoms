@@ -34,27 +34,35 @@ IMPORTANT: This code *only* implements assimilation in the CitcomS code.  There 
 
 In principle you can use either Open MPI or MPICH as an MPI distribution to run CitcomS.  However, unfortunately the LLDB (debugger) prefers Open MPI, whereas valgrind prefers MPICH.  Therefore I install both MPI distributions and switch between them using ```sudo port select --set mpi```.
 
-Install build tools:
+#### Install build tools:
 
 ```sudo port install automake autoconf libtool```
 
-Install Open MPI and HDF5 (later is probably optional):
+#### MPI option 1. Install Open MPI and HDF5 (later is probably optional):
 
 ```sudo port install openmpi```
 
-```sudo port select --set mpi openmpi-mp-fortran```
-
 ```sudo port install hdf5 +openmpi```
 
-Install MPICH
+```sudo port select --set mpi openmpi-mp-fortran```
+
+#### and/or MPI option 2. Install MPICH
 
 ```sudo port install mpich```
 
-For valgrind (memory leak checker):
+```sudo port select --set mpi mpich-mp-fortran```
 
-```sudo port install valgrind-devel +openmpi```
+#### Install valgrind (memory leak checker):
 
-To run a uniprocessor job:
+```sudo port install valgrind-devel```
+
+or install version 3.14 from the website
+
+#### Install LLDB (debugger)
+
+This is already on my mac - perhaps it comes with XCode?
+
+#### To run a uniprocessor job:
 
 ```mpirun -np 1 CitcomSRegional input.sample```
 
