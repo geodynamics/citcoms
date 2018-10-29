@@ -32,11 +32,17 @@ IMPORTANT: This code *only* implements assimilation in the CitcomS code.  There 
 
 ### Quick start for Mac OSX
 
+Install Open MPI and HDF5 (later is probably optional)
+
 ```sudo port install openmpi```
 
 ```sudo port select --set mpi openmpi-mp-fortran```
 
 ```sudo port install hdf5 +openmpi```
+
+To run a uniprocessor job:
+
+```mpirun -np 1 CitcomSRegional input.sample```
 
 ## Features that are implemented
 
