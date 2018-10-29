@@ -38,6 +38,8 @@ In principle you can use either Open MPI or MPICH as an MPI distribution to run 
 
 ```sudo port install automake autoconf libtool```
 
+Note that you should use the command ```glibtoolize```, since ```libtool``` already exists on Mac OSX although it is not the GNU version.  So MacPorts uses a program name transform. 
+
 #### MPI option 1. Install Open MPI and HDF5 (later is probably optional):
 
 ```sudo port install openmpi```
