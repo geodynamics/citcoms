@@ -33,7 +33,9 @@ IMPORTANT: This code *only* implements assimilation in the CitcomS code.  There 
 ### Quick start for Mac OSX
 
 ```sudo port install openmpi```
+
 ```sudo port select --set mpi openmpi-mp-fortran```
+
 ```sudo port install hdf5 +openmpi```
 
 ## Features that are implemented
