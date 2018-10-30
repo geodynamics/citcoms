@@ -87,23 +87,25 @@ void read_temperature_boundary_from_file(E)
 void read_slab_temperature_from_file(E)
      struct All_variables *E;
 {
-      if( E->parallel.me == 0)
-               fprintf(stderr, "\nINSIDE read_slab_temperature_from_file just before call with 6,1 \n");
+    /* debugging */
+    /*if( E->parallel.me == 0)
+        fprintf(stderr, "read_slab_temperature_from_file, just before call with 6,1\n");*/
 
     (E->solver.read_input_files_for_timesteps)(E,6,1); /* read temperature and stencil (6) and output(1) */
     return;
 }
 
 /*=======================================================================
-  read slab velocity from files
+  read internal (slab) velocity from files
 =========================================================================*/
 /* DJB SLAB */
 
 void read_internal_velocity_from_file(E)
      struct All_variables *E; 
 {
-      if( E->parallel.me == 0)
-               fprintf(stderr, "\nINSIDE read_internal_velocity_from_file just before call with 7,1 \n");
+    /* debugging */
+    /*if( E->parallel.me == 0)
+        fprintf(stderr, "read_internal_velocity_from_file, just before call with 7,1\n"); */
 
     (E->solver.read_input_files_for_timesteps)(E,7,1); /* read velocity and stencil (7) and output(1) */
     return;

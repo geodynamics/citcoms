@@ -304,19 +304,20 @@ void PG_timestep_solve(struct All_variables *E)
       }
   }
 
+  /* DJB SLAB */
   if(E->control.lith_age) {
       if(E->parallel.me==0) fprintf(stderr,"PG_timestep_solve\n");
       lith_age_conform_tbc(E);
+      if(E->parallel.me==0) fprintf(stderr,"assimilate_lith_conform_bcs\n");
       assimilate_lith_conform_bcs(E);
   }
 
   /* DJB SLAB */
   if(E->control.slab_assim) {
-      if(E->parallel.me==0) fprintf(stderr,"Call assimilate_slab_conform_bcs\n");
+      if(E->parallel.me==0) fprintf(stderr,"assimilate_slab_conform_bcs\n");
       assimilate_slab_conform_bcs(E);
-      if(E->parallel.me==0) fprintf(stderr,"Returned from assimilate_slab_conform_bcs\n");
+      /*if(E->parallel.me==0) fprintf(stderr,"Returned from assimilate_slab_conform_bcs\n");*/
   }
-
 
   return;
 }
