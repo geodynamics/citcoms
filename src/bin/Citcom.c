@@ -53,6 +53,7 @@ int main(argc,argv)
   void read_instructions();
   void initial_setup();
   void initial_conditions();
+  void internal_velocity_bc(); // DJB SLAB
   void post_processing();
   void read_velocity_boundary_from_file();
   void read_rayleigh_from_file();
@@ -304,6 +305,12 @@ int main(argc,argv)
     /* updating plate velocity boundary condition */
     if(E->control.vbcs_file==1)
       read_velocity_boundary_from_file(E);
+
+    /* DJB SLAB */
+    if(E->control.internal_vbcs_file) {
+      /* internal velocity boundary condition */
+      internal_velocity_bc(E);
+    }
 
     /* updating plate temperature boundary condition */
     if(E->control.tbcs_file)
