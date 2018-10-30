@@ -218,12 +218,13 @@ void full_read_input_files_for_timesteps(E,action,output)
 	
       case 6:  /* read temperature and stencil for slab assimilation */
         /* DJB SLAB */
-        if( E->parallel.me == 0)
-               fprintf(stderr, "\nTemperature and Slab assimilation action=%d output=%d\n",action,output);
+        /* debugging */
+        /*if( E->parallel.me == 0)
+            fprintf(stderr, "\nTemperature and Slab assimilation action=%d output=%d\n",action,output);*/
 
         sprintf(output_file1,"%s%0.0f.%d",E->control.slab_assim_file,newage1,cap);
         sprintf(output_file2,"%s%0.0f.%d",E->control.slab_assim_file,newage2,cap);
-        fprintf(stderr, "\nSlab assimilation %s\n",output_file1);
+        /*fprintf(stderr, "\nSlab assimilation %s\n",output_file1);*/
         fp1=fopen(output_file1,"r");
         if (fp1 == NULL) {
             fprintf(E->fp,"(Problem_related #12) Cannot open %s\n",output_file1);
@@ -249,12 +250,12 @@ void full_read_input_files_for_timesteps(E,action,output)
 
       case 7:  /* read internal velocity */
         /* DJB SLAB */
-        if( E->parallel.me == 0)
-            fprintf(stderr, "\nInternal Velocity, action=%d output=%d\n",action,output);
+        /*if( E->parallel.me == 0)
+            fprintf(stderr, "\nInternal Velocity, action=%d output=%d\n",action,output);*/
 
         sprintf(output_file1,"%s%0.0f.%d",E->control.velocity_internal_file,newage1,cap);
         sprintf(output_file2,"%s%0.0f.%d",E->control.velocity_internal_file,newage2,cap);
-        fprintf(stderr, "\nInternal Velocity, %s\n",output_file1);
+        /*fprintf(stderr, "\nInternal Velocity, %s\n",output_file1);*/
         fp1=fopen(output_file1,"r");
         if (fp1 == NULL) {
           fprintf(E->fp,"(Problem_related #14) Cannot open %s\n",output_file1);
@@ -487,9 +488,10 @@ void full_read_input_files_for_timesteps(E,action,output)
 	break;
 
       case 6:  /* read temperature and stencil for slab assimilation */
-          /* XXX DJB */
-          if( E->parallel.me == 0)
-               fprintf(stderr, "\nTemperature and Slab assimilation action=%d\n",action);
+          /* DJB SLAB */
+          /* debugging */
+          /*if( E->parallel.me == 0)
+              fprintf(stderr, "\nTemperature and Slab assimilation action=%d\n",action);*/
           nnn=nox*noy*noz;
           ST1=(float*) malloc ((nnn+1)*sizeof(float));
           ST2=(float*) malloc ((nnn+1)*sizeof(float));
@@ -539,7 +541,7 @@ void full_read_input_files_for_timesteps(E,action,output)
 
   case 7: /* velocity assimilation */
 
-      /* XXX DJB */
+      /* DJB SLAB */
       nnn=nox*noy*noz;
       for(i=1;i<=dims+1;i++)  {
         VB1[i]=(float*) malloc ((nnn+1)*sizeof(float));
