@@ -1282,7 +1282,7 @@ void restart_tic_from_gzdir_file(struct All_variables *E)
       for(i=1;i<=E->lmesh.nno;i++){
 	if(fscanf(fp,"%f",&g) != 1)
 	  myerror(E,"restart vtkl read error 2");
-	if(!finite(g)){
+	if(!isfinite(g)){
 	  fprintf(stderr,"WARNING: found a NaN in input temperatures\n");
 	  g=0.0;
 	}
