@@ -33,7 +33,7 @@ the ggrd subroutines of the hc package
 */
 #ifdef USE_GZDIR
 #include <zlib.h>
-gzFile *gzdir_output_open(char *,char *);
+gzFile gzdir_output_open(char *,char *);
 
 #endif
 
@@ -816,7 +816,7 @@ void ggrd_read_vtop_from_file(struct All_variables *E, int is_geographic)
   } **euler;
   FILE *in;
 #ifdef USE_GZDIR
-  gzFile *fp1;
+  gzFile fp1;
 #else
   myerror(E,"ggrd_read_vtop_from_file needs to use GZDIR (set USE_GZDIR flag) because of code output");
 #endif
