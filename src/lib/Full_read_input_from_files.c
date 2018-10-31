@@ -583,7 +583,7 @@ void full_read_input_files_for_timesteps(E,action,output)
             if ((int)VB1[4][nodeg]!=2) { // && (int)VB2[4][nodeg]!=2) {
               if (pos_age) {
                 /* age is closest to newage1 */
-                if (abs(age-newage1) <= abs(age-newage2)) {
+                if (fabs(age-newage1) <= fabs(age-newage2)) {
                   E->sphere.cap[m].VB[1][nodel] = VB1[1][nodeg]*E->data.scalev;
                   E->sphere.cap[m].VB[2][nodel] = VB1[2][nodeg]*E->data.scalev;
                   E->sphere.cap[m].VB[3][nodel] = VB1[3][nodeg]*E->data.scalev;
