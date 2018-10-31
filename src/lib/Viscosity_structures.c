@@ -31,6 +31,7 @@
 
 
 #include <math.h>
+#include <string.h>
 #include <sys/types.h>
 #include "element_definitions.h"
 #include "global_defs.h"

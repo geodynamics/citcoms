@@ -32,6 +32,7 @@
 #include <stdlib.h>
 #include <stdint.h>
 #include <math.h>
+#include <string.h>
 #include <mpi.h>
 #include "element_definitions.h"
 #include "global_defs.h"
