@@ -26,6 +26,7 @@
  *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  */
 
+#include <math.h>
 #include "global_defs.h"
 void horizontal_bc(struct All_variables *,float *[],int,int,float,unsigned int,char,int,int);
 void internal_horizontal_bc(struct All_variables *,float *[],int,int,float,unsigned int,char,int,int);
