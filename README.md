@@ -139,6 +139,8 @@ A data assimilation manual is hosted in an svn repository located at ```https://
 1. Temperature and internal velocity stencil for slab assimilation
     - ```sten_temp```
     - ```sten_velo```
+1. Tracer density at the nodes (originally written by Ting Yang)
+    - ```tracer_dens```
 1. Fixed pid file output for lith_age_min, z_interface, and output_optional
 
 ### Topography (grep for 'DJB TOPO')
