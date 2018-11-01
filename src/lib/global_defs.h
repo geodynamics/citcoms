@@ -805,6 +805,8 @@ struct All_variables {
     double *heating_visc[NCS];
     double *heating_latent[NCS];
 
+    /* p_to_nodes maps a double to a float, so these must be
+       floats! */
     float *heating_visc_nd[NCS]; // DJB OUT
     float *heating_adi_nd[NCS]; // DJB OUT
     float *heating_latent_nd[NCS]; // DJB OUT

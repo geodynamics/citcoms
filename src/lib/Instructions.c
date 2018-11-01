@@ -993,7 +993,6 @@ void allocate_common_vars(E)
   E->mat[j] = (int *) malloc((nel+2)*sizeof(int));
   E->VIP[j] = (float *) malloc((nel+2)*sizeof(float));
 
-  /* TODO: why are these double and the output is float? */
   E->heating_adi[j]    = (double *) malloc((nel+1)*sizeof(double));
   E->heating_visc[j]   = (double *) malloc((nel+1)*sizeof(double));
   E->heating_latent[j] = (double *) malloc((nel+1)*sizeof(double));
