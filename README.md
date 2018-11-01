@@ -32,7 +32,7 @@ IMPORTANT: This code *only* implements assimilation in the CitcomS code.  There 
 
 ### Quick start for Mac OSX
 
-In principle you can use either Open MPI or MPICH as an MPI distribution to run CitcomS.  However, unfortunately the LLDB (debugger) prefers Open MPI, whereas valgrind prefers MPICH.  Therefore I install both MPI distributions and switch between them using ```sudo port select --set mpi```.
+Note that the following instructions assume you have MacPorts (https://www.macports.org) installed.  In principle you can use either Open MPI or MPICH as an MPI distribution to run CitcomS.  However, unfortunately the LLDB (debugger) prefers Open MPI, whereas valgrind prefers MPICH.  Therefore I install both MPI distributions and switch between them using ```sudo port select --set mpi```.
 
 #### Install build tools:
 
