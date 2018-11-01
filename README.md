@@ -32,13 +32,13 @@ IMPORTANT: This code *only* implements assimilation in the CitcomS code.  There 
 
 ### Quick start for Mac OSX
 
-In principle you can use either Open MPI or MPICH as an MPI distribution to run CitcomS.  However, unfortunately the LLDB (debugger) prefers Open MPI, whereas valgrind prefers MPICH.  Therefore I install both MPI distributions and switch between them using ```sudo port select --set mpi```.
+Note that the following instructions assume you have MacPorts (https://www.macports.org) installed.  In principle you can use either Open MPI or MPICH as an MPI distribution to run CitcomS.  However, unfortunately the LLDB (debugger) prefers Open MPI, whereas valgrind prefers MPICH.  Therefore I install both MPI distributions and switch between them using ```sudo port select --set mpi```.
 
 #### Install build tools:
 
 ```sudo port install automake autoconf libtool```
 
-Note that you should use the command ```glibtoolize```, since ```libtool``` already exists on Mac OSX although it is not the GNU version.  So MacPorts uses a program name transform. 
+Note that you should use the command ```glibtoolize```, since ```libtool``` already exists on Mac OSX although it is not the GNU version.  So MacPorts uses a program name transform.  This means you should replace ```libtoolize``` in ```mymake.py``` with ```glibtoolize```.
 
 #### MPI option 1. Install Open MPI and HDF5 (later is probably optional):
 
@@ -53,6 +53,13 @@ Note that you should use the command ```glibtoolize```, since ```libtool``` alre
 ```sudo port install mpich```
 
 ```sudo port select --set mpi mpich-mp-fortran```
+
+#### mymake.py
+
+To compile on a Mac, ensure you have edited ```mymake.py``` as follows:
+
+1. Replace ```libtoolize``` with ```glibtoolize```
+1. (Optional) Add ```CFLAGS=-g -O0 CXXFLAGS=-g -O0``` to the compile command.  This ensures that valgrind and LLDB will be able to identify line numbers of problematic code precisely.
 
 #### Install valgrind (memory leak checker):
 
@@ -181,18 +188,18 @@ See diff/ directory for complete record
 ### Log of features implemented from legacy code
 1. Adv\_diff -> COMPLETE
 1. BC\_util -> COMPLETE
-1. Composition\_related.c -> tracer density (TODO)
-1. composition\_related.h -> tracer density (TODO)
+1. Composition\_related.c -> COMPLETE
+1. composition\_related.h -> COMPLETE
 1. Convection.c -> COMPLETE
 1. Element\_calculations -> COMPLETE
 1. Full\_boundary\_conditions -> COMPLETE
 1. Full\_lith\_age\_read\_files -> COMPLETE
 1. Full_read_input_from_file -> COMPLETE
 1. Full\_solver.c -> COMPLETE
-1. global\_defs.h -> TODO
-1. Instructions.c -> outputs, divv (TODO)
+1. global\_defs.h -> (divv) TODO
+1. Instructions.c -> output divv (TODO)
 1. Lith\_age.c -> COMPLETE
-1. output.c -> various outputs (TODO)
+1. output.c -> divv (TODO)
 1. Pan\_problem.c -> COMPLETE
 1. Problem\_related.c -> COMPLETE
 1. Regional\_boundary\_conditions.c -> COMPLETE
@@ -201,5 +208,5 @@ See diff/ directory for complete record
 1. Regional\_solver -> COMPLETE
 1. solver.h -> COMPLETE
 1. Stokes\_flow\_incom -> divv calculation for output (TODO)
-1. tracer\_defs.h -> output tracer density (TODO)
+1. tracer\_defs.h -> COMPLETE
 1. Viscosity\_structure.c -> COMPLETE
