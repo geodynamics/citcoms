@@ -57,6 +57,7 @@ Note that you should use the command ```glibtoolize```, since ```libtool``` alre
 #### mymake.py
 
 To compile on a Mac, ensure you have edited ```mymake.py``` as follows:
+
 1. Replace ```libtoolize``` with ```glibtoolize```
 1. (Optional) Add ```CFLAGS=-g -O0 CXXFLAGS=-g -O0``` to the compile command.  This ensures that valgrind and LLDB will be able to identify line numbers of problematic code precisely.
 
