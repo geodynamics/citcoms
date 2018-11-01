@@ -38,7 +38,7 @@ In principle you can use either Open MPI or MPICH as an MPI distribution to run 
 
 ```sudo port install automake autoconf libtool```
 
-Note that you should use the command ```glibtoolize```, since ```libtool``` already exists on Mac OSX although it is not the GNU version.  So MacPorts uses a program name transform. 
+Note that you should use the command ```glibtoolize```, since ```libtool``` already exists on Mac OSX although it is not the GNU version.  So MacPorts uses a program name transform.  This means you should replace ```libtoolize``` in ```mymake.py``` with ```glibtoolize```.
 
 #### MPI option 1. Install Open MPI and HDF5 (later is probably optional):
 
@@ -53,6 +53,12 @@ Note that you should use the command ```glibtoolize```, since ```libtool``` alre
 ```sudo port install mpich```
 
 ```sudo port select --set mpi mpich-mp-fortran```
+
+#### mymake.py
+
+To compile on a Mac, ensure you have edited ```mymake.py``` as follows:
+1. Replace ```libtoolize``` with ```glibtoolize```
+1. (Optional) Add ```CFLAGS=-g -O0 CXXFLAGS=-g -O0``` to the compile command.  This ensures that valgrind and LLDB will be able to identify line numbers of problematic code precisely.
 
 #### Install valgrind (memory leak checker):
 
