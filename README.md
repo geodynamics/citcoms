@@ -188,18 +188,18 @@ See diff/ directory for complete record
 ### Log of features implemented from legacy code
 1. Adv\_diff -> COMPLETE
 1. BC\_util -> COMPLETE
-1. Composition\_related.c -> tracer density (TODO)
-1. composition\_related.h -> tracer density (TODO)
+1. Composition\_related.c -> COMPLETE
+1. composition\_related.h -> COMPLETE
 1. Convection.c -> COMPLETE
 1. Element\_calculations -> COMPLETE
 1. Full\_boundary\_conditions -> COMPLETE
 1. Full\_lith\_age\_read\_files -> COMPLETE
 1. Full_read_input_from_file -> COMPLETE
 1. Full\_solver.c -> COMPLETE
-1. global\_defs.h -> TODO
-1. Instructions.c -> outputs, divv (TODO)
+1. global\_defs.h -> (divv) TODO
+1. Instructions.c -> output divv (TODO)
 1. Lith\_age.c -> COMPLETE
-1. output.c -> various outputs (TODO)
+1. output.c -> divv (TODO)
 1. Pan\_problem.c -> COMPLETE
 1. Problem\_related.c -> COMPLETE
 1. Regional\_boundary\_conditions.c -> COMPLETE
@@ -208,5 +208,5 @@ See diff/ directory for complete record
 1. Regional\_solver -> COMPLETE
 1. solver.h -> COMPLETE
 1. Stokes\_flow\_incom -> divv calculation for output (TODO)
-1. tracer\_defs.h -> output tracer density (TODO)
+1. tracer\_defs.h -> COMPLETE
 1. Viscosity\_structure.c -> COMPLETE
