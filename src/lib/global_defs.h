@@ -679,6 +679,7 @@ struct Output {
     int comp_nd;      /* whether to output composition at nodes */
     /* DJB SLAB DJB OUT*/
     int sten_temp;    /* whether to output slab temp stencil */
+    int sten_velo;    /* whether to output slab velo stencil */
     /* DJB OUT */
     int temp_sph;     /* whether to output spherical harmonics for temperature */
     int comp_sph;     /* whether to output spherical harmonics for composition */

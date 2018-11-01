@@ -926,6 +926,12 @@ void global_derived_values(struct All_variables *E)
 	fprintf(E->fp,"Problem has %i x %i x %i nodes per cap, %i nodes and %i elements in total\n",
                 E->mesh.nox, E->mesh.noz, E->mesh.noy, E->mesh.nno, E->mesh.nel);
     }
+
+    /* nodex, nodey, and nodez are determined from other parameters for the multigrid solver */
+    if(E->control.print_convergence && E->parallel.me==0 && strcmp(E->control.SOLVER_TYPE,"multigrid") == 0) {
+        fprintf(stderr,"For multigrid, nodex, nodey, and nodez are determined using mgunitx, mgunity, and mgunitz\n");
+    }
+
    return;
 }
 
@@ -1616,6 +1622,7 @@ static void output_parse_optional(struct  All_variables *E)
     E->output.temp_sph = 0; // DJB OUT
     E->output.comp_sph = 0; // DJB OUT
     E->output.sten_temp = 0; // DJB SLAB DJB OUT
+    E->output.sten_velo = 0; // DJB SLAB DJB OUT
 
     while(1) {
         /* get next field */
@@ -1679,6 +1686,8 @@ static void output_parse_optional(struct  All_variables *E)
         /* DJB SLAB */
         else if(strcmp(prev, "sten_temp")==0)
             E->output.sten_temp = 1;
+        else if(strcmp(prev, "sten_velo")==0)
+            E->output.sten_velo = 1;
         else if(strcmp(prev, "heating")==0)
             E->output.heating = 1;
         else
