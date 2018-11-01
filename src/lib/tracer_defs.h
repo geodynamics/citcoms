@@ -68,6 +68,11 @@ struct TRACE{
     int nflavors;
     int **ntracer_flavor[13];
 
+    // DJB
+    /* tracer density */
+    double *dens_el[13];
+    double *dens_node[13];
+
     int ic_method_for_flavors;
     double *z_interface;
 

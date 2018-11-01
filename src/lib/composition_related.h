@@ -31,4 +31,4 @@ void write_composition_instructions(struct All_variables *E);
 void fill_composition(struct All_variables *E);
 void get_bulk_composition(struct All_variables *E);
 void map_composition_to_nodes(struct All_variables *E);
-
+void map_tracer_dens_to_nodes(struct All_variables *E);

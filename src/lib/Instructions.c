@@ -1621,6 +1621,7 @@ static void output_parse_optional(struct  All_variables *E)
     E->output.seismic = 0;
     E->output.coord_bin = 0;
     E->output.tracer = 0;
+    E->output.tracer_dens = 0;
     E->output.comp_el = 0;
     E->output.comp_nd = 0;
     E->output.heating = 0;
@@ -1687,6 +1688,9 @@ static void output_parse_optional(struct  All_variables *E)
             E->output.temp_sph = 1;
         else if(strcmp(prev, "tracer")==0)
             E->output.tracer = 1;
+        // DJB
+        else if(strcmp(prev, "tracer_dens")==0)
+            E->output.tracer_dens = 1;
         else if(strcmp(prev, "comp_el")==0)
             E->output.comp_el = 1;
         else if(strcmp(prev, "comp_nd")==0)

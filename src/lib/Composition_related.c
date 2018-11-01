@@ -252,6 +252,15 @@ static void allocate_composition_memory(struct All_variables *E)
 
     }
 
+    // DJB
+    /* allocate memory for tracer density fields at the nodes and elements */
+    if(E->control.tracer) {
+      for (j=1;j<=E->sphere.caps_per_proc;j++) {
+          E->trace.dens_el[j]=(double *)malloc((E->lmesh.nel+1)*sizeof(double));
+          E->trace.dens_node[j]=(double *)malloc((E->lmesh.nno+1)*sizeof(double));
+          }
+    }
+
     return;
 }
 
@@ -324,6 +333,12 @@ static void compute_elemental_composition_ratio_method(struct All_variables *E)
             for (flavor=0; flavor<E->trace.nflavors; flavor++)
                 numtracers += E->trace.ntracer_flavor[j][flavor][e];
 
+            // DJB
+            /* tracer density in each element
+               Note that the distribution of tracers is homogeneous and the 
+               volume of the elements is uneven
+               thus tracer density of each element depends on element volume */
+            E->trace.dens_el[j][e]=numtracers;
             /* Check for empty entries and compute ratio.  */
             /* If no tracers are in an element, skip this element, */
             /* use previous composition. */
@@ -361,6 +376,10 @@ static void compute_elemental_composition_ratio_method(struct All_variables *E)
     } /* end j */
 
     E->trace.istat_iempty += iempty;
+
+    // DJB
+    /* Map tracer density to nodes */
+    map_tracer_dens_to_nodes(E);
 
     return;
 }
@@ -488,6 +507,75 @@ void map_composition_to_nodes(struct All_variables *E)
         for(i=0;i<E->composition.ncomp;i++)
             for (kk=1;kk<=E->lmesh.nno;kk++)
                 E->composition.comp_node[j][i][kk] *= E->MASS[E->mesh.levmax][j][kk];
+
+        /* testing */
+        /*
+        for(i=0;i<E->composition.ncomp;i++)
+            for (kk=1;kk<=E->lmesh.nel;kk++) {
+                fprintf(E->trace.fpt,"%d %f\n",kk,E->composition.comp_el[j][i][kk]);
+            }
+
+        for(i=0;i<E->composition.ncomp;i++)
+            for (kk=1;kk<=E->lmesh.nno;kk++) {
+                fprintf(E->trace.fpt,"%d %f %f\n",kk,E->sx[j][3][kk],E->composition.comp_node[j][i][kk]);
+            }
+        fflush(E->trace.fpt);
+        */
+
+    } /* end j */
+
+    return;
+}
+
+
+/********** MAP TRACER DENSITY TO NODES ****************/
+/*                                                  */
+
+/* Originally added by Ting Yang, Caltech post-doc */
+void map_tracer_dens_to_nodes(struct All_variables *E)
+{
+    double *tmp[NCS];
+    int i, n, kk;
+    int nelem, nodenum;
+    int j;
+    double tmp1;
+
+    for (j=1;j<=E->sphere.caps_per_proc;j++) {
+
+        /* first, initialize node array */
+        for (kk=1;kk<=E->lmesh.nno;kk++)
+             E->trace.dens_node[j][kk]=0.0;
+
+        /* average element volume of the whole domain */
+        /* Dividing the element tracer density by ( element volume / average element volume ) gives a homogeneous distribution of tracer density which will be interpolated to get tracer density at each nodes */
+        tmp1=E->mesh.volume/E->mesh.nel;
+
+        /* Loop through all elements */
+        for (nelem=1;nelem<=E->lmesh.nel;nelem++) {
+
+            /* for each element, loop through element nodes */
+
+            /* weight composition */
+
+            for (nodenum=1;nodenum<=8;nodenum++) {
+                n = E->ien[j][nelem].node[nodenum];
+                E->trace.dens_node[j][n] +=
+                        (E->trace.dens_el[j][nelem]/E->eco[j][nelem].area*tmp1)*
+                        E->TWW[E->mesh.levmax][j][nelem].node[nodenum];
+            }
+
+        } /* end nelem */
+    } /* end j */
+
+    for (j=1;j<=E->sphere.caps_per_proc;j++)
+         tmp[j] = E->trace.dens_node[j];
+
+    (E->exchange_node_d)(E,tmp,E->mesh.levmax);
+
+    /* Divide by nodal volume */
+    for (j=1;j<=E->sphere.caps_per_proc;j++) {
+            for (kk=1;kk<=E->lmesh.nno;kk++)
+                E->trace.dens_node[j][kk] *= E->MASS[E->mesh.levmax][j][kk];
 
         /* testing */
         /*

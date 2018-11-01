@@ -675,6 +675,8 @@ struct Output {
     int seismic;      /* whether to output seismic velocity model */
     int coord_bin;    /* whether to output coordinates in binary format */
     int tracer;       /* whether to output tracer coordinate */
+    // DJB
+    int tracer_dens;  /* whether to output tracer density at nodes */
     int comp_el;      /* whether to output composition at elements */
     int comp_nd;      /* whether to output composition at nodes */
     /* DJB SLAB DJB OUT*/

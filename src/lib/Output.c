@@ -53,6 +53,7 @@ void output_horiz_avg(struct All_variables *, int);
 void output_sten_temp(struct All_variables *, int); // DJB SLAB DJB OUT
 void output_sten_velo(struct All_variables *, int); // DJB SLAB DJB OUT
 void output_tracer(struct All_variables *, int);
+void output_tracer_dens(struct All_variables *, int); // DJB OUT
 void output_pressure(struct All_variables *, int);
 void output_heating(struct All_variables *, int);
 void output_heating_visc_nd(struct All_variables *, int); // DJB OUT
@@ -166,6 +167,9 @@ void output(struct All_variables *E, int cycles)
 
   if(E->output.tracer && E->control.tracer)
       output_tracer(E, cycles);
+
+  if(E->output.tracer_dens && E->control.tracer)
+      output_tracer_dens(E, cycles);
 
   if (E->output.comp_nd && E->composition.on)
       output_comp_nd(E, cycles);
@@ -780,6 +784,29 @@ void output_tracer(struct All_variables *E, int cycles)
   return;
 }
 
+void output_tracer_dens(struct All_variables *E, int cycles)
+{
+  int i, j;
+  char output_file[255];
+  FILE *fp1;
+
+  sprintf(output_file,"%s.tracer_dens.%d.%d", E->control.data_file,
+          E->parallel.me, cycles);
+  fp1 = output_open(output_file, "w");
+
+  fprintf(fp1,"%d %d %.5e\n",cycles,E->lmesh.nno,E->monitor.elapsed_time);
+
+  for(j=1;j<=E->sphere.caps_per_proc;j++) {
+    fprintf(fp1,"%3d %7d\n",j,E->lmesh.nno);
+    for(i=1;i<=E->lmesh.nno;i++) {
+        fprintf(fp1,"%.6e\n",E->trace.dens_node[j][i]);
+    }
+  }
+
+  fclose(fp1);
+
+  return;
+}
 
 void output_comp_nd(struct All_variables *E, int cycles)
 {
