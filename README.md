@@ -114,7 +114,7 @@ A data assimilation manual is hosted in an svn repository located at ```https://
 ### Extended-Boussinesq modifications (grep for 'DJB EBA')
 1. depth-dependent scaling for the dissipation number (Di)
     - Di is typically defined at the surface, using surface values of alpha, cp, and g
-    - a depth-dependent scaling (typically between 0 and 1) is introduced to scale Di
+    - a depth-dependent scaling (typically between 0 and 1) is introduced to additionally scale Di
     - this scales Di in the energy equation, i.e. the adiabatic, viscous, and latent heating terms
     - useful to avoid intense shear heating near the surface and hence avoid artefacts when using data assimilation  
 2. Therefore, an extra column is added to the ```refstate_file```:
