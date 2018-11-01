@@ -173,7 +173,7 @@ See diff/ directory for complete record
 
 ### Code features NOT implemented
 
-1. outputs of heating terms, divv
+1. output of divv
 1. tracer density for elements and nodes output (added by Ting, see svn r52 through r55)
 1. reverse gravity acceleraton (added by Ting, see svn r76) for SBI
    note that this appears to have been subsequently removed in r88?
@@ -190,7 +190,7 @@ See diff/ directory for complete record
 1. Full_read_input_from_file -> COMPLETE
 1. Full\_solver.c -> COMPLETE
 1. global\_defs.h -> TODO
-1. Instructions.c -> outputs, heating terms, divv (TODO)
+1. Instructions.c -> outputs, divv (TODO)
 1. Lith\_age.c -> COMPLETE
 1. output.c -> various outputs (TODO)
 1. Pan\_problem.c -> COMPLETE
