@@ -82,6 +82,7 @@ A data assimilation manual is hosted in an svn repository located at ```https://
 1. ```sten_temp``` as an output option (char)
 1. ```internal_vbcs_file``` (bool)
 1. ```velocity_internal_file``` (char)
+1. ```sten_velo``` as an output option (char)
 
 ### Composition (grep for 'DJB COMP')
 1. ```hybrid_method``` (bool)
@@ -128,7 +129,9 @@ A data assimilation manual is hosted in an svn repository located at ```https://
 1. Composition and temperature spherical harmonics as an output option (char).  See issue, since output for comp only occurs for the last comp field.
     - ```comp_sph```
     - ```temp_sph```
+1. Temperature and internal velocity stencil for slab assimilation
     - ```sten_temp```
+    - ```sten_velo```
 1. Fixed pid file output for lith_age_min, z_interface, and output_optional
 
 ### Topography (grep for 'DJB TOPO')
