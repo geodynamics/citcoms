@@ -686,6 +686,11 @@ struct Output {
  
     int heating;      /* whether to output heating terms at elements */
 
+    /* DJB OUT */
+    int heating_visc_nd;
+    int heating_adi_nd;
+    int heating_latent_nd;
+
 
   /* flags used by GZDIR */
   struct gzd_struc gzdir;
@@ -799,6 +804,10 @@ struct All_variables {
     double *heating_adi[NCS];
     double *heating_visc[NCS];
     double *heating_latent[NCS];
+
+    float *heating_visc_nd[NCS]; // DJB OUT
+    float *heating_adi_nd[NCS]; // DJB OUT
+    float *heating_latent_nd[NCS]; // DJB OUT
 
     double *P[NCS],*F[NCS],*U[NCS];
     double *T[NCS],*Tdot[NCS],*buoyancy[NCS];

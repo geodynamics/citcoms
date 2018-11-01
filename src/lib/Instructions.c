@@ -993,9 +993,15 @@ void allocate_common_vars(E)
   E->mat[j] = (int *) malloc((nel+2)*sizeof(int));
   E->VIP[j] = (float *) malloc((nel+2)*sizeof(float));
 
+  /* TODO: why are these double and the output is float? */
   E->heating_adi[j]    = (double *) malloc((nel+1)*sizeof(double));
   E->heating_visc[j]   = (double *) malloc((nel+1)*sizeof(double));
   E->heating_latent[j] = (double *) malloc((nel+1)*sizeof(double));
+
+  /* DJB OUT heating quantities on nodes */
+  E->heating_adi_nd[j] = (float *) malloc((nno+1)*sizeof(float));
+  E->heating_visc_nd[j] = (float *) malloc((nno+1)*sizeof(float));
+  E->heating_latent_nd[j] = (float *) malloc((nno+1)*sizeof(float));
 
   /* lump mass matrix for the energy eqn */
   E->TMass[j] = (double *) malloc((nno+1)*sizeof(double));
@@ -1623,6 +1629,9 @@ static void output_parse_optional(struct  All_variables *E)
     E->output.comp_sph = 0; // DJB OUT
     E->output.sten_temp = 0; // DJB SLAB DJB OUT
     E->output.sten_velo = 0; // DJB SLAB DJB OUT
+    E->output.heating_visc_nd = 0; // DJB OUT
+    E->output.heating_adi_nd = 0; // DJB OUT
+    E->output.heating_latent_nd = 0; // DJB OUT
 
     while(1) {
         /* get next field */
@@ -1684,6 +1693,12 @@ static void output_parse_optional(struct  All_variables *E)
         else if(strcmp(prev, "comp_nd")==0)
             E->output.comp_nd = 1;
         /* DJB SLAB */
+        else if(strcmp(prev, "heating_visc_nd")==0)
+            E->output.heating_visc_nd = 1;
+        else if(strcmp(prev, "heating_adi_nd")==0)
+            E->output.heating_adi_nd = 1;
+        else if(strcmp(prev, "heating_latent_nd")==0)
+            E->output.heating_latent_nd = 1;
         else if(strcmp(prev, "sten_temp")==0)
             E->output.sten_temp = 1;
         else if(strcmp(prev, "sten_velo")==0)

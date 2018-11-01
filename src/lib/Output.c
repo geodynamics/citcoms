@@ -55,6 +55,9 @@ void output_sten_velo(struct All_variables *, int); // DJB SLAB DJB OUT
 void output_tracer(struct All_variables *, int);
 void output_pressure(struct All_variables *, int);
 void output_heating(struct All_variables *, int);
+void output_heating_visc_nd(struct All_variables *, int); // DJB OUT
+void output_heating_adi_nd(struct All_variables *, int); // DJB OUT
+void output_heating_latent_nd(struct All_variables *, int); // DJB OUT
 void output_temp_sph(struct All_variables *, int); // DJB OUT
 void output_comp_sph(struct All_variables *, int); // DJB OUT
 
@@ -172,6 +175,16 @@ void output(struct All_variables *E, int cycles)
 
   if(E->output.heating && E->control.disptn_number != 0)
       output_heating(E, cycles);
+
+  /* DJB OUT */
+  if (E->output.heating_visc_nd && E->control.disptn_number != 0)
+      output_heating_visc_nd(E, cycles);
+
+  if (E->output.heating_adi_nd && E->control.disptn_number != 0)
+      output_heating_adi_nd(E, cycles);
+
+  if (E->output.heating_latent_nd && E->control.disptn_number != 0)
+      output_heating_latent_nd(E, cycles);
 
   /* DJB SLAB */
   if (E->output.sten_temp)
@@ -859,6 +872,89 @@ void output_heating(struct All_variables *E, int cycles)
     fclose(fp1);
 
     return;
+}
+
+/* DJB OUT */
+void output_heating_adi_nd(struct All_variables *E, int cycles)
+{
+  void p_to_nodes();
+
+  p_to_nodes(E,E->heating_adi,E->heating_adi_nd,E->mesh.levmax);
+
+  int i, j;
+  char output_file[255];
+  FILE *fp1;
+
+  sprintf(output_file,"%s.heating_adi_nd.%d.%d", E->control.data_file,
+          E->parallel.me, cycles);
+  fp1 = output_open(output_file, "w");
+
+  fprintf(fp1,"%d %d %.5e\n",cycles,E->lmesh.nno,E->monitor.elapsed_time);
+
+  for(j=1;j<=E->sphere.caps_per_proc;j++) {
+    fprintf(fp1,"%3d %7d\n",j,E->lmesh.nno);
+    for(i=1;i<=E->lmesh.nno;i++)
+      fprintf(fp1,"%.4e\n",E->heating_adi_nd[j][i]);
+  }
+
+  fclose(fp1);
+
+  return;
+}
+
+
+void output_heating_latent_nd(struct All_variables *E, int cycles)
+{
+  void p_to_nodes();
+
+  p_to_nodes(E,E->heating_latent,E->heating_latent_nd,E->mesh.levmax);
+
+  int i, j;
+  char output_file[255];
+  FILE *fp1;
+
+  sprintf(output_file,"%s.heating_latent_nd.%d.%d", E->control.data_file,
+          E->parallel.me, cycles);
+  fp1 = output_open(output_file, "w");
+
+  fprintf(fp1,"%d %d %.5e\n",cycles,E->lmesh.nno,E->monitor.elapsed_time);
+
+  for(j=1;j<=E->sphere.caps_per_proc;j++) {
+    fprintf(fp1,"%3d %7d\n",j,E->lmesh.nno);
+    for(i=1;i<=E->lmesh.nno;i++)
+      fprintf(fp1,"%.4e\n",E->heating_latent_nd[j][i]);
+  }
+
+  fclose(fp1);
+
+  return;
+}
+
+void output_heating_visc_nd(struct All_variables *E, int cycles)
+{
+  void p_to_nodes();
+
+  p_to_nodes(E,E->heating_visc,E->heating_visc_nd,E->mesh.levmax);
+
+  int i, j;
+  char output_file[255];
+  FILE *fp1;
+
+  sprintf(output_file,"%s.heating_visc_nd.%d.%d", E->control.data_file,
+          E->parallel.me, cycles);
+  fp1 = output_open(output_file, "w");
+
+  fprintf(fp1,"%d %d %.5e\n",cycles,E->lmesh.nno,E->monitor.elapsed_time);
+
+  for(j=1;j<=E->sphere.caps_per_proc;j++) {
+    fprintf(fp1,"%3d %7d\n",j,E->lmesh.nno);
+    for(i=1;i<=E->lmesh.nno;i++)
+      fprintf(fp1,"%.4e\n",E->heating_visc_nd[j][i]);
+  }
+
+  fclose(fp1);
+
+  return;
 }
 
 // DJB OUT
