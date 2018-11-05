@@ -79,13 +79,14 @@ void internal_velocity_bc(E)
     /* fprintf(stderr,"level=%d, levdepth=%d, nox1=%d, noy1=%d, noz1=%d\n",level,levdepth,nox1,noy1,noz1); */
     /* fprintf(stderr,"level=%d, levdepth=%d, nox=%d, noy=%d, noz=%d\n",level,levdepth,nox,noy,noz); */
 
-    /* XXX DJB - OPTION 1 - prescribe bcs at all levels */
+    /* DJB SLAB - prescribe internal velocity boundary conditions at all levels.  This is the recommended
+       approach, see Issue #6 in the bitbucket repo */
     if ( (E->control.CONJ_GRAD && level==E->mesh.levmax) || E->control.NMULTIGRID)  {
 
-    /* XXX DJB - OPTION 2 - let's try just prescribing at finest mesh */
+    /* DJB SLAB - prescribe at finest mesh (done for testing) */
     /*if ( level==E->mesh.levmax )  { */
 
-      /* `depth' in multigrid */
+      /* this is the depth in multigrid */
       levdepth = E->mesh.levmax-level;
 
       nox1 = E->lmesh.NOX[level];
@@ -105,12 +106,12 @@ void internal_velocity_bc(E)
               node += (i-1)*noz*pow(2,levdepth); // for i
               node += (j-1)*noz*nox*pow(2,levdepth); // for j
 
-              /* XXX DJB - debugging */
+              /* DJB - debugging */
               /* theta = E->SX[level][m][1][nodel];
               phi = E->SX[level][m][2][nodel];
               r = E->SX[level][m][3][nodel]; */
 
-              /* XXX DJB - debugging */
+              /* DJB - debugging */
               /* if(E->sphere.cap[m].slab_sten2[node]==1) {
                 fprintf(stderr,"%d %d %d %d %d %d %d %d %d %d %f %f %f %d\n",level,m,noy1,nox1,noz1,j,i,k,nodel,node,theta,phi,r,E->sphere.cap[m].slab_sten2[node]);
               } */
