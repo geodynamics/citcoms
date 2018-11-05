@@ -212,9 +212,12 @@ void tracer_input(struct All_variables *E)
             full_tracer_input(E);
 
 
-        composition_input(E);
+        //composition_input(E);
 
     }
+
+    // DJB moved to here since otherwise CDEPV is uninitialised
+    composition_input(E);
 
     return;
 }
