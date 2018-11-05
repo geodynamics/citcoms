@@ -1989,9 +1989,14 @@ void print_all_config_parameters(struct All_variables *E)
     fprintf(fp, "coor=%d\n", E->control.coor);
     fprintf(fp, "coor_file=%s\n", E->control.coor_file);
     fprintf(fp, "coor_refine=");
-    for(i=0; i<3; i++)
-      fprintf(fp, "%g,", E->control.coor_refine[i]);
-    fprintf(fp, "%g\n", E->control.coor_refine[3]);
+    // DJB
+    if (E->control.coor == 2){
+        for(i=0; i<3; i++)
+            fprintf(fp, "%g,", E->control.coor_refine[i]);
+        fprintf(fp, "%g\n", E->control.coor_refine[3]);
+    }
+    else
+        fprintf(fp, "\n");
     fprintf(fp, "nodex=%d\n", E->mesh.nox);
     fprintf(fp, "nodey=%d\n", E->mesh.noy);
     fprintf(fp, "nodez=%d\n", E->mesh.noz);
