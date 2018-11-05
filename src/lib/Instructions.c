@@ -836,7 +836,7 @@ void check_settings_consistency(struct All_variables *E)
 							 */
     }
 
-    if (strcmp(E->output.vtk_format, "binary") == 0) {
+    if (strcmp(E->output.format, "vtk") == 0 && strcmp(E->output.vtk_format, "binary") == 0) {
 #ifndef USE_GZDIR
         /* zlib is required for vtk binary output */
         if(E->parallel.me == 0) {
