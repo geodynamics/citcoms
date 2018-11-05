@@ -2102,8 +2102,16 @@ void print_all_config_parameters(struct All_variables *E)
     fprintf(fp, "bottbc=%d\n", E->mesh.bottbc);
     fprintf(fp, "bottbcval=%g\n", E->control.TBCbotval);
     fprintf(fp, "temperature_bound_adj=%d\n", E->control.temperature_bound_adj);
-    fprintf(fp, "depth_bound_adj=%g\n", E->control.depth_bound_adj);
-    fprintf(fp, "width_bound_adj=%g\n", E->control.width_bound_adj);
+    fprintf(fp, "depth_bound_adj=");
+    if (E->control.temperature_bound_adj)
+        fprintf(fp, "%g\n", E->control.depth_bound_adj);
+    else
+        fprintf(fp, "\n");
+    fprintf(fp, "width_bound_adj=");
+    if (E->control.temperature_bound_adj)
+        fprintf(fp, "%g\n", E->control.width_bound_adj);
+    else
+        fprintf(fp, "\n");
     fprintf(fp, "\n\n");
     
     fprintf(fp, "# CitcomS.solver.const\n");
@@ -2157,13 +2165,30 @@ void print_all_config_parameters(struct All_variables *E)
     }
     fprintf(fp, "half_space_age=%g\n", E->convection.half_space_age);
     fprintf(fp, "mantle_temp=%g\n", E->control.mantle_temp);
-    fprintf(fp, "blob_center=[%g,%g,%g]\n", 
+    fprintf(fp, "blob_center=");
+    if (E->convection.tic_method==2) {
+        fprintf(fp, "[%g,%g,%g]\n", 
 	    E->convection.blob_center[0],
 	    E->convection.blob_center[1],
 	    E->convection.blob_center[2]);
-    fprintf(fp, "blob_radius=%g\n", E->convection.blob_radius);
-    fprintf(fp, "blob_dT=%g\n", E->convection.blob_dT);
-    fprintf(fp, "blob_bc_persist=%d\n", E->convection.blob_bc_persist);
+    }
+    else
+        fprintf(fp, "\n");
+    fprintf(fp, "blob_radius=");
+    if (E->convection.tic_method==2)
+        fprintf(fp, "%g\n", E->convection.blob_radius);
+    else
+        fprintf(fp, "\n");
+    fprintf(fp, "blob_dT=");
+    if (E->convection.tic_method==2)  
+        fprintf(fp, "%g\n", E->convection.blob_dT);
+    else
+        fprintf(fp, "\n");
+    fprintf(fp, "blob_bc_persist=");
+    if (E->convection.tic_method==2)  
+        fprintf(fp, "%d\n", E->convection.blob_bc_persist);
+    else
+        fprintf(fp, "\n");
     fprintf(fp, "\n\n");
 
     fprintf(fp, "# CitcomS.solver.output\n");
