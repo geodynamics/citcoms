@@ -1990,7 +1990,7 @@ void print_all_config_parameters(struct All_variables *E)
     fprintf(fp, "coor_file=%s\n", E->control.coor_file);
     fprintf(fp, "coor_refine=");
     // DJB
-    if (E->control.coor == 2){
+    if (E->control.coor==2){
         for(i=0; i<3; i++)
             fprintf(fp, "%g,", E->control.coor_refine[i]);
         fprintf(fp, "%g\n", E->control.coor_refine[3]);
@@ -2010,9 +2010,14 @@ void print_all_config_parameters(struct All_variables *E)
     fprintf(fp, "theta_max=%g\n", E->control.theta_max);
     fprintf(fp, "fi_min=%g\n", E->control.fi_min);
     fprintf(fp, "fi_max=%g\n", E->control.fi_max);
-    fprintf(fp, "r_grid_layers=%d\n", E->control.rlayers);
+    // DJB
+    fprintf(fp, "r_grid_layers=");
+    if (E->control.coor==3)
+        fprintf(fp, "%d\n", E->control.rlayers);
+    else
+        fprintf(fp, "\n");
     fprintf(fp, "rr=");
-    if(E->control.rlayers > 0)
+    if (E->control.coor==3 && E->control.rlayers > 0)
     {
       for(i=0; i<E->control.rlayers-1;i++)
 	fprintf(fp, "%g,", E->control.rrlayer[i]);
@@ -2023,7 +2028,7 @@ void print_all_config_parameters(struct All_variables *E)
       fprintf(fp, "\n");
     }
     fprintf(fp, "nr=");
-    if(E->control.rlayers > 0)
+    if (E->control.coor==3 && E->control.rlayers > 0)
     {
       for(i=0; i<E->control.rlayers-1;i++)
         fprintf(fp, "%d,", E->control.nrlayer[i]);
@@ -2051,8 +2056,16 @@ void print_all_config_parameters(struct All_variables *E)
     fprintf(fp, "node_assemble=%d\n", E->control.NASSEMBLE);
     fprintf(fp, "precond=%d\n", E->control.precondition);
     fprintf(fp, "accuracy=%g\n", E->control.accuracy);
-    fprintf(fp, "uzawa=%s\n", E->control.uzawa);
-    fprintf(fp, "compress_iter_maxstep=%d\n", E->control.compress_iter_maxstep);
+    fprintf(fp, "uzawa=");
+    if(E->control.inv_gruneisen != 0)
+        fprintf(fp, "%s\n", E->control.uzawa);
+    else
+        fprintf(fp, "\n");
+    fprintf(fp, "compress_iter_maxstep=");
+    if(E->control.inv_gruneisen != 0 && strcmp(E->control.uzawa, "cg") == 0)
+        fprintf(fp, "%d\n", E->control.compress_iter_maxstep);
+    else
+        fprintf(fp, "\n");
     fprintf(fp, "mg_cycle=%d\n", E->control.mg_cycle);
     fprintf(fp, "down_heavy=%d\n", E->control.down_heavy);
     fprintf(fp, "up_heavy=%d\n", E->control.up_heavy);
