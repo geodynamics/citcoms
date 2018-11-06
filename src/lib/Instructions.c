@@ -2197,6 +2197,7 @@ void print_all_config_parameters(struct All_variables *E)
     fprintf(fp, "output_ll_max=%d\n", E->output.llmax);
     fprintf(fp, "self_gravitation=%d\n", E->control.self_gravitation);
     fprintf(fp, "use_cbf_topo=%d\n", E->control.use_cbf_topo);
+#ifdef USE_HDF5
     fprintf(fp, "cb_block_size=%d\n", E->output.cb_block_size);
     fprintf(fp, "cb_buffer_size=%d\n", E->output.cb_buffer_size);
     fprintf(fp, "sieve_buf_size=%d\n", E->output.sieve_buf_size);
@@ -2205,15 +2206,24 @@ void print_all_config_parameters(struct All_variables *E)
     fprintf(fp, "cache_mdc_nelmts=%d\n", E->output.cache_mdc_nelmts);
     fprintf(fp, "cache_rdcc_nelmts=%d\n", E->output.cache_rdcc_nelmts);
     fprintf(fp, "cache_rdcc_nbytes=%d\n", E->output.cache_rdcc_nbytes);
+#endif
     fprintf(fp, "write_q_files=%d\n", E->output.write_q_files);
-    fprintf(fp, "vtk_format=%s\n", E->output.vtk_format);
+    fprintf(fp, "vtk_format=");
+    if(strcmp(E->output.format, "vtk") == 0)
+        fprintf(fp, "%s\n", E->output.vtk_format);
+    else
+        fprintf(fp, "\n");
     fprintf(fp, "gzdir_vtkio=%d\n", E->output.gzdir.vtk_io);
     fprintf(fp, "gzdir_rnr=%d\n", E->output.gzdir.rnr);
     fprintf(fp, "\n\n");
 
     fprintf(fp, "# CitcomS.solver.param\n");
     fprintf(fp, "reference_state=%d\n", E->refstate.choice);
-    fprintf(fp, "refstate_file=%s\n", E->refstate.filename);
+    fprintf(fp, "refstate_file=");
+    if(E->refstate.choice == 0)
+        fprintf(fp, "%s\n", E->refstate.filename);
+    else
+        fprintf(fp, "\n");
     fprintf(fp, "mineral_physics_model=%d\n", E->control.mineral_physics_model);
     fprintf(fp, "file_vbcs=%d\n", E->control.vbcs_file);
     fprintf(fp, "vel_bound_file=%s\n", E->control.velocity_boundary_file);
@@ -2231,7 +2241,11 @@ void print_all_config_parameters(struct All_variables *E)
     fprintf(fp, "slab_assim=%d\n", E->control.slab_assim);
     fprintf(fp, "slab_assim_file=%s\n", E->control.slab_assim_file);
     fprintf(fp, "internal_vbcs_file=%d\n", E->control.internal_vbcs_file);
-    fprintf(fp, "velocity_internal_file=%s\n", E->control.velocity_internal_file);
+    fprintf(fp, "velocity_internal_file=");
+    if (E->control.internal_vbcs_file)
+        fprintf(fp, "%s\n", E->control.velocity_internal_file);
+    else
+        fprintf(fp, "\n");
     /* end of DJB SLAB */
     /* DJB TOPO */
     fprintf(fp, "remove_buoyancy_above_znode=%d\n", E->control.remove_buoyancy_above_znode);
@@ -2267,14 +2281,34 @@ void print_all_config_parameters(struct All_variables *E)
 
     fprintf(fp, "# CitcomS.solver.tracer\n");
     fprintf(fp, "tracer=%d\n", E->control.tracer);
-    fprintf(fp, "tracer_ic_method=%d\n", E->trace.ic_method);
-    fprintf(fp, "tracers_per_element=%d\n", E->trace.itperel);
-    fprintf(fp, "tracer_file=%s\n", E->trace.tracer_file);
-    fprintf(fp, "tracer_flavors=%d\n", E->trace.nflavors);
-    fprintf(fp, "ic_method_for_flavors=%d\n", E->trace.ic_method_for_flavors);
+    fprintf(fp, "tracer_ic_method=");
+    if(E->control.tracer)
+        fprintf(fp, "%d\n", E->trace.ic_method);
+    else
+        fprintf(fp, "\n");
+    fprintf(fp, "tracers_per_element=");
+    if (E->control.tracer && E->trace.ic_method==0)
+        fprintf(fp, "%d\n", E->trace.itperel);
+    else
+        fprintf(fp, "\n");
+    fprintf(fp, "tracer_file=");
+    if (E->control.tracer && E->trace.ic_method==1)
+        fprintf(fp, "%s\n", E->trace.tracer_file);
+    else
+        fprintf(fp, "\n");
+    fprintf(fp, "tracer_flavors=");
+    if(E->control.tracer)
+        fprintf(fp, "%d\n", E->trace.nflavors);
+    else
+        fprintf(fp, "\n");
+    fprintf(fp, "ic_method_for_flavors=");
+    if(E->control.tracer)
+        fprintf(fp, "%d\n", E->trace.ic_method_for_flavors);
+    else
+        fprintf(fp, "\n");
     fprintf(fp, "z_interface=");
     // DJB OUT
-    if(E->trace.nflavors > 0){
+    if(E->control.tracer && E->trace.nflavors > 0){
         fprintf(fp, "%g", E->trace.z_interface[0]);
         if(E->trace.nflavors > 2){
             for(i=1; i<E->trace.nflavors-1;i++){
@@ -2283,14 +2317,34 @@ void print_all_config_parameters(struct All_variables *E)
         }
     }
     fprintf(fp, "\n");
-    fprintf(fp, "itracer_warnings=%d\n", E->trace.itracer_warnings);
-    fprintf(fp, "regular_grid_deltheta=%g\n", E->trace.deltheta[0]);
-    fprintf(fp, "regular_grid_delphi=%g\n", E->trace.delphi[0]);
+    fprintf(fp, "itracer_warnings=");
+    if(E->control.tracer)
+        fprintf(fp, "%d\n", E->trace.itracer_warnings);
+    else
+        fprintf(fp, "\n");
+    fprintf(fp, "regular_grid_deltheta=");
+    if(E->control.tracer && E->parallel.nprocxy == 12)
+        fprintf(fp, "%g\n", E->trace.deltheta[0]);
+    else
+        fprintf(fp, "\n");
+    fprintf(fp, "regular_grid_delphi=");
+    if(E->control.tracer && E->parallel.nprocxy == 12)
+        fprintf(fp, "%g\n", E->trace.delphi[0]);
+    else
+        fprintf(fp, "\n");
     fprintf(fp, "chemical_buoyancy=%d\n", E->composition.ichemical_buoyancy);
-    fprintf(fp, "buoy_type=%d\n", E->composition.ibuoy_type);
-    fprintf(fp, "hybrid_method=%d\n", E->composition.hybrid_method); // DJB COMP
+    fprintf(fp, "buoy_type=");
+    if (E->control.tracer && (E->composition.ichemical_buoyancy || E->composition.icompositional_rheology))
+        fprintf(fp, "%d\n", E->composition.ibuoy_type);
+    else
+        fprintf(fp, "\n");
+    fprintf(fp, "hybrid_method="); // DJB COMP
+    if (E->control.tracer && (E->composition.ichemical_buoyancy || E->composition.icompositional_rheology))
+        fprintf(fp, "%d\n", E->composition.hybrid_method); // DJB COMP
+    else
+        fprintf(fp, "\n");
     fprintf(fp, "buoyancy_ratio=");
-    if(E->composition.ncomp > 0)
+    if(E->control.tracer && (E->composition.ichemical_buoyancy || E->composition.icompositional_rheology) && E->composition.ncomp > 0)
     {
       for(i=0; i<E->composition.ncomp-1;i++)
         fprintf(fp, "%g,", E->composition.buoyancy_ratio[i]);
