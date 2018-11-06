@@ -977,9 +977,13 @@ void allocate_common_vars(E)
       E->sphere.cap[j].TB[i] = (float *)  malloc((nno+1)*sizeof(float));
 
   /* DJB SLAB */
-  E->sphere.cap[j].slab_temp = (double *) malloc((nno+1)*sizeof(double));
-  E->sphere.cap[j].slab_sten = (double *) malloc((nno+1)*sizeof(double));
-  E->sphere.cap[j].slab_sten2 = (int *) malloc((nno+1)*sizeof(int));
+  /* calloc, because this avoids a uninitialised variable warning (valgrind),
+     since these arrays are written out but are not actually populated until
+     after time step 0.  this is because assimilation blends with the solution
+     from the previous timestep, and a previous time step is not known initially */
+  E->sphere.cap[j].slab_temp = (double *) calloc((nno+1), sizeof(double));
+  E->sphere.cap[j].slab_sten = (double *) calloc((nno+1), sizeof(double));
+  E->sphere.cap[j].slab_sten2 = (int *) calloc((nno+1), sizeof(int));
 
   E->slice.tpg[j]      = (float *)malloc((nsf+2)*sizeof(float));
   E->slice.tpgb[j]     = (float *)malloc((nsf+2)*sizeof(float));
