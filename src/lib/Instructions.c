@@ -2472,7 +2472,7 @@ void print_all_config_parameters(struct All_variables *E)
     {
       fprintf(fp, "\n");
     }
-    fprintf(fp, "pdepv_eff=")
+    fprintf(fp, "pdepv_eff=");
     if (E->viscosity.PDEPV)
         fprintf(fp, "%d\n", E->viscosity.pdepv_eff);
     else
