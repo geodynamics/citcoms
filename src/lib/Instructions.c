@@ -2354,8 +2354,16 @@ void print_all_config_parameters(struct All_variables *E)
     {
       fprintf(fp, "\n");
     }
-    fprintf(fp, "tracer_enriched=%d\n", E->control.tracer_enriched);
-    fprintf(fp, "Q0_enriched=%g\n", E->control.Q0ER);
+    fprintf(fp, "tracer_enriched=");
+    if(E->control.tracer)
+        fprintf(fp, "%d\n", E->control.tracer_enriched);
+    else
+        fprintf(fp, "\n");
+    fprintf(fp, "Q0_enriched=");
+    if(E->control.tracer && E->control.tracer_enriched)
+        fprintf(fp, "%g\n", E->control.Q0ER);
+    else
+        fprintf(fp, "\n");
     fprintf(fp, "\n\n");
 
     fprintf(fp, "# CitcomS.solver.visc\n");
@@ -2465,10 +2473,14 @@ void print_all_config_parameters(struct All_variables *E)
       fprintf(fp, "\n");
     }
     fprintf(fp, "pdepv_eff=%d\n", E->viscosity.pdepv_eff);
-    fprintf(fp, "pdepv_offset=%g\n", E->viscosity.pdepv_offset);
+    fprintf(fp, "pdepv_offset=");
+    if (E->viscosity.PDEPV)
+        fprintf(fp, "%g\n", E->viscosity.pdepv_offset);
+    else
+        fprintf(fp, "\n");
     fprintf(fp, "CDEPV=%d\n", E->viscosity.CDEPV);
     fprintf(fp, "cdepv_ff=");
-    if(E->trace.nflavors > 0)
+    if(E->viscosity.CDEPV && E->trace.nflavors > 0)
     {
       for(i=0; i<E->trace.nflavors-1;i++)
         fprintf(fp, "%g,", E->viscosity.cdepv_ff[i]);
@@ -2485,9 +2497,17 @@ void print_all_config_parameters(struct All_variables *E)
     fprintf(fp, "lv_channel_thickness=%g\n", E->viscosity.lv_channel_thickness);
     fprintf(fp, "lv_reduction=%g\n", E->viscosity.lv_reduction);
     fprintf(fp, "VMIN=%d\n", E->viscosity.MIN);
-    fprintf(fp, "visc_min=%g\n", E->viscosity.min_value);
+    fprintf(fp, "visc_min=");
+    if (E->viscosity.MIN)
+        fprintf(fp, "%g\n", E->viscosity.min_value);
+    else
+        fprintf(fp, "\n");
     fprintf(fp, "VMAX=%d\n", E->viscosity.MAX);
-    fprintf(fp, "visc_max=%g\n", E->viscosity.max_value);
+    fprintf(fp, "visc_max=");
+    if (E->viscosity.MAX)
+        fprintf(fp, "%g\n", E->viscosity.max_value);
+    else
+        fprintf(fp, "\n");
     fprintf(fp, "z_layer=");
     if(E->viscosity.num_mat > 0)
     {
