@@ -69,7 +69,7 @@ or install version 3.14 from the website
 
 #### Install LLDB (debugger)
 
-This is already on my mac - perhaps it comes with XCode?
+This comes with Xcode
 
 #### To run a uniprocessor job:
 
@@ -142,6 +142,7 @@ A data assimilation manual is hosted in an svn repository located at ```https://
 1. Tracer density at the nodes (originally written by Ting Yang)
     - ```tracer_dens```
 1. Fixed pid file output for lith_age_min, z_interface, and output_optional
+1. Fixed various valgrind uninitialised variable warnings relating to the writing of the pid file
 
 ### Topography (grep for 'DJB TOPO')
 1. Parameter to remove buoyancy above a given znode for computing dynamic topography
@@ -183,7 +184,6 @@ See diff/ directory for complete record
 ### Code features NOT implemented
 
 1. output of divv
-1. tracer density for elements and nodes output (added by Ting, see svn r52 through r55)
 1. reverse gravity acceleraton (added by Ting, see svn r76) for SBI
    note that this appears to have been subsequently removed in r88?
 
