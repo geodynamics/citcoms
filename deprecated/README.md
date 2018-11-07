@@ -1,0 +1,1 @@
+This directory contains the prior version of the CitcomS assimilation code that requires pyre (svn\_old\_version) and several undocumented branches.  These are largely redundant, but are kept for historical purposes in case some features are requested in the future.
