@@ -101,7 +101,7 @@ void advection_diffusion_allocate_memory(struct All_variables *E)
   int i,m;
 
   for(m=1;m<=E->sphere.caps_per_proc;m++)  {
-    E->Tdot[m]= (double *)malloc((E->lmesh.nno+1)*sizeof(double));
+    E->Tdot[m]= (double *)calloc((E->lmesh.nno+1),sizeof(double));
 
     for(i=1;i<=E->lmesh.nno;i++)
       E->Tdot[m][i]=0.0;
