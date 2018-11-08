@@ -964,9 +964,10 @@ void allocate_common_vars(E)
   elx  = E->lmesh.elx;
   ely  = E->lmesh.ely;
 
-  E->P[j]        = (double *) malloc((npno+1)*sizeof(double));
   /* DJB calloc to avoid a valgrind warning when the first checkpoint
      is written */
+  E->T[j]        = (double *) calloc((nno+1),sizeof(double));
+  E->P[j]        = (double *) calloc((npno+1),sizeof(double));
   E->T[j]        = (double *) calloc((nno+1),sizeof(double));
   E->NP[j]       = (float *) malloc((nno+1)*sizeof(float));
   E->buoyancy[j] = (double *) malloc((nno+1)*sizeof(double));
