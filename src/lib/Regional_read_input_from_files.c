@@ -47,7 +47,7 @@ void regional_read_input_files_for_timesteps(E,action,output)
     FILE *fp1, *fp2;
     float age, newage1, newage2;
     char output_file1[255],output_file2[255];
-    float *TB1, *TB2, *VB1[4],*VB2[4], inputage1, inputage2;
+    float *TB1, *TB2, *VB1[5],*VB2[5], inputage1, inputage2;
     int nox,noz,noy,nnn,nox1,noz1,noy1;
     int i,ii,ll,mm,j,k,n,nodeg,nodel,node;
     int mm1, mm2; // DJB SLAB
