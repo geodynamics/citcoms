@@ -988,6 +988,9 @@ void allocate_common_vars(E)
   E->sphere.cap[j].slab_sten = (double *) calloc((nno+1), sizeof(double));
   E->sphere.cap[j].slab_sten2 = (int *) calloc((nno+1), sizeof(int));
 
+  /* DJB OUT */
+  E->divv[j] = (double *) malloc((npno+1)*sizeof(double));
+
   E->slice.tpg[j]      = (float *)malloc((nsf+2)*sizeof(float));
   E->slice.tpgb[j]     = (float *)malloc((nsf+2)*sizeof(float));
   E->slice.divg[j]     = (float *)malloc((nsf+2)*sizeof(float));
@@ -1639,6 +1642,7 @@ static void output_parse_optional(struct  All_variables *E)
     E->output.heating_visc_nd = 0; // DJB OUT
     E->output.heating_adi_nd = 0; // DJB OUT
     E->output.heating_latent_nd = 0; // DJB OUT
+    E->output.divv = 0; // DJB OUT
 
     while(1) {
         /* get next field */
@@ -1713,6 +1717,8 @@ static void output_parse_optional(struct  All_variables *E)
             E->output.sten_temp = 1;
         else if(strcmp(prev, "sten_velo")==0)
             E->output.sten_velo = 1;
+        else if(strcmp(prev, "divv")==0)
+            E->output.divv = 1;
         else if(strcmp(prev, "heating")==0)
             E->output.heating = 1;
         else

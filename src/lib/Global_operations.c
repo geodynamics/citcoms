@@ -646,6 +646,12 @@ double global_div_norm2(struct All_variables *E,  double **A)
             /* L2 norm of div(u) */
             temp += A[m][i] * A[m][i] / E->eco[m][i].area;
 
+            /* DJB OUT */
+            /* save divergence to output at nodes */
+            /* note that A[m][i] already had E->eco[m][i].area multiplied once, before global_div_norm2() call */
+            E->divv[m][i] = A[m][i] * A[m][i] / E->eco[m][i].area;
+            E->divv[m][i] /= E->eco[m][i].area; /* need to divide by area again, as with below for global norm */
+
             /* L1 norm */
             /*temp += fabs(A[m][i]);*/
         }

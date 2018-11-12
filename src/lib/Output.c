@@ -61,6 +61,7 @@ void output_heating_adi_nd(struct All_variables *, int); // DJB OUT
 void output_heating_latent_nd(struct All_variables *, int); // DJB OUT
 void output_temp_sph(struct All_variables *, int); // DJB OUT
 void output_comp_sph(struct All_variables *, int); // DJB OUT
+void output_divv(struct All_variables *, int); // DJB OUT
 
 extern void parallel_process_termination();
 extern void heat_flux(struct All_variables *);
@@ -196,6 +197,10 @@ void output(struct All_variables *E, int cycles)
 
   if (E->output.sten_velo)
       output_sten_velo(E, cycles);
+
+  /* DJB OUT */
+  if (E->output.divv)
+      output_divv(E, cycles);
 
   return;
 }
@@ -390,6 +395,46 @@ void output_avisc(struct All_variables *E, int cycles)
   return;
 }
 #endif
+
+/* DJB OUT */
+void output_divv(struct All_variables *E, int cycles)
+{
+  void p_to_nodes();
+  int i, j, m;
+  float *divv_nd[NCS];
+  char output_file[255];
+  FILE *fp1;
+
+  for(m=1;m<=E->sphere.caps_per_proc;m++)
+    divv_nd[m] = (float *) malloc ((E->lmesh.nno+1)*sizeof(float));
+
+  /* for(m=1;m<=E->sphere.caps_per_proc;m++) {
+    for(i=1;i<=E->lmesh.nno;i++) {
+      divv_nd[m][i] = 0.0;
+    }
+  } */
+
+  p_to_nodes(E,E->divv,divv_nd,E->mesh.levmax);
+
+  sprintf(output_file,"%s.divv.%d.%d", E->control.data_file,
+          E->parallel.me, cycles);
+  fp1 = output_open(output_file, "w");
+
+  fprintf(fp1,"%d %d %.5e\n",cycles,E->lmesh.nno,E->monitor.elapsed_time);
+
+  for(j=1;j<=E->sphere.caps_per_proc;j++) {
+    fprintf(fp1,"%3d %7d\n",j,E->lmesh.nno);
+    for(i=1;i<=E->lmesh.nno;i++)
+      fprintf(fp1,"%.6e\n",divv_nd[j][i]);
+  }
+
+  fclose(fp1);
+
+  for(m=1;m<=E->sphere.caps_per_proc;m++)
+    free(divv_nd[m]);
+
+  return;
+}
 
 /* DJB SLAB */
 void output_sten_temp(struct All_variables *E, int cycles)

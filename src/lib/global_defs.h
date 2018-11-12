@@ -683,6 +683,7 @@ struct Output {
     int sten_temp;    /* whether to output slab temp stencil */
     int sten_velo;    /* whether to output slab velo stencil */
     /* DJB OUT */
+    int divv;         /* whether to output divergence on nodes */
     int temp_sph;     /* whether to output spherical harmonics for temperature */
     int comp_sph;     /* whether to output spherical harmonics for composition */
  
@@ -812,6 +813,8 @@ struct All_variables {
     float *heating_visc_nd[NCS]; // DJB OUT
     float *heating_adi_nd[NCS]; // DJB OUT
     float *heating_latent_nd[NCS]; // DJB OUT
+
+    double *divv[NCS]; // DJB OUT
 
     double *P[NCS],*F[NCS],*U[NCS];
     double *T[NCS],*Tdot[NCS],*buoyancy[NCS];
