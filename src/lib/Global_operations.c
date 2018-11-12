@@ -655,12 +655,12 @@ double global_div_norm2(struct All_variables *E,  double **A)
     for (m=1; m<=E->sphere.caps_per_proc; m++)
         for (i=1; i<=E->lmesh.npno; i++) {
             /* L2 norm of div(u) */
-            temp += A[m][i] * A[m][i] / E->eco[m][i].area;
 
             /* DJB OUT */
             /* save divergence to output at nodes */
             /* note that A[m][i] already had E->eco[m][i].area multiplied once, before global_div_norm2() call */
             E->div_norm2[m][i] = A[m][i] * A[m][i] / E->eco[m][i].area;
+            temp += E->div_norm2[m][i]; /* A[m][i] * A[m][i] / E->eco[m][i].area; */
             E->div_norm2[m][i] /= E->eco[m][i].area; /* need to divide by area again, as with below for global norm */
 
             /* L1 norm */
