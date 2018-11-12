@@ -141,6 +141,8 @@ A data assimilation manual is hosted in an svn repository located at ```https://
     - ```sten_velo```
 1. Tracer density at the nodes (originally written by Ting Yang)
     - ```tracer_dens```
+1. Divergence (div/v) at the nodes.  Useful for debugging convergence issues.
+    - ```divv```
 1. Fixed pid file output for lith_age_min, z_interface, and output_optional
 1. Fixed various valgrind uninitialised variable warnings relating to the writing of the pid file
 
@@ -198,10 +200,10 @@ See diff/ directory for complete record
 1. Full\_lith\_age\_read\_files -> COMPLETE
 1. Full_read_input_from_file -> COMPLETE
 1. Full\_solver.c -> COMPLETE
-1. global\_defs.h -> (divv) TODO
-1. Instructions.c -> output divv (TODO)
+1. global\_defs.h -> COMPLETE
+1. Instructions.c -> COMPLETE
 1. Lith\_age.c -> COMPLETE
-1. output.c -> divv (TODO)
+1. output.c -> COMPLETE
 1. Pan\_problem.c -> COMPLETE
 1. Problem\_related.c -> COMPLETE
 1. Regional\_boundary\_conditions.c -> COMPLETE
@@ -209,6 +211,6 @@ See diff/ directory for complete record
 1. Regional\_read\_input\_files -> COMPLETE
 1. Regional\_solver -> COMPLETE
 1. solver.h -> COMPLETE
-1. Stokes\_flow\_incom -> divv calculation for output (TODO)
+1. Stokes\_flow\_incom -> divv calculation for output COMPLETE
 1. tracer\_defs.h -> COMPLETE
 1. Viscosity\_structure.c -> COMPLETE
