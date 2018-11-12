@@ -1,3 +1,4 @@
 examples/Create_History
 *.o
 *.Po
+*.net
