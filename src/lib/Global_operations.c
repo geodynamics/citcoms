@@ -605,6 +605,17 @@ double global_v_norm2(struct All_variables *E,  double **V)
             temp += (V[m][eqn1] * V[m][eqn1] +
                      V[m][eqn2] * V[m][eqn2] +
                      V[m][eqn3] * V[m][eqn3]) * E->NMass[m][i];
+
+            /* DJB OUT */
+            /* for simplicity, now just using global L2 norm of V */
+
+            /* need velocity to normalise divergence output */
+            /*E->v_norm2[m][i] = (V[m][eqn1] * V[m][eqn1] +
+                V[m][eqn2] * V[m][eqn2] +
+                V[m][eqn3] * V[m][eqn3]) * E->NMass[m][i];*/
+            /* TODO: need to divide by element volume, but this quantity
+               is on the nodes, so need to do something else */
+
         }
 
     MPI_Allreduce(&temp, &prod, 1, MPI_DOUBLE, MPI_SUM, E->parallel.world);
@@ -649,8 +660,8 @@ double global_div_norm2(struct All_variables *E,  double **A)
             /* DJB OUT */
             /* save divergence to output at nodes */
             /* note that A[m][i] already had E->eco[m][i].area multiplied once, before global_div_norm2() call */
-            E->divv[m][i] = A[m][i] * A[m][i] / E->eco[m][i].area;
-            E->divv[m][i] /= E->eco[m][i].area; /* need to divide by area again, as with below for global norm */
+            E->div_norm2[m][i] = A[m][i] * A[m][i] / E->eco[m][i].area;
+            E->div_norm2[m][i] /= E->eco[m][i].area; /* need to divide by area again, as with below for global norm */
 
             /* L1 norm */
             /*temp += fabs(A[m][i]);*/

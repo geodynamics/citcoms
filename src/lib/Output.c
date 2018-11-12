@@ -401,20 +401,16 @@ void output_divv(struct All_variables *E, int cycles)
 {
   void p_to_nodes();
   int i, j, m;
-  float *divv_nd[NCS];
+  float *div_norm2_nd[NCS];
+  float out;
   char output_file[255];
   FILE *fp1;
 
+  /* p_to_nodes requires a float array to output */
   for(m=1;m<=E->sphere.caps_per_proc;m++)
-    divv_nd[m] = (float *) malloc ((E->lmesh.nno+1)*sizeof(float));
+    div_norm2_nd[m] = (float *) malloc ((E->lmesh.nno+1)*sizeof(float));
 
-  /* for(m=1;m<=E->sphere.caps_per_proc;m++) {
-    for(i=1;i<=E->lmesh.nno;i++) {
-      divv_nd[m][i] = 0.0;
-    }
-  } */
-
-  p_to_nodes(E,E->divv,divv_nd,E->mesh.levmax);
+  p_to_nodes(E,E->div_norm2,div_norm2_nd,E->mesh.levmax);
 
   sprintf(output_file,"%s.divv.%d.%d", E->control.data_file,
           E->parallel.me, cycles);
@@ -424,14 +420,19 @@ void output_divv(struct All_variables *E, int cycles)
 
   for(j=1;j<=E->sphere.caps_per_proc;j++) {
     fprintf(fp1,"%3d %7d\n",j,E->lmesh.nno);
-    for(i=1;i<=E->lmesh.nno;i++)
-      fprintf(fp1,"%.6e\n",divv_nd[j][i]);
+    for(i=1;i<=E->lmesh.nno;i++){
+      /* DJB OUT */
+      /* normalising by E->monitor.vdotv = global_v_norm2(E, V); to be
+         consistent with the global calculation of divv */
+      out = sqrt(div_norm2_nd[j][i] / (1e-32 + (float)E->monitor.vdotv));
+      fprintf(fp1,"%.6e\n",out);
+    }
   }
 
   fclose(fp1);
 
   for(m=1;m<=E->sphere.caps_per_proc;m++)
-    free(divv_nd[m]);
+    free(div_norm2_nd[m]);
 
   return;
 }

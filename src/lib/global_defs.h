@@ -814,7 +814,8 @@ struct All_variables {
     float *heating_adi_nd[NCS]; // DJB OUT
     float *heating_latent_nd[NCS]; // DJB OUT
 
-    double *divv[NCS]; // DJB OUT
+    double *div_norm2[NCS]; // DJB OUT
+    //double *v_norm2[NCS]; // DJB OUT
 
     double *P[NCS],*F[NCS],*U[NCS];
     double *T[NCS],*Tdot[NCS],*buoyancy[NCS];
