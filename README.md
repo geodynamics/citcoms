@@ -185,7 +185,6 @@ See diff/ directory for complete record
 
 ### Code features NOT implemented
 
-1. output of divv
 1. reverse gravity acceleraton (added by Ting, see svn r76) for SBI
    note that this appears to have been subsequently removed in r88?
 
