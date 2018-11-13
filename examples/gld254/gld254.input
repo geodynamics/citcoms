@@ -1,37 +1,51 @@
+# timestepping information
+minstep=1
+maxstep=100000
+maxtotstep=100000
+storage_spacing_Myr=5
+exit_at_present=1
+storage_spacing=10000
+checkpointFrequency=10000
+cpu_limits_in_seconds=360000000
+
+
+# Governing parameters
+inputdiffusivity=1.0
+rayleigh=8.6e08
+Q0=0
+
+
+# Age information
+start_age=230
+reset_startage=0
+
+
 # specify output files
-datadir="/home/ubelix/csh/bower/mc/CitcomS/models/gld254/new/data/%RANK"
+datadir="/short/q97/nif562/Global/Lith_Def/gld254/Data/%RANK"
 datafile="gld254"
 
 output_format=ascii
-output_optional=surf,botm
+output_optional=surf,botm,horiz_avg
 output_ll_max=20
+stokes_flow_only=0
 
-# specify input files
-# Important: when file_vbcs is 1, make sure topvbc is also turned on.
-file_vbcs=1
-vel_bound_file="/home/ubelix/csh/bower/mc/CitcomS/models/gld254/input/velocity/bvel"
 
-coor=1
-coor_file="/home/ubelix/csh/bower/mc/CitcomS/models/gld254/new/G5.coor.global.dat"
+# restart info
+restart=0
+post_p=0
+datadir_old="/short/q97/nif562/Global/Lith_Def/Preprocessing/2015_2-svn875/Reconstruction/ic"
+datafile_old="PlateModel_2015v2_svn875"
+solution_cycles_init=230
+zero_elapsed_time=1
+tic_method=-1
 
-mat_control=0
-mat_file=""
+# Data input and program debugging
+DESCRIBE=off
+BEGINNER=off
+VERBOSE=on
 
-lith_age=1
-lith_age_file="/home/ubelix/csh/bower/mc/CitcomS/models/gld254/input/age/PlateModel_2015v2_svn875.lith.dat"
-
-lith_age_time=1
-lith_age_depth=1
-lith_age_depth_function=1
-lith_age_exponent=0.5
-lith_age_min=23.9
-lith_age_stencil_value=-999
-
-slab_assim=1
-slab_assim_file="/home/ubelix/csh/bower/mc/CitcomS/models/gld254/input/hist/PlateModel_2015v2_svn875.hist.dat"
-
-tracer=0
-tracer_file=""
+verbose=off
+see_convergence=0
 
 
 # processors, mesh grid information
@@ -48,80 +62,52 @@ mgunitz=4
 levels=4
 
 
-# the calculation region definition
-radius_inner=0.55
-radius_outer=1.0
+# Tracer information
+tracer=on
+
+tracer_enriched=0
+tracer_ic_method=1
+tracers_per_element=30
+tracer_file="/short/q97/nif562/Global/Lith_Def/Preprocessing/2015_2-svn875/Reconstruction/tracers/PlateModel_2015v2_svn875.tracer.230Ma"
+
+tracer_flavors=6
+ic_method_for_flavors=0
+z_interface=0.9937,0.9843,0.9356,0.8964,0.57355
+itracer_warnings=1
+
+regular_grid_deltheta=0.05
+regular_grid_delphi=0.05
+
+chemical_buoyancy=on
+buoy_type=1
+hybrid_method=1
+buoyancy_ratio=-0.8345,-0.235,-0.211,-0.192,0.5
+reset_initial_composition=off
 
 
-# restart info
-restart=0
-post_p=0
-datadir_old="/home/ubelix/csh/bower/mc/CitcomS/models/gld254/input/ic"
-datafile_old="PlateModel_2015v2_svn875"
-solution_cycles_init=230
-zero_elapsed_time=1
+# specify input files
+# Important: when file_vbcs is 1, make sure topvbc is also turned on.
+file_vbcs=1
+vel_bound_file="/short/q97/nif562/Global/Lith_Def/Preprocessing/2015_2-svn875/Reconstruction/velocity/bvel"
 
+coor=1
+coor_file="/home/562/nif562/Global/Lith_Def/gld254/G5.coor.global.dat"
 
-# timestepping information
-minstep=1
-maxstep=2
-maxtotstep=100000
-storage_space_Myr=5
-storage_spacing=100000
-cpu_limits_in_seconds=360000000
+mat_control=0
+mat_file=""
 
-# Initial conditions
-num_perturbations=1
-perturbmag=0.05
-perturbl=2
-perturbm=2
-perturblayer=5
+lith_age=1
+lith_age_file="/short/q97/nif562/Global/Lith_Def/Preprocessing/2015_2-svn875/Reconstruction/age/PlateModel_2015v2_svn875.lith.dat"
 
+lith_age_time=1
+lith_age_depth=1
+lith_age_depth_function=1
+lith_age_exponent=0.5
+lith_age_min=23.9
+lith_age_stencil_value=-999
 
-# Boundary Conditions
-topvbc=1
-     topvbxval=0.0
-     topvbyval=0.0
-botvbc=0
-     botvbxval=0.0
-     botvbyval=0.0
-
-toptbc=1
-     toptbcval=0.0
-bottbc=1
-     bottbcval=1.0
-
-#lith_age_time=0
-#lith_age_depth=0.031400
-mantle_temp=1.000000
-temperature_bound_adj=0
-depth_bound_adj=0.157000
-width_bound_adj=0.087270
-
-
-# miscellaneous information
-stokes_flow_only=0
-inputdiffusicity=1.0
-rayleigh=8.6e08
-Q0=0
-
-
-# required information
-Problem=convection
-Geometry=sphere
-Solver=multigrid
-node_assemble=1
-
-
-# Depth Information
-# for material above z_lith,    mat = 1;
-# for material above z_410,     mat = 2;
-# for material above z_lmantle, mat = 3;
-# for material below z_lmantle, mat = 4;
-z_lith=0.0007848
-z_410=0.03924			#also depth of 410-phase change
-z_lmantle=0.06435		#also depth of 670-phase change
-z_cmb=0.439			#     depth of another phase change
+slab_assim=1
+slab_assim_file="/short/q97/nif562/Global/Lith_Def/Preprocessing/2015_2-svn875/Reconstruction/hist/PlateModel_2015v2_svn875.hist.dat"
 
 
 # Viscosity Information
@@ -136,6 +122,9 @@ TDEPV=on
 viscE=9.0,9.0,9.0,3.0
 viscT=.16,.16,.16,.16
 visc0=1,0.1,1,100
+
+CDEPV=on
+cdepv_ff=1,100,100,100,100,1
 
 SDEPV=off
 sdepv_expt=1,1,1,1
@@ -152,28 +141,6 @@ VMIN=on
 visc_min=0.1
 VMAX=on
 visc_max=100.0
-
-
-# Tracer information
-tracer=on
-
-tracer_enriched=0
-tracer_ic_method=1
-tracers_per_element=10
-tracer_file="/home/ubelix/csh/bower/mc/CitcomS/models/gld254/input/tracers/PlateModel_2015v2_svn875.tracer.230Ma"
-
-tracer_flavors=6
-ic_method_for_flavors=0
-z_interface=0.9937,0.9843,0.9356,0.8964,0.57355
-itracer_warnings=0
-
-regular_grid_deltheta=0.05
-regular_grid_delphi=0.05
-
-chemical_buoyancy=on
-buoy_type=1
-buoyancy_ratio=-0.8345,-0.235,-0.211,-0.192,0.5
-reset_initial_composition=off
 
 
 # Phase Change Information
@@ -193,6 +160,56 @@ transTcmb=0.875
 widthcmb=0.0058
 
 
+# Boundary Conditions
+topvbc=1
+     topvbxval=0.0
+     topvbyval=0.0
+botvbc=0
+     botvbxval=0.0
+     botvbyval=0.0
+
+toptbc=1
+     toptbcval=0.0
+bottbc=1
+     bottbcval=1.0
+
+mantle_temp=0.500000
+temperature_bound_adj=0
+depth_bound_adj=0.157000
+width_bound_adj=0.087270
+
+
+# Initial conditions
+num_perturbations=1
+perturbmag=0.05
+perturbl=1
+perturbm=1
+perturblayer=5
+
+
+# required information
+Problem=convection
+Geometry=sphere
+Solver=multigrid
+node_assemble=1
+
+
+# Depth Information
+# for material above z_lith,    mat = 1;
+# for material above z_410,     mat = 2;
+# for material above z_lmantle, mat = 3;
+# for material below z_lmantle, mat = 4;
+z_lith=0.02511
+z_410=0.04866                   #also depth of 410-phase change
+z_lmantle=0.105                 #also depth of 670-phase change
+z_cmb=0.45                      #     depth of another phase change
+
+
+#  calculation region definition
+radius_inner=0.55
+radius_outer=1.0
+
+
 # Dimensional Information
 radius=6371e3
 density=4000.0
@@ -203,15 +220,6 @@ refvisc=1e21
 cp=1200
 density_above=1030.0
 density_below=6600.0
-
-
-# Data input and program debugging
-DESCRIBE=off
-BEGINNER=off
-VERBOSE=on
-
-verbose=on
-see_convergence=1
 
 
 # Solver Related Matters
@@ -225,7 +233,7 @@ piterations=300
 accuracy=1.0e-4
 
 ADV=on
-monitor_max_T=1 
+monitor_max_T=1
 fixed_timestep=0.0
 finetunedt=0.9
 adv_sub_iterations=2
@@ -237,11 +245,7 @@ aug_number=2.0e3
 
 inner_remove_rigid_rotation=0
 remove_rigid_rotation=0
+remove_angular_momentum=0
 
 check_continuity_convergence=0
 check_pressure_convergence=1
-
-# Age information
-start_age=230
-reset_startage=0
-
