@@ -966,7 +966,6 @@ void allocate_common_vars(E)
 
   /* DJB calloc to avoid a valgrind warning when the first checkpoint
      is written */
-  E->T[j]        = (double *) calloc((nno+1),sizeof(double));
   E->P[j]        = (double *) calloc((npno+1),sizeof(double));
   E->T[j]        = (double *) calloc((nno+1),sizeof(double));
   E->NP[j]       = (float *) malloc((nno+1)*sizeof(float));
