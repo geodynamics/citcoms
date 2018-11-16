@@ -1,0 +1,76 @@
+//
+// time: Mon May 17 10:31:08 2004
+//
+// version: 3.2.0 (format), 4.3.0 (DX)
+//
+//
+// Begin MDF
+// MODULE ShowSphere
+// CATEGORY Macros
+// DESCRIPTION Show Core-Mantle Boundary
+// INPUT input_1; vector list; ([0 0 0]); origin
+// INPUT input_2; value list or string list; (0.5);  
+// OPTIONS 0.5 ; 0.55 ; 0.6 
+// OUTPUT sphere; color field;  
+// End MDF
+// workspace: width = 156, height = 407
+// layout: snap = 0, width = 50, height = 50, align = NN
+//
+macro ShowSphere(
+ input_1
+,input_2
+) -> (
+ sphere
+) {
+    // 
+    // node Input[17]: x = 31, y = 6, inputs = 0, label = Input
+    // parameter: position = 1, name = 'input_1', value = '([0 0 0])', descriptive = 1, description = 'origin', required = 0, visible = 1
+    //
+ShowSphere_Input_17_out_1 = input_1;
+    // 
+    // node Input[16]: x = 103, y = 7, inputs = 0, label = Input
+    // parameter: position = 2, name = 'input_2', value = '(0.5)', descriptive = 1, description = ' ', required = 0, visible = 1
+    //
+ShowSphere_Input_16_out_1 = input_2;
+    // 
+    // node Construct[2]: x = 40, y = 101, inputs = 4, label = Construct
+    // input[1]: defaulting = 1, visible = 1, type = 16777224, value = {[0 0 0]}
+    // input[3]: defaulting = 0, visible = 1, type = 1, value = 1
+    // input[4]: defaulting = 1, visible = 1, type = 16777245, value = {0.5}
+    //
+ShowSphere_Construct_2_out_1 = 
+    Construct(
+    ShowSphere_Input_17_out_1,
+    NULL,
+    1,
+    ShowSphere_Input_16_out_1
+    ) [instance: 2, cache: 1];
+    // 
+    // node Glyph[3]: x = 36, y = 187, inputs = 7, label = Glyph
+    // input[1]: defaulting = 1, visible = 1, type = 67584, value = NULL
+    // input[2]: defaulting = 0, visible = 1, type = 32, value = "spiffy"
+    // input[3]: defaulting = 0, visible = 1, type = 5, value = NULL
+    // input[4]: defaulting = 0, visible = 1, type = 5, value = 1.0
+    // input[5]: defaulting = 0, visible = 1, type = 5, value = NULL
+    //
+ShowSphere_Glyph_3_out_1 = 
+    Glyph(
+    ShowSphere_Construct_2_out_1,
+    "spiffy",
+    NULL,
+    1.0,
+    NULL,
+    NULL,
+    NULL
+    ) [instance: 3, cache: 1];
+    // 
+    // node Output[12]: x = 69, y = 345, inputs = 1, label = Output
+    // parameter: position = 1, name = 'sphere', value = '(NULL)', descriptive = 1, description = ' ', required = 0, visible = 1
+    //
+sphere = ShowSphere_Glyph_3_out_1;
+// network: end of macro body
+}
+ShowSphere_Input_17_out_1 = NULL;
+ShowSphere_Input_16_out_1 = NULL;
+ShowSphere_Construct_2_out_1 = NULL;
+ShowSphere_Glyph_3_out_1 = NULL;

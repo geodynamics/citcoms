@@ -1,0 +1,997 @@
+diff -r src_rakib/CitcomS/Components/IC.py legacy/release/CitcomS-assim-r88-source/CitcomS/Components/IC.py
+49d48
+<         inv.silo_base_center = map(float, inv.silo_base_center)
+138,148c137
+<         blob_profile = pyre.inventory.str("blob_profile", default="default")
+<         
+<         # for tic_method=400
+<         silo_base_center = pyre.inventory.list("silo_base_center", default=[-999., -999., -999.])
+<         silo_radius = pyre.inventory.float("silo_radius", default=0.063)
+<         silo_cylinder_height = pyre.inventory.float("silo_cylinder_height", default=0.0784)
+<         silo_dT = pyre.inventory.float("silo_dT", default=0.18)
+<         silo_profile = pyre.inventory.str("silo_profile", default="default")
+<         
+<         # for tic_method=401
+<         mantle_temp_adiabatic_increase = pyre.inventory.float("mantle_temp_adiabatic_increase", default=0.3)
+---
+> 
+Only in src_rakib/CitcomS/Components: IC.pyc
+Only in src_rakib/CitcomS/Components: __init__.pyc
+diff -r src_rakib/CitcomS/Components/Output.py legacy/release/CitcomS-assim-r88-source/CitcomS/Components/Output.py
+42,45d41
+< 
+<         inv = self.inventory
+<         inv.output_shell_rids = map(int, inv.output_shell_rids)
+< 
+54,58d49
+<         
+<         output_num_shells = inv.int("output_num_shells", default=0)
+<         output_shell_rids = inv.list("output_shell_rids", default=[])
+<         output_shell_num_buffered_timesteps = inv.int("output_shell_num_buffered_timesteps", default=5);
+<         output_shell_every = inv.int("output_shell_every", default=4);
+diff -r src_rakib/CitcomS/Controller.py legacy/release/CitcomS-assim-r88-source/CitcomS/Controller.py
+155c155
+<         self.solver.save(self.inventory.monitoringFrequencyMyr)
+---
+>         self.solver.save(self.inventory.monitoringFrequency)
+160c160
+<         self.solver.checkpoint(self.inventory.checkpointFrequencyMyr)
+---
+>         self.solver.checkpoint(self.inventory.checkpointFrequency)
+170d169
+<         monitoringFrequencyMyr = pyre.inventory.int("monitoringFrequencyMyr", default=5)
+172d170
+<         checkpointFrequencyMyr = pyre.inventory.int("checkpointFrequencyMyr", default=5)
+diff -r src_rakib/CitcomS/Solver/Solver.py legacy/release/CitcomS-assim-r88-source/CitcomS/Solver/Solver.py
+43,46d42
+<         
+<         self.last_output_time = 0.
+<         self.last_checkpoint_time = 0.
+<         
+122,125c118,121
+<             print >> stream, ("monitoringFrequencyMyr=%d" %
+<                 application.controller.inventory.monitoringFrequencyMyr)
+<             print >> stream, ("checkpointFrequencyMyr=%d" %
+<                 application.controller.inventory.checkpointFrequencyMyr)
+---
+>             print >> stream, ("monitoringFrequency=%d" %
+>                 application.controller.inventory.monitoringFrequency)
+>             print >> stream, ("checkpointFrequency=%d" %
+>                 application.controller.inventory.checkpointFrequency)
+150,151d145
+<             self.last_output_time = self.t
+<             self.last_checkpoint_time = self.t
+154,155d147
+<             self.last_output_time = 0.
+<             self.last_checkpoint_time = 0.
+251c243
+<     def save(self, monitoringFrequencyMyr):
+---
+>     def save(self, monitoringFrequency):
+260,269c252
+<         #if not (step % monitoringFrequency):
+<         #    output(self.all_variables, step)
+< 
+<         # output IC
+<         if (step==0):
+<             output(self.all_variables, step)
+<             self.last_output_time = self.t
+<             
+<         tdiff = (self.t - self.last_output_time)*self.inventory.const.inventory.radius**2/self.inventory.const.inventory.thermdiff / (3.15569e7*1e6)
+<         if (tdiff >= monitoringFrequencyMyr):
+---
+>         if not (step % monitoringFrequency):
+271d253
+<             self.last_output_time = self.t
+277c259
+<     def checkpoint(self, checkpointFrequencyMyr):
+---
+>     def checkpoint(self, checkpointFrequency):
+280,283c262
+<         #if not (step % checkpointFrequency):
+<         #    output_checkpoint(self.all_variables)
+<         tdiff = (self.t - self.last_checkpoint_time)*self.inventory.const.inventory.radius**2/self.inventory.const.inventory.thermdiff / (3.15569e7*1e6)
+<         if (tdiff >= checkpointFrequencyMyr):
+---
+>         if not (step % checkpointFrequency):
+285,286d263
+<             self.last_checkpoint_time = self.t
+<         
+diff -r src_rakib/lib/Advection_diffusion.c legacy/release/CitcomS-assim-r88-source/lib/Advection_diffusion.c
+782,783c782,783
+<     int e, ez, i;
+<     double visc, temp, matprop;
+---
+>     int e, i;
+>     double visc, temp;
+793,796d792
+<         ez = (e - 1) % E->lmesh.elz + 1;
+<         matprop = 0.5
+<             * (E->refstate.dis[ez] +
+<                E->refstate.dis[ez + 1]);       
+801c797
+<         heating[e] = matprop * temp * visc * strain_sqr[e];
+---
+>         heating[e] = temp * visc * strain_sqr[e];
+820c816
+<         matprop = 0.0625
+---
+>         matprop = 0.125
+823,824d818
+<             * (E->refstate.dis[ez] +
+<                E->refstate.dis[ez + 1])
+856c850
+<         matprop = 0.0625
+---
+>         matprop = 0.125
+859,860d852
+<             * (E->refstate.dis[ez] +
+<                E->refstate.dis[ez + 1])            
+diff -r src_rakib/lib/composition_related.h legacy/release/CitcomS-assim-r88-source/lib/composition_related.h
+1,33c1,33
+< /*
+<  *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ *
+<  *<LicenseText>
+<  *
+<  * CitcomS by Louis Moresi, Shijie Zhong, Lijie Han, Eh Tan,
+<  * Clint Conrad, Michael Gurnis, and Eun-seo Choi.
+<  * Copyright (C) 1994-2005, California Institute of Technology.
+<  *
+<  * This program is free software; you can redistribute it and/or modify
+<  * it under the terms of the GNU General Public License as published by
+<  * the Free Software Foundation; either version 2 of the License, or
+<  * (at your option) any later version.
+<  *
+<  * This program is distributed in the hope that it will be useful,
+<  * but WITHOUT ANY WARRANTY; without even the implied warranty of
+<  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+<  * GNU General Public License for more details.
+<  *
+<  * You should have received a copy of the GNU General Public License
+<  * along with this program; if not, write to the Free Software
+<  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+<  *
+<  *</LicenseText>
+<  *
+<  *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
+< 
+< 
+< void composition_input(struct All_variables *E);
+< void composition_setup(struct All_variables *E);
+< void write_composition_instructions(struct All_variables *E);
+< void fill_composition(struct All_variables *E);
+< void get_bulk_composition(struct All_variables *E);
+< void map_composition_to_nodes(struct All_variables *E);
+---
+> /*
+>  *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ *
+>  *<LicenseText>
+>  *
+>  * CitcomS by Louis Moresi, Shijie Zhong, Lijie Han, Eh Tan,
+>  * Clint Conrad, Michael Gurnis, and Eun-seo Choi.
+>  * Copyright (C) 1994-2005, California Institute of Technology.
+>  *
+>  * This program is free software; you can redistribute it and/or modify
+>  * it under the terms of the GNU General Public License as published by
+>  * the Free Software Foundation; either version 2 of the License, or
+>  * (at your option) any later version.
+>  *
+>  * This program is distributed in the hope that it will be useful,
+>  * but WITHOUT ANY WARRANTY; without even the implied warranty of
+>  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+>  * GNU General Public License for more details.
+>  *
+>  * You should have received a copy of the GNU General Public License
+>  * along with this program; if not, write to the Free Software
+>  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+>  *
+>  *</LicenseText>
+>  *
+>  *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
+> 
+> 
+> void composition_input(struct All_variables *E);
+> void composition_setup(struct All_variables *E);
+> void write_composition_instructions(struct All_variables *E);
+> void fill_composition(struct All_variables *E);
+> void get_bulk_composition(struct All_variables *E);
+> void map_composition_to_nodes(struct All_variables *E);
+diff -r src_rakib/lib/convection_variables.h legacy/release/CitcomS-assim-r88-source/lib/convection_variables.h
+45d44
+<   char  blob_profile[256];
+47,53d45
+<   
+<   float silo_base_center[3];
+<   float silo_radius;
+<   float silo_cylinder_height;
+<   float silo_dT;
+<   float mantle_temp_adiabatic_increase;
+<   char  silo_profile[256];
+diff -r src_rakib/lib/global_defs.h legacy/release/CitcomS-assim-r88-source/lib/global_defs.h
+637,658d636
+< 
+< /*-----------------------------------------------------------------------------
+<  * Shell-output facility
+<  *-----------------------------------------------------------------------------*/
+< typedef struct ShellData_t{
+<     int ts;
+< 
+<     float *theta;
+<     float *phi;
+<     float *r;
+<     float *temperature;
+<     float *vr;
+< }ShellData;
+< 
+< typedef struct ShellOutput_t{
+<     ShellData **sd;
+< 
+<     int initialized;
+<     int save_count;
+<     int skip_count;
+< }ShellOutput;
+< 
+712,721d689
+< 
+<   /*-----------------------------------------------------------------------------
+<    * Shell output 
+<    *-----------------------------------------------------------------------------*/
+<   int output_num_shells;
+<   int output_shell_rids[20];
+<   int output_shell_num_buffered_timesteps;
+<   int output_shell_every;
+< 
+<   ShellOutput so;
+844d811
+<     double *Tslabs[NCS],*Tslabs_stencil[NCS];
+diff -r src_rakib/lib/Initial_temperature.c legacy/release/CitcomS-assim-r88-source/lib/Initial_temperature.c
+32d31
+< #include <float.h>
+140,142c139
+<     case 2: 
+<     case 200:			
+<     case 201:     /* blob */
+---
+>     case 2:			/* blob */
+156d152
+<       input_string("blob_profile", E->convection.blob_profile, "default", m);
+161,199d156
+<     case 400:     /* silo */
+<       if( ! input_float_vector("silo_base_center", 3, E->convection.silo_base_center, m)) {
+< 	assert( E->sphere.caps == 12 || E->sphere.caps == 1 );
+< 	if(E->sphere.caps == 12) { /* Full version: just quit here */
+< 	  fprintf(stderr,"Missing input parameter: 'silo_base_center'.\n");
+< 	  parallel_process_termination();
+< 	}
+< 	else if(E->sphere.caps == 1) { /* Regional version: put the blob at the center */
+< 	  fprintf(stderr,"Missing input parameter: 'silo_base_center'. The silo will be placed at the center of the domain.\n");
+< 	  E->convection.silo_base_center[0] = 0.5*(E->control.theta_min+E->control.theta_max);
+< 	  E->convection.silo_base_center[1] = 0.5*(E->control.fi_min+E->control.fi_max);
+< 	  E->convection.silo_base_center[2] = 0.5*(E->sphere.ri+E->sphere.ro);
+< 	}
+<       }
+<       input_string("silo_profile", E->convection.silo_profile, "default", m);
+<       input_float("silo_radius", &(E->convection.silo_radius), "0.063,0.0,1.0", m);
+<       input_float("silo_cylinder_height", &(E->convection.silo_cylinder_height), "0.0784,0.0,1.0", m);
+<       input_float("silo_dT", &(E->convection.silo_dT), "0.18,nomin,nomax", m);
+<       break;      
+<     case 401:     /* silo with adiabatic profile*/
+<       if( ! input_float_vector("silo_base_center", 3, E->convection.silo_base_center, m)) {
+< 	assert( E->sphere.caps == 12 || E->sphere.caps == 1 );
+< 	if(E->sphere.caps == 12) { /* Full version: just quit here */
+< 	  fprintf(stderr,"Missing input parameter: 'silo_base_center'.\n");
+< 	  parallel_process_termination();
+< 	}
+< 	else if(E->sphere.caps == 1) { /* Regional version: put the blob at the center */
+< 	  fprintf(stderr,"Missing input parameter: 'silo_base_center'. The silo will be placed at the center of the domain.\n");
+< 	  E->convection.silo_base_center[0] = 0.5*(E->control.theta_min+E->control.theta_max);
+< 	  E->convection.silo_base_center[1] = 0.5*(E->control.fi_min+E->control.fi_max);
+< 	  E->convection.silo_base_center[2] = 0.5*(E->sphere.ri+E->sphere.ro);
+< 	}
+<       }
+<       input_string("silo_profile", E->convection.silo_profile, "default", m);
+<       input_float("silo_radius", &(E->convection.silo_radius), "0.063,0.0,1.0", m);
+<       input_float("silo_cylinder_height", &(E->convection.silo_cylinder_height), "0.0784,0.0,1.0", m);
+<       input_float("silo_dT", &(E->convection.silo_dT), "0.18,nomin,nomax", m);    
+<       input_float("mantle_temp_adiabatic_increase", &(E->convection.mantle_temp_adiabatic_increase), "0.3,nomin,nomax", m);    
+<     break;
+335d273
+<       /*E->Tslabs[m][i] = max(0.0,min(g,1.0)); */
+461,485d398
+< static void add_mantle_adiabatic_increase(struct All_variables *E, 
+<                                           double increase)
+< {
+<     int m, i, j, k, node;
+<     int nox, noy, noz;
+<     double r1;
+<     double minr, maxr;
+< 
+<     nox = E->lmesh.nox;
+<     noy = E->lmesh.noy;
+<     noz = E->lmesh.noz;
+< 
+<     double rlen = E->sphere.ro-E->sphere.ri;
+<     for(m=1; m<=E->sphere.caps_per_proc; m++)
+<         for(i=1; i<=noy; i++)
+<             for(j=1; j<=nox;j ++)
+<                 for(k=1; k<=noz; k++) {
+<                     node = k + (j-1)*noz + (i-1)*nox*noz;
+<                     r1 = E->sx[m][3][node] - E->sphere.ri;
+<                     
+<                     E->T[m][node] += increase * (rlen-r1) / rlen;
+<                 }    
+< 
+<     return;
+< }
+625,632d537
+<     typedef enum PROFILE_t
+<     {
+<         DEFAULT,
+<         CONSTANT,
+<         GAUSSIAN1,
+<         GAUSSIAN2
+<     }PROFILE;
+< 
+640,650d544
+<     char *profileStr = NULL;
+<     PROFILE profile;
+< 
+<     profileStr   = E->convection.blob_profile;
+< 
+<     if(!strcasecmp(profileStr, "default"))              profile = DEFAULT;
+<     else if(!strcasecmp(profileStr, "constant"))        profile = CONSTANT;
+<     else if(!strcasecmp(profileStr, "gaussian1"))       profile = GAUSSIAN1;
+<     else if(!strcasecmp(profileStr, "gaussian2"))       profile = GAUSSIAN2;
+<     else assert(0);
+< 
+665c559
+< 
+---
+>     
+684,698c578
+<               switch (profile)
+<               {
+<                   case DEFAULT:
+< 		            E->T[m][node] += amp * exp(-1.0*distance/radius);
+<                   break;
+<                   case CONSTANT:
+< 		            E->T[m][node] += amp;
+<                   break;
+<                   case GAUSSIAN1:
+<                     E->T[m][node] += amp * exp(-1.0*pow(distance/radius,2.));
+<                   break;
+<                   case GAUSSIAN2:
+<                     E->T[m][node] += amp * (1-pow(distance/radius,2.)) * exp(-1.0*pow(distance/radius,2.));
+<                   break;
+<               };
+---
+> 		      E->T[m][node] += amp * exp(-1.0*distance/radius);
+714,884d593
+< static void vrtp2vxyz(double vr, double vtheta, double vphi, double r, double theta, double phi, double *vxyz)
+< {
+<     double sinTheta = sin(theta);
+<     double cosTheta = cos(theta);
+<     
+<     double sinPhi = sin(phi);
+<     double cosPhi = cos(phi);
+< 
+<     vxyz[0] = sinTheta*cosPhi*vr + cosTheta*cosPhi*vtheta - sinPhi*vphi;
+<     vxyz[1] = sinTheta*sinPhi*vr + cosTheta*sinPhi*vtheta + cosPhi*vphi;
+<     vxyz[2] = cosTheta*vr - sinTheta*vtheta;
+< }
+< 
+< static double is_within_silo(double *base_center, double *top_center, double length_sq, double radius_sq, double *test_point)
+< {
+<     double dx, dy, dz;       // vector d from base_center to top_center
+<     double pdx, pdy, pdz;    // vector pd from base_center to test point
+<     double dot, dsq;
+< 
+<     dx = top_center[0] - base_center[0]; 
+<     dy = top_center[1] - base_center[1];
+<     dz = top_center[2] - base_center[2];
+< 
+<     pdx = test_point[0] - base_center[0]; // vector from base_center to test point.
+<     pdy = test_point[1] - base_center[1];
+<     pdz = test_point[2] - base_center[2];
+< 
+<     // Dot the d and pd vectors to see if point lies behind the 
+<     // cylinder cap at base_center
+< 
+<     dot = pdx * dx + pdy * dy + pdz * dz;
+< 
+<     // If dot is less than zero the point is behind the pt1 cap.
+<     // If greater than the cylinder axis line segment length squared
+<     // then the point is outside the other end cap at pt2.
+< 
+<     if( dot < 0.0f)
+<     {
+<         return( -1.0f );
+<     }
+<     else if( dot > length_sq ) // Above top_center
+<     {
+<         double hemisphere_dist_sq;
+<         double tdx, tdy, tdz;  // vector pd from top_center to test point
+<         tdx = test_point[0] - top_center[0];
+<         tdy = test_point[1] - top_center[1];
+<         tdz = test_point[2] - top_center[2];
+<         
+<         hemisphere_dist_sq = tdx*tdx + tdy*tdy + tdz*tdz;
+<         if(hemisphere_dist_sq > radius_sq) return -1.0f;
+<         else return sqrt(hemisphere_dist_sq);
+<     }
+<     else 
+<     {
+<         // Point lies within the parallel caps, so find
+<         // distance squared from point to line, using the fact that sin^2 + cos^2 = 1
+<         // the dot = cos() * |d||pd|, and cross*cross = sin^2 * |d|^2 * |pd|^2
+<         // Carefull: '*' means mult for scalars and dotproduct for vectors
+<         // In short, where dist is pt distance to cyl axis: 
+<         // dist = sin( pd to d ) * |pd|
+<         // distsq = dsq = (1 - cos^2( pd to d)) * |pd|^2
+<         // dsq = ( 1 - (pd * d)^2 / (|pd|^2 * |d|^2) ) * |pd|^2
+<         // dsq = pd * pd - dot * dot / lengthsq
+<         //  where lengthsq is d*d or |d|^2 that is passed into this function 
+< 
+<         // distance squared to the cylinder axis:
+< 
+<         dsq = (pdx*pdx + pdy*pdy + pdz*pdz) - dot*dot/length_sq;
+< 
+<         if( dsq > radius_sq )
+<         {
+<             return( -1.0f );
+<         }
+<         else
+<         {
+<             return( sqrt(dsq) );
+<         }
+<     }    
+< }
+< 
+< static void add_silo_anomaly(struct All_variables *E)
+< {
+<     typedef enum PROFILE_t
+<     {
+<         DEFAULT,
+<         CONSTANT,
+<         GAUSSIAN1,
+<         GAUSSIAN2
+<     }PROFILE;
+< 
+<     int i, j ,k , m, node;
+<     int nox, noy, noz;
+< 
+<     double theta_center, fi_center, r_center,x_center[4],dx[4];
+<     double cylinder_base_center_cart[3], normal[3], axis_unit_vector_cart[3];
+<     double cylinder_top_center_cart[3], test_point[3];
+<     double radius, height, amp, r1,rout,rin;
+<     const double e_4 = 1e-4;
+<     double distance;
+<     char *profileStr = NULL;
+<     PROFILE profile;
+< 
+<     profileStr   = E->convection.silo_profile;
+< 
+<     if(!strcasecmp(profileStr, "default"))              profile = DEFAULT;
+<     else if(!strcasecmp(profileStr, "constant"))        profile = CONSTANT;
+<     else if(!strcasecmp(profileStr, "gaussian1"))       profile = GAUSSIAN1;
+<     else if(!strcasecmp(profileStr, "gaussian2"))       profile = GAUSSIAN2;
+<     else assert(0);
+< 
+< 
+<     noy = E->lmesh.noy;
+<     nox = E->lmesh.nox;
+<     noz = E->lmesh.noz;
+< 
+<     rout = E->sphere.ro;
+<     rin = E->sphere.ri;
+< 
+< 
+<     theta_center        = E->convection.silo_base_center[0];
+<     fi_center           = E->convection.silo_base_center[1];
+<     r_center            = E->convection.silo_base_center[2];
+<     radius              = E->convection.silo_radius;
+<     height              = E->convection.silo_cylinder_height;
+<     amp                 = E->convection.silo_dT;
+< 
+<     rtp2xyzd(r_center, theta_center, fi_center, cylinder_base_center_cart);
+<     vrtp2vxyz(1., 0, 0, r_center, theta_center, fi_center, axis_unit_vector_cart);
+<     
+<     for(i=0; i<3; i++) cylinder_top_center_cart[i] = cylinder_base_center_cart[i] + axis_unit_vector_cart[i]*height;
+< 
+<     if(E->parallel.me == 0)
+<       fprintf(stderr,"center=(%e %e %e) radius=%e dT=%e\n",
+< 	      theta_center, fi_center, r_center, radius, amp);
+<     
+<     rtp2xyzd(r_center, theta_center, fi_center, (x_center+1));
+< 
+<     /* compute temperature field according to nodal coordinate */
+<     for(m=1; m<=E->sphere.caps_per_proc; m++)
+<         for(i=1; i<=noy; i++)
+<             for(j=1; j<=nox;j ++)
+<                 for(k=1; k<=noz; k++) {
+<                     node = k + (j-1)*noz + (i-1)*nox*noz;
+< 
+<                     test_point[0] = E->x[m][1][node];
+<                     test_point[1] = E->x[m][2][node];
+<                     test_point[2] = E->x[m][3][node];
+< 
+<                     distance = is_within_silo( cylinder_base_center_cart, cylinder_top_center_cart, 
+<                                                height*height, radius*radius, test_point);
+<                     if (distance > -1.0f){
+<               switch (profile)
+<               {
+<                   case DEFAULT:
+< 		            E->T[m][node] += amp * exp(-1.0*distance/radius);
+<                   break;
+<                   case CONSTANT:
+< 		            E->T[m][node] += amp;
+<                   break;
+<                   case GAUSSIAN1:
+<                     E->T[m][node] += amp * exp(-1.0*pow(distance/radius,2.));
+<                   break;
+<                   case GAUSSIAN2:
+<                     E->T[m][node] += amp * (1-pow(distance/radius,2.)) * exp(-1.0*pow(distance/radius,2.));
+<                   break;
+<               };
+< 
+< 		    }
+<                 }
+<     return;
+< }
+889d597
+<     double mantle_temp_adiabatic_increase;
+913,947d620
+<      
+<      case 200:
+<         /*  T='mantle_temp' for whole mantle + cold lithosphere TBL + hot CMB TBL
+<             + a spherical anomaly at lower center */
+<         mantle_temperature = E->control.mantle_temp;
+<         constant_temperature_profile(E, mantle_temperature);
+<         add_top_tbl(E, E->convection.half_space_age, mantle_temperature);
+<         add_bottom_tbl(E, E->convection.half_space_age, mantle_temperature);
+<         add_spherical_anomaly(E);
+<      break;
+<      
+<      case 400:
+<         /*  T='mantle_temp' for whole mantle + cold lithosphere TBL + hot CMB TBL
+<             + a silo-shaped anomaly at lower center */
+<         mantle_temperature = E->control.mantle_temp;
+<         constant_temperature_profile(E, mantle_temperature);
+<         add_top_tbl(E, E->convection.half_space_age, mantle_temperature);
+<         add_bottom_tbl(E, E->convection.half_space_age, mantle_temperature);
+<         add_silo_anomaly(E);
+<      break;
+< 
+<      case 401:
+<         /* This is similar to 400, except for a mantle adiabatic profile */
+<         /*  T= mantle-adiabat + cold lithosphere TBL + hot CMB TBL
+<             + a silo-shaped anomaly at lower center */
+<         mantle_temperature = E->control.mantle_temp;
+<         mantle_temp_adiabatic_increase = E->convection.mantle_temp_adiabatic_increase;
+< 
+<         /* Sanity-check */
+<         if((mantle_temp_adiabatic_increase > (E->control.TBCbotval - E->control.TBCtopval)) ||
+<            ((mantle_temp_adiabatic_increase/2. + mantle_temperature) > E->control.TBCbotval))
+<         {
+< 	        fprintf(stderr,"Invalid input parameter: 'mantle_temp_adiabatic_increase'.\n");
+<             parallel_process_termination();
+<         }
+949,963d621
+<         constant_temperature_profile(E, mantle_temperature - mantle_temp_adiabatic_increase/2.);
+<         add_mantle_adiabatic_increase( E, mantle_temp_adiabatic_increase );
+<         add_top_tbl(E, E->convection.half_space_age, mantle_temperature - mantle_temp_adiabatic_increase/2.);
+<         add_bottom_tbl(E, E->convection.half_space_age, mantle_temperature + mantle_temp_adiabatic_increase/2.);
+<         add_silo_anomaly(E);
+<      break;
+<      
+<      case 201:
+<         /*  T='mantle_temp' for whole mantle
+<             + a spherical anomaly at lower center */
+<         mantle_temperature = E->control.mantle_temp;
+<         constant_temperature_profile(E, mantle_temperature);
+<         add_spherical_anomaly(E);
+<      break;
+<     
+diff -r src_rakib/lib/Material_properties.c legacy/release/CitcomS-assim-r88-source/lib/Material_properties.c
+63,65d62
+<     
+<     /* disspipation scaling */
+<     E->refstate.dis = (double *) malloc((noz+1)*sizeof(double));
+107c104
+<       fprintf(stderr, "   nz     radius      depth    rho              dis           layer\n");      
+---
+>       fprintf(stderr, "   nz     radius      depth    rho              layer\n");
+111,112c108
+<             fprintf(stderr, "%4d %11f %11f %11e %e %4i\n",
+< 
+---
+>             fprintf(stderr, "%6d %11f %11f %11e %5i\n",
+114c110
+<                     E->refstate.rho[i], E->refstate.dis[i], layers_r(E,E->sx[1][3][i]));
+---
+>                     E->refstate.rho[i],layers_r(E,E->sx[1][3][i]));
+147d142
+<                   &(E->refstate.dis[i]),
+149c144,145
+<                   &not_used2) != 7) {
+---
+>                   &not_used2,
+>                   &not_used3) != 7) {
+182d177
+< 	E->refstate.dis[i] = 1;
+269d263
+< 	E->refstate.dis[i] = 1;
+diff -r src_rakib/lib/Output.c legacy/release/CitcomS-assim-r88-source/lib/Output.c
+112,139d111
+< 
+<     
+<     /*-----------------------------------------------------------------------------
+<      * Initialize shell-output
+<      *-----------------------------------------------------------------------------*/
+<     if((E->output.so.initialized==0) && (E->output.output_num_shells>0))
+<     {
+<         int i=0,j=0;
+<         E->output.so.sd = (ShellData**)malloc(sizeof(ShellData*)*E->output.output_num_shells);
+<         for(i=0; i<E->output.output_num_shells; i++)
+<         {
+<             E->output.so.sd[i] = (ShellData*)malloc(sizeof(ShellData)*E->output.output_shell_num_buffered_timesteps);
+<         }
+< 
+<         for(i=0; i<E->output.output_num_shells; i++)
+<         {
+<             for(j=0; j<E->output.output_shell_num_buffered_timesteps; j++)
+<             {
+<                 E->output.so.sd[i][j].theta          = (float*) malloc(sizeof(float)*E->lmesh.nsf);
+<                 E->output.so.sd[i][j].phi            = (float*) malloc(sizeof(float)*E->lmesh.nsf);
+<                 E->output.so.sd[i][j].r              = (float*) malloc(sizeof(float)*E->lmesh.nsf);
+<                 E->output.so.sd[i][j].temperature    = (float*) malloc(sizeof(float)*E->lmesh.nsf);
+<                 E->output.so.sd[i][j].vr             = (float*) malloc(sizeof(float)*E->lmesh.nsf);
+<             }
+<         }
+<         E->output.so.initialized = 1;
+<     }
+<     
+251,340d222
+< void output_shell(struct All_variables *E, int cycles)
+< {
+<     int i=0, j=0, c=0;
+<     int proc = E->parallel.me;
+<     
+<     if(E->output.output_num_shells == 0) return;
+< 
+<     if(cycles!=0)
+<     {
+<         if(E->output.so.skip_count < E->output.output_shell_every)
+<         {
+<             E->output.so.skip_count++;
+<             return;
+<         }
+<         else
+<         {
+<             E->output.so.skip_count=0;
+<         }
+<     }
+< 
+<     for(i=0; i<E->output.output_num_shells; i++)
+<     {
+<         E->output.so.sd[i][E->output.so.save_count].ts = cycles;
+<     }
+< 
+<     for(c=0; c<E->output.output_num_shells; c++)
+<     {
+<         for(j=1;j<=E->sphere.caps_per_proc;j++)  
+<         {
+<             int count = 0;
+<             for(i=1;i<=E->lmesh.nno;i++)   
+<             {
+<                 if(fabs(E->sphere.gr[E->output.output_shell_rids[c]+1] - E->sx[j][3][i]) < 0.0001)
+<                 {
+<                     E->output.so.sd[c][E->output.so.save_count].theta[count]          = E->sx[j][1][i];
+<                     E->output.so.sd[c][E->output.so.save_count].phi[count]            = E->sx[j][2][i];
+<                     E->output.so.sd[c][E->output.so.save_count].r[count]              = E->sx[j][3][i];
+<                     E->output.so.sd[c][E->output.so.save_count].temperature[count]    = E->T[j][i];
+<                     E->output.so.sd[c][E->output.so.save_count].vr[count]             = E->sphere.cap[j].V[3][i];
+< 
+<                     count++;
+<                 }
+<             }
+< 
+<             if((count>0) && (count!=E->lmesh.nsf))
+<             {
+<                 fprintf(stderr, "Number of shell-nodes mismatch detected..! Aborting.. %d %d\n",
+<                         count, E->lmesh.nsf);
+<                 parallel_process_termination();
+<             }        
+<         }
+<     }
+<     
+<     E->output.so.save_count++;
+< 
+<     if(E->output.so.save_count == E->output.output_shell_num_buffered_timesteps)
+<     {
+<         int k=0, m=0;
+<                 
+<         /*-----------------------------------------------------------------------------
+<          * Save shells
+<          *-----------------------------------------------------------------------------*/
+<         for(k=0; k<E->output.so.save_count; k++)
+<         {
+<             char output_file[255];
+<             FILE *fp1;
+<             sprintf(output_file,"%s.shell.%d.%d", E->control.data_file,
+<                     proc, E->output.so.sd[0][k].ts);
+<             fp1 = output_open(output_file, "w");
+< 
+<             for(c=0; c<E->output.output_num_shells; c++)
+<             {
+<                 for(m=0; m<E->lmesh.nsf; m++)
+<                 {
+<                     fprintf(fp1,"%.6e %.6e %.6e %.6e %.6e\n",   E->output.so.sd[c][k].theta[m], 
+<                                                                 E->output.so.sd[c][k].phi[m],
+<                                                                 E->output.so.sd[c][k].r[m],
+<                                                                 E->output.so.sd[c][k].temperature[m],
+<                                                                 E->output.so.sd[c][k].vr[m]);
+<                 }
+<             }
+< 
+<             fclose(fp1);            
+<         }
+< 
+<         E->output.so.save_count = 0;
+<     }
+< 
+<     return;
+< }
+1238,1239d1119
+<   output_shell(E, cycles);
+< 
+diff -r src_rakib/lib/Viscosity_structures.c legacy/release/CitcomS-assim-r88-source/lib/Viscosity_structures.c
+1002,1213d1001
+<     case 112:
+<         /* 
+<          * if(layer==3): factor = vRef * 0.5 * math.pow(10, (4*zzz/(router-rinner)-0.5))
+<          * else        : factor = vRef*v0[idx];
+<          *
+<          * eta = N_0(r) * factor * exp(E/(T+T_0) - E/(0.5+T_0)) 
+<            where T is normalized to be within 0...1
+<          */
+<         for(m=1;m<=E->sphere.caps_per_proc;m++)
+<             for(i=1;i<=nel;i++)   {
+<                 l = E->mat[m][i] - 1;
+< 
+<                 if(E->control.mat_control) /* switch moved up here TWB */
+<                   tempa = E->viscosity.N0[l] * E->VIP[m][i];
+<                 else
+<                   tempa = E->viscosity.N0[l];
+< 
+<                 for(kk=1;kk<=ends;kk++) {
+<                   TT[kk] = E->T[m][E->ien[m][i].node[kk]];
+<                   zz[kk] = (1.-E->sx[m][3][E->ien[m][i].node[kk]]);
+<                 }
+< 
+<                 for(jj=1;jj<=vpts;jj++) {
+<                     temp=0.0;
+<                     zzz=0.0;
+<                     for(kk=1;kk<=ends;kk++)   { 
+<                       TT[kk]=max(TT[kk],zero);
+<                       temp += min(TT[kk],one) * E->N.vpt[GNVINDEX(kk,jj)];
+< 		      zzz += zz[kk] * E->N.vpt[GNVINDEX(kk,jj)];
+<                     }
+< 
+<                     if(l==3) {
+<                          tempa = 0.5 * pow(10, (4*zzz/(E->sphere.ro-E->sphere.ri)-0.5));
+<                      }
+< 
+<                     EEta[m][ (i-1)*vpts + jj ] = tempa*
+<                       exp( E->viscosity.E[l]/(temp+E->viscosity.T[l])
+<                            - E->viscosity.E[l]/(0.5 +E->viscosity.T[l]) );
+<                 }
+<             }
+<         break;
+<     
+< 
+<     case 113:
+<         {
+<         double Zmax = 10.5;
+<         double Zmin = 2.25;
+<         double Zavg = (Zmax-Zmin)/2.;
+<         double l3Const = 0.85;
+<         double l012Const = 2.5;
+<         /* Z = [0.5..7] (Linear increase in LM viscosity with depth, otherwise 0)
+<          * eta = N_0(r) * v0[idx] * exp((E+Z)/(T+T_0) - (E+max(Z))/(0.7+T_0)) 
+<          * where T is normalized to be within 0...1
+<          */
+<         for(m=1;m<=E->sphere.caps_per_proc;m++)
+<             for(i=1;i<=nel;i++)   {
+<                 l = E->mat[m][i] - 1;
+< 
+<                 if(E->control.mat_control) /* switch moved up here TWB */
+<                   tempa = E->viscosity.N0[l] * E->VIP[m][i];
+<                 else
+<                   tempa = E->viscosity.N0[l];
+< 
+<                 for(kk=1;kk<=ends;kk++) {
+<                   TT[kk] = E->T[m][E->ien[m][i].node[kk]];
+<                   zz[kk] = (1.-E->sx[m][3][E->ien[m][i].node[kk]]);
+<                 }
+< 
+<                 for(jj=1;jj<=vpts;jj++) {
+<                     temp=0.0;
+<                     zzz=0.0;
+<                     for(kk=1;kk<=ends;kk++)   { 
+<                       TT[kk]=max(TT[kk],zero);
+<                       temp += min(TT[kk],one) * E->N.vpt[GNVINDEX(kk,jj)];
+< 		      zzz += zz[kk] * E->N.vpt[GNVINDEX(kk,jj)];
+<                     }
+<                     
+<                     if(l==3) {
+<                         double Zr = 0.;
+<                         double result = 0;
+< 
+<                         Zr = Zmin + (Zmax-Zmin)*(zzz-E->viscosity.zbase_layer[l-1])/(E->viscosity.zbase_layer[l]-E->viscosity.zbase_layer[l-1]);
+< 
+<                         result =
+<                                   exp( (E->viscosity.E[l]+Zr) /(temp+E->viscosity.T[l])
+<                                   - (E->viscosity.E[l]+Zmax)/(l3Const +E->viscosity.T[l]) );
+< 
+<                         //if(zzz>0.44) result = max(min(result, 100),5); /* clip visc near the ltbl */
+<                         if(zzz>0.43) result = max(min(result, 100),20); /*  clip visc near the ltbl */
+<                         
+<                         EEta[m][ (i-1)*vpts + jj ] = result;
+<                      }
+<                      else{
+<                         EEta[m][ (i-1)*vpts + jj ] = 
+<                                   exp( E->viscosity.E[l]/(temp+E->viscosity.T[l])
+<                                   - (E->viscosity.E[l]+Zavg)/(l012Const +E->viscosity.T[l]) );
+<                      }
+<                 }
+<             }
+<         }
+<         break;
+<     case 117:
+<         {
+<             double result = 0;
+<         /*
+<          * This is similar to rheol 7
+<          * vRef*v0[idx] * math.exp( (vE[idx] + (vZ[idx]*(ir)))/(t[i] + vT[idx]) - \
+<          *                                  (vE[idx] + (vZ[idx]*(max(r))))/(1 + vT[idx]) ) )
+<          */
+<         for(m=1;m<=E->sphere.caps_per_proc;m++)
+<             for(i=1;i<=nel;i++)   {
+<                 l = E->mat[m][i] - 1;
+< 
+<                 if(E->control.mat_control) /* switch moved up here TWB */
+<                   tempa = E->viscosity.N0[l] * E->VIP[m][i];
+<                 else
+<                   tempa = E->viscosity.N0[l];
+< 
+<                 for(kk=1;kk<=ends;kk++) {
+<                   TT[kk] = E->T[m][E->ien[m][i].node[kk]];
+<                   zz[kk] = (1.-E->sx[m][3][E->ien[m][i].node[kk]]);
+<                 }
+< 
+<                 for(jj=1;jj<=vpts;jj++) {
+<                     temp=0.0;
+<                     zzz=0.0;
+<                     for(kk=1;kk<=ends;kk++)   { 
+<                       TT[kk]=max(TT[kk],zero);
+<                       temp += min(TT[kk],one) * E->N.vpt[GNVINDEX(kk,jj)];
+< 		      zzz += zz[kk] * E->N.vpt[GNVINDEX(kk,jj)];
+<                     }
+<                     
+< 
+<                     result = E->viscosity.N0[l] * 
+<                              exp( ( E->viscosity.E[l] + E->viscosity.Z[l]*zzz ) / (temp + E->viscosity.T[l]) 
+<                                   - ( E->viscosity.E[l] + E->viscosity.Z[l]*(E->sphere.ro - E->sphere.ri) ) / (1 + E->viscosity.T[l]) );
+< 
+<                     //if(zzz>0.43) result = max(min(result, 100),20); /* clip visc near the ltbl */
+<                     
+<                     //if(zzz>0.43) result = max(result, 1); /*  clip visc near the ltbl */
+<                     if(zzz<0.06) result = min(result, 1); /*  clip visc near the utbl */
+< 
+<                     EEta[m][ (i-1)*vpts + jj ] = result;
+<                  }
+<             }
+<         }
+<         break;
+< 
+< 
+<     case 118:
+<         {
+<             double result = 0;
+<         /*
+<          * This is similar to rheol 7
+<          * vRef*v0[idx] * math.exp( (vE[idx] + (vZ[idx]*(ir)))/(t[i] + vT[idx]) - \
+<          *                                  (vE[idx] + (vZ[idx]*(max(r))))/(1 + vT[idx]) ) )
+<          */
+<         for(m=1;m<=E->sphere.caps_per_proc;m++)
+<             for(i=1;i<=nel;i++)   {
+<                 l = E->mat[m][i] - 1;
+< 
+<                 if(E->control.mat_control) /* switch moved up here TWB */
+<                   tempa = E->viscosity.N0[l] * E->VIP[m][i];
+<                 else
+<                   tempa = E->viscosity.N0[l];
+< 
+<                 for(kk=1;kk<=ends;kk++) {
+<                   TT[kk] = E->T[m][E->ien[m][i].node[kk]];
+<                   zz[kk] = (1.-E->sx[m][3][E->ien[m][i].node[kk]]);
+<                 }
+< 
+<                 for(jj=1;jj<=vpts;jj++) {
+<                     temp=0.0;
+<                     zzz=0.0;
+<                     for(kk=1;kk<=ends;kk++)   { 
+<                       TT[kk]=max(TT[kk],zero);
+<                       temp += min(TT[kk],one) * E->N.vpt[GNVINDEX(kk,jj)];
+< 		      zzz += zz[kk] * E->N.vpt[GNVINDEX(kk,jj)];
+<                     }
+<                     
+< 
+<                     result = E->viscosity.N0[l] * 
+<                              exp( ( E->viscosity.E[l] + E->viscosity.Z[l]*zzz ) / (temp + E->viscosity.T[l]) 
+<                                   - ( E->viscosity.E[l] + E->viscosity.Z[l]*(E->sphere.ro - E->sphere.ri) ) / (1 + E->viscosity.T[l]) );
+< 
+<                     //if(zzz>0.43) result = max(min(result, 100),20); /* clip visc near the ltbl */
+<                     
+<                     //if(zzz>0.43) result = max(result, 1); /*  clip visc near the ltbl */
+<                     
+< #if 0
+<                     if(zzz<0.06) result = min(result, 1); /*  clip visc near the utbl  - has no effect */
+<                     
+<                     if(zzz<0.015) {
+<                         result = 1. - zzz/0.015; /*   clip visc near the utbl to 21 for warmup runs */
+<                     }
+<                     else if((zzz>=0.015) && (zzz<0.045)) {
+<                         result = 0.1; /*   clip visc near the utbl to 21 for warmup runs */
+<                     }
+< #endif
+< 
+< #if 0
+<                     if(zzz<0.075){
+<                         result = 1. - zzz*zzz/0.075; /*   clip visc near the utbl to 21 for warmup runs*/
+<                     }
+< #endif
+< 
+<                     EEta[m][ (i-1)*vpts + jj ] = result;
+<                  }
+<             }
+<         }
+<         break;
+< 
+diff -r src_rakib/module/setProperties.c legacy/release/CitcomS-assim-r88-source/module/setProperties.c
+164d163
+< 
+282,294d280
+<     getStringProperty(properties, "blob_profile", E->convection.blob_profile, fp);
+< 
+<     getFloatVectorProperty(properties, "silo_base_center", E->convection.silo_base_center, 3, fp);
+<     if( E->convection.silo_base_center[0] == -999.0 && E->convection.silo_base_center[1] == -999.0 && E->convection.silo_base_center[2] == -999.0 ) {
+<         E->convection.silo_base_center[0] = 0.5*(E->control.theta_min+E->control.theta_max);
+<         E->convection.silo_base_center[1] = 0.5*(E->control.fi_min+E->control.fi_max);
+<         E->convection.silo_base_center[2] = 0.5*(E->sphere.ri+E->sphere.ro);
+<     }
+<     getFloatProperty(properties, "silo_radius", E->convection.silo_radius, fp);
+<     getFloatProperty(properties, "silo_cylinder_height", E->convection.silo_cylinder_height, fp);
+<     getFloatProperty(properties, "silo_dT", E->convection.silo_dT, fp);
+<     getStringProperty(properties, "silo_profile", E->convection.silo_profile, fp);    
+<     getFloatProperty(properties, "mantle_temp_adiabatic_increase", E->convection.mantle_temp_adiabatic_increase, fp);
+352,369d337
+< 
+<     /*-----------------------------------------------------------------------------
+<      * Shell-output 
+<      *-----------------------------------------------------------------------------*/
+<     /*-----------------------------------------------------------------------------
+<      * Read shell-data output parameters 
+<      *-----------------------------------------------------------------------------*/
+< 
+<     getIntProperty(properties, "output_num_shells", E->output.output_num_shells, fp);
+<     
+<     getIntVectorProperty(properties, "output_shell_rids", E->output.output_shell_rids, 
+<                          E->output.output_num_shells, fp);
+<     
+<     getIntProperty(properties, "output_shell_num_buffered_timesteps", 
+<                    E->output.output_shell_num_buffered_timesteps, fp);
+<     getIntProperty(properties, "output_shell_every", E->output.output_shell_every, fp);
+< 
+< 

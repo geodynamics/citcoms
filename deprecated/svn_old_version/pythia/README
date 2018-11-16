@@ -1,0 +1,1 @@
+you can copy a version of pythia directly into the deps/ directory if the CitcomS configure returns an error relating to being unable to download packages.  You do not need to process the .tar.gz -- CitcomS does this for you.  DJB (10/09/2017)

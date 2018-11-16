@@ -1,0 +1,25 @@
+#!/usr/bin/env python
+#
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#
+#                             Michael A.G. Aivazis
+#                      California Institute of Technology
+#                      (C) 1998-2005  All Rights Reserved
+#
+# {LicenseText}
+#
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#
+
+
+def renderer(blade):
+    """alias for gnome-2.x"""
+
+    component = blade.retrieveRenderer(toolkit='gnome-2.x', language='viewer')
+    return component
+
+
+# version
+__id__ = "$Id: viewer.odb,v 1.1.1.1 2005/03/08 16:13:56 aivazis Exp $"
+
+# End of file 

@@ -1,0 +1,41 @@
+K 25
+svn:wc:ra_dav:version-url
+V 88
+/svn/cig/!svn/ver/5549/mc/3D/CitcomS/trunk/visual/Mayavi2/citcoms_plugins/plugins/filter
+END
+CitcomSFilterActions.py
+K 25
+svn:wc:ra_dav:version-url
+V 112
+/svn/cig/!svn/ver/5549/mc/3D/CitcomS/trunk/visual/Mayavi2/citcoms_plugins/plugins/filter/CitcomSFilterActions.py
+END
+CitcomSSphere.py
+K 25
+svn:wc:ra_dav:version-url
+V 105
+/svn/cig/!svn/ver/5542/mc/3D/CitcomS/trunk/visual/Mayavi2/citcoms_plugins/plugins/filter/CitcomSSphere.py
+END
+CitcomSshowSurface.py
+K 25
+svn:wc:ra_dav:version-url
+V 110
+/svn/cig/!svn/ver/5542/mc/3D/CitcomS/trunk/visual/Mayavi2/citcoms_plugins/plugins/filter/CitcomSshowSurface.py
+END
+CitcomsCapFilter.py
+K 25
+svn:wc:ra_dav:version-url
+V 108
+/svn/cig/!svn/ver/5549/mc/3D/CitcomS/trunk/visual/Mayavi2/citcoms_plugins/plugins/filter/CitcomsCapFilter.py
+END
+CitcomsReduceFilter.py
+K 25
+svn:wc:ra_dav:version-url
+V 111
+/svn/cig/!svn/ver/5549/mc/3D/CitcomS/trunk/visual/Mayavi2/citcoms_plugins/plugins/filter/CitcomsReduceFilter.py
+END
+__init__.py
+K 25
+svn:wc:ra_dav:version-url
+V 100
+/svn/cig/!svn/ver/5542/mc/3D/CitcomS/trunk/visual/Mayavi2/citcoms_plugins/plugins/filter/__init__.py
+END

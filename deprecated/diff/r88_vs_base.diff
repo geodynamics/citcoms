@@ -1,0 +1,2659 @@
+diff -r CitcomS-assim-r88-source/CitcomS/Components/BC.py ../base/CitcomS-assim-base/CitcomS/Components/BC.py
+52,57d51
+<     # XXX DJB
+<     def updateInternalVelocity(self):
+<         from CitcomSLib import BC_update_internal_velocity
+<         BC_update_internal_velocity(self.all_variables)
+<         return
+< 
+89,90c83,85
+<         # these parameters are for 'lith_age',
+<         # put them here temporalily
+---
+> 
+> 	    # these parameters are for 'lith_age',
+> 	    # put them here temporalily
+diff -r CitcomS-assim-r88-source/CitcomS/Components/Param.py ../base/CitcomS-assim-base/CitcomS/Components/Param.py
+67d66
+<         # XXX DJB
+72,89d70
+<         lith_age_depth_function = pyre.inventory.bool("lith_age_depth_function", default=False)
+<         lith_age_exponent = pyre.inventory.float("lith_age_exponent", default=0.5)
+<         lith_age_stencil_value = pyre.inventory.float("lith_age_stencil_value", default=0.0)
+<         lith_age_min = pyre.inventory.float("lith_age_min", default=0.01)
+< 
+<         # XXX DJB
+<         slab_assim = pyre.inventory.bool("slab_assim", default=False)
+<         slab_assim_file = pyre.inventory.str("slab_assim_file", default="slab.dat")
+<         # slab_assim_time = pyre.inventory.bool("slab_assim_time", default=False)
+< 
+<         # XXX DJB
+<         file_internal_vbcs = pyre.inventory.bool("file_internal_vbcs", default=False)
+<         vel_internal_file = pyre.inventory.str("vel_internal_file", default="ivel.dat")
+< 
+<         # XXX DJB, for dynamic topography restart
+<         exclude_buoy_above_znode = pyre.inventory.bool("exclude_buoy_above_znode", default=False)
+<         exclude_buoy_znode = pyre.inventory.int("exclude_buoy_znode", default=1)
+< 
+diff -r CitcomS-assim-r88-source/CitcomS/Components/Tracer.py ../base/CitcomS-assim-base/CitcomS/Components/Tracer.py
+113,115d112
+<         # DJB
+<         hybrid_method = inv.int("hybrid_method", default=0)
+< 
+diff -r CitcomS-assim-r88-source/CitcomS/Solver/Solver.py ../base/CitcomS-assim-base/CitcomS/Solver/Solver.py
+217d216
+<         # XXX DJB
+219d217
+<         self.inventory.bc.updateInternalVelocity()
+diff -r CitcomS-assim-r88-source/lib/Advection_diffusion.c ../base/CitcomS-assim-base/lib/Advection_diffusion.c
+205d204
+<   void assimilate_slab_conform_bcs();
+252d250
+<         /* XXX DJB - this next line does nothing if lith_age is set */
+313,318d310
+<   if(E->control.slab_assim) {
+<       if(E->parallel.me==0) fprintf(stderr,"Call assimilate_slab_conform_bcs\n");
+<       assimilate_slab_conform_bcs(E);
+<       if(E->parallel.me==0) fprintf(stderr,"Returned from assimilate_slab_conform_bcs\n");
+<   }
+< 
+diff -r CitcomS-assim-r88-source/lib/BC_util.c ../base/CitcomS-assim-base/lib/BC_util.c
+30d29
+< #include "math.h"
+32,154d30
+< void read_internal_velocity_from_file(struct All_variables *);
+< //void get_bcs_id_for_residual();
+< void construct_id();
+< 
+< /* XXX DJB */
+< void internal_velocity_bc(E)
+<      struct All_variables *E;
+< {    int i,j,k,m,level,nodel,node;
+<      int nox1,noy1,noz1;
+<      int nox,noy,noz,levdepth;
+<      // float theta,phi,r;
+< 
+<   /* read internal velocity from file */
+<   /* nodes are ignored with flag !=0 or !=1 */
+<   read_internal_velocity_from_file(E);
+< 
+<   if(E->control.verbose) {
+<       fprintf(E->fp_out,"INSIDE internal_velocity_bc\n");
+<       fflush(E->fp_out);
+<   }
+< 
+<   if(E->parallel.me==0){
+<       fprintf(E->fp,"Internal Velocity: Setting VBX, VBY, VBZ flags\n");
+<       fflush(E->fp);
+<     // fprintf(stderr,"Internal Velocity: Setting VBX, VBY, VBZ flags\n");
+<   }
+< 
+<   /* for debugging */
+<   // fprintf(stderr,"gridmax=%d, gridmin=%d, levmax=%d, levmin=%d\n",E->mesh.gridmax,E->mesh.gridmin,E->mesh.levmax,E->mesh.levmin);
+< 
+<   nox = E->lmesh.nox;
+<   noy = E->lmesh.noy;
+<   noz = E->lmesh.noz;
+< 
+<   // fprintf(stderr,"Internal Velocity: nox=%d, noy=%d, noz=%d\n",nox,noy,noz);
+< 
+<   /* update VBX, VBY, VBZ, SBX, SBY, SBZ flags (at all levels) */
+<   for(level=E->mesh.levmax;level>=E->mesh.levmin;level--) {
+< 
+<     /* for debugging */
+<     // fprintf(stderr,"level=%d, levdepth=%d, nox1=%d, noy1=%d, noz1=%d\n",level,levdepth,nox1,noy1,noz1);
+<     // fprintf(stderr,"level=%d, levdepth=%d, nox=%d, noy=%d, noz=%d\n",level,levdepth,nox,noy,noz);
+< 
+<     // XXX DJB - OPTION 1 - prescribe bcs at all levels
+<     if ( (E->control.CONJ_GRAD && level==E->mesh.levmax) || E->control.NMULTIGRID)  {
+< 
+<     // XXX DJB - OPTION 2 - let's try just prescribing at finest mesh
+<     //if ( level==E->mesh.levmax )  {
+< 
+<       /* `depth' in multigrid */
+<       levdepth = E->mesh.levmax-level;
+< 
+<       nox1 = E->lmesh.NOX[level];
+<       noy1 = E->lmesh.NOY[level];
+<       noz1 = E->lmesh.NOZ[level];
+< 
+<       /* for debugging */
+<       //fprintf(stderr,"level=%d, levdepth=%d, nox=%d, noy=%d, noz=%d\n",level,levdepth,nox,noy,noz);
+<       // fprintf(stderr,"level=%d, levdepth=%d, nox1=%d, noy1=%d, noz1=%d\n",level,levdepth,nox1,noy1,noz1);
+< 
+<       for(m=1;m<=E->sphere.caps_per_proc;m++) {
+<         for(j=1;j<=noy1;j++)
+<           for(i=1;i<=nox1;i++)
+<             for(k=1;k<=noz1;k++) {
+<               nodel = k+(i-1)*noz1+(j-1)*noz1*nox1;
+<               node = 1 + (k-1)*pow(2,levdepth); // for k
+<               node += (i-1)*noz*pow(2,levdepth); // for i
+<               node += (j-1)*noz*nox*pow(2,levdepth); // for j
+< 
+<               /* XXX DJB - debugging */
+<               /* theta = E->SX[level][m][1][nodel];
+<               phi = E->SX[level][m][2][nodel];
+<               r = E->SX[level][m][3][nodel]; */
+< 
+<               /* XXX DJB - debugging */
+<               /* if(E->sphere.cap[m].slab_sten2[node]==1) {
+<                 fprintf(stderr,"%d %d %d %d %d %d %d %d %d %d %f %f %f %d\n",level,m,noy1,nox1,noz1,j,i,k,nodel,node,theta,phi,r,E->sphere.cap[m].slab_sten2[node]);
+<               } */
+< 
+<               if(E->sphere.cap[m].slab_sten2[node]==0) { // turn OFF all velocity and stress BC's
+<                 E->NODE[level][m][nodel] = E->NODE[level][m][nodel] & (~VBX);
+<                 E->NODE[level][m][nodel] = E->NODE[level][m][nodel] & (~VBY);
+<                 E->NODE[level][m][nodel] = E->NODE[level][m][nodel] & (~VBZ);
+<                 E->NODE[level][m][nodel] = E->NODE[level][m][nodel] & (~SBX);
+<                 E->NODE[level][m][nodel] = E->NODE[level][m][nodel] & (~SBY);
+<                 E->NODE[level][m][nodel] = E->NODE[level][m][nodel] & (~SBZ);
+<               }
+<               else if(E->sphere.cap[m].slab_sten2[node]==1) { // turn ON velocity BC's
+< 
+<                 if(E->control.verbose) {
+<                   fprintf(E->fp_out,"Apply internal velocity boundary condition\n");
+<                   fflush(E->fp_out);
+<                 }
+<                 /* for debugging */
+<                 // fprintf(stderr,"Internal Velocity: level=%d, levdepth=%d, m=%d, nodel=%d, node=%d\n",level,levdepth,m,nodel,node);
+<                 E->NODE[level][m][nodel] = E->NODE[level][m][nodel] | (VBX);
+<                 E->NODE[level][m][nodel] = E->NODE[level][m][nodel] | (VBY);
+<                 E->NODE[level][m][nodel] = E->NODE[level][m][nodel] | (VBZ);
+<                 E->NODE[level][m][nodel] = E->NODE[level][m][nodel] & (~SBX);
+<                 E->NODE[level][m][nodel] = E->NODE[level][m][nodel] & (~SBY);
+<                 E->NODE[level][m][nodel] = E->NODE[level][m][nodel] & (~SBZ);
+<               }
+<            /* else */
+<              /* do nothing, leave BC's untouched */
+< 
+<         } /* end i, j, k loop */
+< 
+<         /* this is now done in construct_id */
+<         /* update E->zero_resid which is used by solvers */
+<         //fprintf(stderr,"Internal Velocity: Update E->zero_resid\n"))
+<         // get_bcs_id_for_residual(E,level,m);
+< 
+<       } /* end loop over m */
+<     } /* end if */
+<   } /* end loop over level */
+< 
+<   /* suggested by Eh Tan, presumably rather than get_bcs_id_for_residual */
+<   construct_id(E);
+< 
+<   // fprintf(stderr,"DONE with internal_velocity_bc\n");
+<  
+<   return;
+< }
+diff -r CitcomS-assim-r88-source/lib/Composition_related.c ../base/CitcomS-assim-base/lib/Composition_related.c
+48,49d47
+<     input_boolean("CDEPV",&(E->viscosity.CDEPV),"off",m);
+<     E->composition.icompositional_rheology = E->viscosity.CDEPV;
+55,57c53
+<     if (E->control.tracer && 
+< 	(E->composition.ichemical_buoyancy || 
+< 	 E->composition.icompositional_rheology)) {
+---
+>     if (E->control.tracer && E->composition.ichemical_buoyancy) {
+73c69
+< 	
+---
+> 
+88,92c84
+<     /* what was this about? there is a CDEPV for compositional rheology 
+<        
+<     i moved this to the top so that cdepv = on would activate tracers
+< 
+<     TWB  */
+---
+>     /* what was this about? there is a CDEPV for compositional rheology TWB  */
+96,98c88
+<     //E->composition.icompositional_rheology = 0;
+< 
+< 
+---
+>     E->composition.icompositional_rheology = 0;
+148,151d137
+<         /* DJB */
+<         if (E->composition.hybrid_method)
+<           fprintf(E->trace.fpt,"Hybrid Method patch activated\n");
+< 
+253,260d238
+<     /* allocat memory for tracer density fields at the nodes and elements */
+< 
+<   if(E->control.tracer) {
+<     for (j=1;j<=E->sphere.caps_per_proc;j++) {
+<         E->trace.dens_el[j]=(double *)malloc((E->lmesh.nel+1)*sizeof(double));
+<         E->trace.dens_node[j]=(double *)malloc((E->lmesh.nno+1)*sizeof(double));
+<         }
+<    }
+283d260
+< 
+285,288c262
+<     /* DJB */
+<     if (!E->composition.hybrid_method) {
+<         check_initial_composition(E);
+<     }
+---
+>     check_initial_composition(E);
+331c305
+<             for (flavor=0; flavor<E->trace.nflavors; flavor++){
+---
+>             for (flavor=0; flavor<E->trace.nflavors; flavor++)
+333,337c307
+< 	    }
+< 	    /* tracer density in each element. */
+< 	    /*  Notice that the distribution of tracer is homogeneous and the volume of the elements is uneven, */ 
+<             /*thus  the tracer density of each element is affected by element volume*/
+<             E->trace.dens_el[j][e]=numtracers;
+---
+> 
+344,350d313
+<                 /* DJB */
+<                 if (E->composition.hybrid_method) {
+<                     for(i=0;i<E->composition.ncomp;i++) {
+<                         E->composition.comp_el[j][i][e] = 0.0;
+<                     }
+<                 }
+< 
+362,363c325
+<         /* DJB */
+<         if ((iempty) && (!E->composition.hybrid_method)) {
+---
+>         if (iempty) {
+375,377d336
+<    
+<     /*Map tracer density to nodes*/ 
+<     map_tracer_dens_to_nodes(E);
+519,589d477
+< /********** MAP TRACER DENSITY TO NODES ****************/
+< /*                                                  */
+< 
+< 
+< void map_tracer_dens_to_nodes(struct All_variables *E)
+< {
+<     double *tmp[NCS];
+<     int i, n, kk;
+<     int nelem, nodenum;
+<     int j;
+<     double tmp1;
+< 
+<     for (j=1;j<=E->sphere.caps_per_proc;j++) {
+< 
+<         /* first, initialize node array */
+<         for (kk=1;kk<=E->lmesh.nno;kk++)
+<              E->trace.dens_node[j][kk]=0.0;
+<         
+<         /* average element volume of the whole domain */
+<         /*Dividing the element tracer density by ( element volume / average element volume ) gives a homogeneous distribution of tracer density which will be 
+<  *        interpolated to get tracer density at each nodes
+<  * */
+<         tmp1=E->mesh.volume/E->mesh.nel;
+< 
+<         /* Loop through all elements */
+<         for (nelem=1;nelem<=E->lmesh.nel;nelem++) {
+< 
+<             /* for each element, loop through element nodes */
+< 
+<             /* weight composition */
+< 
+<             for (nodenum=1;nodenum<=8;nodenum++) {
+<                 n = E->ien[j][nelem].node[nodenum];
+<                 E->trace.dens_node[j][n] +=
+<                         (E->trace.dens_el[j][nelem]/E->eco[j][nelem].area*tmp1)*
+<                         E->TWW[E->mesh.levmax][j][nelem].node[nodenum];
+<             }
+< 
+<         } /* end nelem */
+<     } /* end j */
+< 
+<     for (j=1;j<=E->sphere.caps_per_proc;j++)
+<          tmp[j] = E->trace.dens_node[j];
+< 
+<     (E->exchange_node_d)(E,tmp,E->mesh.levmax);
+< 
+<     /* Divide by nodal volume */
+<     for (j=1;j<=E->sphere.caps_per_proc;j++) {
+<             for (kk=1;kk<=E->lmesh.nno;kk++)
+<                 E->trace.dens_node[j][kk] *= E->MASS[E->mesh.levmax][j][kk];
+< 
+<         /* testing */
+<         /**
+<         for(i=0;i<E->composition.ncomp;i++)
+<             for (kk=1;kk<=E->lmesh.nel;kk++) {
+<                 fprintf(E->trace.fpt,"%d %f\n",kk,E->composition.comp_el[j][i][kk]);
+<             }
+< 
+<         for(i=0;i<E->composition.ncomp;i++)
+<             for (kk=1;kk<=E->lmesh.nno;kk++) {
+<                 fprintf(E->trace.fpt,"%d %f %f\n",kk,E->sx[j][3][kk],E->composition.comp_node[j][i][kk]);
+<             }
+<         fflush(E->trace.fpt);
+<         /**/
+< 
+<     } /* end j */
+< 
+<     return;
+< }
+< 
+< 
+644c532
+<                     exit(10); 
+---
+>                     exit(10);
+diff -r CitcomS-assim-r88-source/lib/composition_related.h ../base/CitcomS-assim-base/lib/composition_related.h
+1,34c1,34
+< /*
+<  *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ *
+<  *<LicenseText>
+<  *
+<  * CitcomS by Louis Moresi, Shijie Zhong, Lijie Han, Eh Tan,
+<  * Clint Conrad, Michael Gurnis, and Eun-seo Choi.
+<  * Copyright (C) 1994-2005, California Institute of Technology.
+<  *
+<  * This program is free software; you can redistribute it and/or modify
+<  * it under the terms of the GNU General Public License as published by
+<  * the Free Software Foundation; either version 2 of the License, or
+<  * (at your option) any later version.
+<  *
+<  * This program is distributed in the hope that it will be useful,
+<  * but WITHOUT ANY WARRANTY; without even the implied warranty of
+<  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+<  * GNU General Public License for more details.
+<  *
+<  * You should have received a copy of the GNU General Public License
+<  * along with this program; if not, write to the Free Software
+<  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+<  *
+<  *</LicenseText>
+<  *
+<  *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
+< 
+< 
+< void composition_input(struct All_variables *E);
+< void composition_setup(struct All_variables *E);
+< void write_composition_instructions(struct All_variables *E);
+< void fill_composition(struct All_variables *E);
+< void get_bulk_composition(struct All_variables *E);
+< void map_composition_to_nodes(struct All_variables *E);
+< void map_tracer_dens_to_nodes(struct All_variables *E);
+---
+> /*
+>  *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ *
+>  *<LicenseText>
+>  *
+>  * CitcomS by Louis Moresi, Shijie Zhong, Lijie Han, Eh Tan,
+>  * Clint Conrad, Michael Gurnis, and Eun-seo Choi.
+>  * Copyright (C) 1994-2005, California Institute of Technology.
+>  *
+>  * This program is free software; you can redistribute it and/or modify
+>  * it under the terms of the GNU General Public License as published by
+>  * the Free Software Foundation; either version 2 of the License, or
+>  * (at your option) any later version.
+>  *
+>  * This program is distributed in the hope that it will be useful,
+>  * but WITHOUT ANY WARRANTY; without even the implied warranty of
+>  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+>  * GNU General Public License for more details.
+>  *
+>  * You should have received a copy of the GNU General Public License
+>  * along with this program; if not, write to the Free Software
+>  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+>  *
+>  *</LicenseText>
+>  *
+>  *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
+> 
+> 
+> void composition_input(struct All_variables *E);
+> void composition_setup(struct All_variables *E);
+> void write_composition_instructions(struct All_variables *E);
+> void fill_composition(struct All_variables *E);
+> void get_bulk_composition(struct All_variables *E);
+> void map_composition_to_nodes(struct All_variables *E);
+> 
+diff -r CitcomS-assim-r88-source/lib/Convection.c ../base/CitcomS-assim-base/lib/Convection.c
+64,65d63
+<     if( E->parallel.me == 0)
+<         fprintf(stderr, "\nINSIDE set_convection_defaults 1\n");
+67,68d64
+<     if( E->parallel.me == 0)
+<         fprintf(stderr, "\nINSIDE set_convection_defaults 1\n");
+diff -r CitcomS-assim-r88-source/lib/Element_calculations.c ../base/CitcomS-assim-base/lib/Element_calculations.c
+84d83
+<   void get_buoyancy_below_znode();
+93,101c92
+<   /* XXX DJB */
+<   if(E->control.exclude_buoy_above_znode){
+<     if(E->parallel.me==0)
+<       fprintf(stderr, "WARNING: get_buoyancy_below_znode activated, znode=%d\n", E->control.exclude_buoy_znode);
+<     get_buoyancy_below_znode(E,E->buoyancy);
+<   }
+<   else
+<     get_buoyancy(E,E->buoyancy);
+< 
+---
+>   get_buoyancy(E,E->buoyancy);
+diff -r CitcomS-assim-r88-source/lib/Full_boundary_conditions.c ../base/CitcomS-assim-base/lib/Full_boundary_conditions.c
+41d40
+< void internal_velocity_bc(); // DJB
+113,118d111
+<       /* DJB */
+<       if(E->control.internal_vbcs_file) {
+<         /* internal velocity boundary condition */
+<         internal_velocity_bc(E);
+<       }
+< 
+253c246
+< /* $Id: Full_boundary_conditions.c 16067 2009-12-04 17:44:24Z becker $ */
+---
+> /* $Id: Full_boundary_conditions.c 15739 2009-10-02 23:16:39Z becker $ */
+diff -r CitcomS-assim-r88-source/lib/Full_lith_age_read_files.c ../base/CitcomS-assim-base/lib/Full_lith_age_read_files.c
+40,47d39
+< void full_slab_temperature_read_files(struct All_variables *E, int output)
+< {
+<     void full_read_input_files_for_timesteps();
+<     full_read_input_files_for_timesteps(E,6,output); /*2 (=action) is for lith_age*/
+<     return;
+< }
+< 
+< 
+diff -r CitcomS-assim-r88-source/lib/Full_read_input_from_files.c ../base/CitcomS-assim-base/lib/Full_read_input_from_files.c
+53d52
+<     int mm1, mm2;
+63d61
+<     float *ST1,*ST2, *SS1, *SS2;
+217,246d214
+< 
+<       case 6:  /* read temperature and stencil for slab assimilation */
+<         /* XXX DJB */
+<         if( E->parallel.me == 0)
+<                fprintf(stderr, "\nTemperature and Slab assimilation action=%d output=%d\n",action,output);
+< 
+<         sprintf(output_file1,"%s%0.0f.%d",E->control.slab_assim_file,newage1,cap);
+<         sprintf(output_file2,"%s%0.0f.%d",E->control.slab_assim_file,newage2,cap);
+<         fprintf(stderr, "\nSlab assimilation %s\n",output_file1);
+<         fp1=fopen(output_file1,"r");
+<         if (fp1 == NULL) {
+<             fprintf(E->fp,"(Problem_related #12) Cannot open %s\n",output_file1);
+<             exit(8);
+<         }
+<         if (pos_age) {
+<            fp2=fopen(output_file2,"r");
+<            if (fp2 == NULL) {
+<                fprintf(E->fp,"(Problem_related #13) Cannot open %s\n",output_file2);
+<             exit(8);
+<            }
+<         }
+<         if((E->parallel.me==0) && (output==1))   {
+<            fprintf(E->fp,"Slab Assimilation: Starting Age = %g, Elapsed time = %g, Current Age = %g\n",E->control.start_age,E->monitor.elapsed_time,age);
+<            fprintf(E->fp,"Slab Assimilation: File1 = %s\n",output_file1);
+<           if (pos_age)
+<              fprintf(E->fp,"Slab Assimilation: File2 = %s\n",output_file2);
+<           else
+<              fprintf(E->fp,"Slab Assimilation: File2 = No file inputted (negative age)\n");
+<         }
+< 
+248,278d215
+< 
+<       case 7:  /* read internal velocity */
+<         /* XXX DJB */
+<         if( E->parallel.me == 0)
+<             fprintf(stderr, "\nInternal Velocity, action=%d output=%d\n",action,output);
+< 
+<         sprintf(output_file1,"%s%0.0f.%d",E->control.velocity_internal_file,newage1,cap);
+<         sprintf(output_file2,"%s%0.0f.%d",E->control.velocity_internal_file,newage2,cap);
+<         fprintf(stderr, "\nInternal Velocity, %s\n",output_file1);
+<         fp1=fopen(output_file1,"r");
+<         if (fp1 == NULL) {
+<           fprintf(E->fp,"(Problem_related #14) Cannot open %s\n",output_file1);
+<           exit(8);
+<         }
+<         if (pos_age) {
+<            fp2=fopen(output_file2,"r");
+<            if (fp2 == NULL) {
+<              fprintf(E->fp,"(Problem_related #15) Cannot open %s\n",output_file2);
+<              exit(8);
+<            }
+<         }
+<         if((E->parallel.me==0) && (output==1))   {
+<            fprintf(E->fp,"Internal Velocity: Starting Age = %g, Elapsed time = %g, Current Age = %g\n",E->control.start_age,E->monitor.elapsed_time,age);
+<            fprintf(E->fp,"Internal Velocity: File1 = %s\n",output_file1);
+<           if (pos_age)
+<              fprintf(E->fp,"Internal Velocity: File2 = %s\n",output_file2);
+<           else
+<              fprintf(E->fp,"Internal Velocity: File2 = No file inputted (negative age)\n");
+<         }
+< 
+<         break;
+360,365d296
+< 
+<               if(inputage1 <= E->control.lith_age_stencil_value || inputage2 <= E->control.lith_age_stencil_value) {
+<                   inputage1=min(inputage1,inputage2);
+<                   inputage2=min(inputage1,inputage2);
+<                }
+< 
+487,536d417
+< 
+<       case 6:  /* read temperature and stencil for slab assimilation */
+<           /* XXX DJB */
+<           if( E->parallel.me == 0)
+<                fprintf(stderr, "\nTemperature and Slab assimilation action=%d\n",action);
+<           nnn=nox*noy*noz;
+<           ST1=(float*) malloc ((nnn+1)*sizeof(float));
+<           ST2=(float*) malloc ((nnn+1)*sizeof(float));
+<           SS1=(float*) malloc ((nnn+1)*sizeof(float));
+<           SS2=(float*) malloc ((nnn+1)*sizeof(float));
+< 
+<           for(i=1;i<=nnn;i++)  {
+<               if(fscanf(fp1,"%g %g",&(ST1[i]),&(SS1[i])) != 2) {
+<                   fprintf(stderr,"Error while reading file '%s'\n", output_file1);
+<                   exit(8);
+<               }
+<               if (pos_age) {
+<                   if(fscanf(fp2,"%g %g",&(ST2[i]),&(SS2[i])) != 2) {
+<                       fprintf(stderr,"Error while reading file '%s'\n", output_file2);
+<                       exit(8);
+<                   }
+<               }
+<           }
+< 
+< 	  fclose(fp1);
+< 	  if (pos_age) fclose(fp2);
+< 
+<           for(j=1;j<=noy1;j++)
+<             for(i=1;i<=nox1;i++)
+<               for(k=1;k<=noz1;k++)    {
+<                 nodel = k + (i-1)*noz1 + (j-1)*nox1*noz1;
+<                 nodeg = (E->lmesh.nzs+k-1) + (E->lmesh.nxs+i-2)*noz + (E->lmesh.nys+j-2)*noz*nox;
+< 
+<                 if (pos_age) { /* positive ages - we must interpolate */
+<                     E->sphere.cap[m].slab_temp[nodel] = (ST1[nodeg] + (ST2[nodeg]-ST1[nodeg])/(newage2-newage1)*(age-newage1));
+<                     E->sphere.cap[m].slab_sten[nodel] = (SS1[nodeg] + (SS2[nodeg]-SS1[nodeg])/(newage2-newage1)*(age-newage1));
+<                 }
+<                 else { /* negative ages - don't do the interpolation */
+<                     E->sphere.cap[m].slab_temp[nodel] = ST1[nodeg];
+<                     E->sphere.cap[m].slab_sten[nodel] = SS1[nodeg];
+<                 }
+< 
+<           } /* next node */
+< 
+< 
+<           free ((void *) ST1);
+<           free ((void *) ST2);
+<           free ((void *) SS1);
+<           free ((void *) SS2);
+< 
+539,630d419
+<   case 7: /* velocity assimilation */
+< 
+<       /* XXX DJB */
+<       nnn=nox*noy*noz;
+<       for(i=1;i<=dims+1;i++)  {
+<         VB1[i]=(float*) malloc ((nnn+1)*sizeof(float));
+<         VB2[i]=(float*) malloc ((nnn+1)*sizeof(float));
+<       }
+< 
+<       for(i=1;i<=nnn;i++)   {
+<          if(fscanf(fp1,"%f %f %f %f",&(VB1[1][i]),&(VB1[2][i]),&(VB1[3][i]),&(VB1[4][i])) != 4) {
+<            fprintf(stderr,"Error while reading file '%s'\n",output_file1);
+<            exit(8);
+<          }
+<          VB1[1][i]=E->data.timedir*VB1[1][i];
+<          VB1[2][i]=E->data.timedir*VB1[2][i];
+<          VB1[3][i]=E->data.timedir*VB1[3][i];
+<          if (pos_age) {
+<              if(fscanf(fp2,"%f %f %f %f",&(VB2[1][i]),&(VB2[2][i]),&(VB2[3][i]),&(VB2[4][i])) != 4) {
+<                  fprintf(stderr,"Error while reading file '%s'\n",output_file2);
+<                  exit(8);
+<              }
+<              VB2[1][i]=E->data.timedir*VB2[1][i];
+<              VB2[2][i]=E->data.timedir*VB2[2][i];
+<              VB2[3][i]=E->data.timedir*VB2[3][i];
+<          }
+<       }
+<       fclose(fp1);
+<       if (pos_age) fclose(fp2);
+< 
+<       for(j=1;j<=noy1;j++)
+<         for(i=1;i<=nox1;i++)
+<           for(k=1;k<=noz1;k++)    {
+<             nodel = k + (i-1)*noz1 + (j-1)*nox1*noz1;
+<             nodeg = (E->lmesh.nzs+k-1) + (E->lmesh.nxs+i-2)*noz + (E->lmesh.nys+j-2)*noz*nox;
+< 
+<             /* flag==2 means skip this node - required for upper and lower surface (all models)
+<                to avoid conflict with plate velocities and free slip CMB
+<                also required for side boundaries for regional models */
+< 
+<             /* no need to also evaluate VB2 since VB1 and VB2 are both 2 at the same nodes */
+<             if ((int)VB1[4][nodeg]!=2) { // && (int)VB2[4][nodeg]!=2) {
+<               if (pos_age) {
+<                 /* age is closest to newage1 */
+<                 if (abs(age-newage1) <= abs(age-newage2)) {
+<                   E->sphere.cap[m].VB[1][nodel] = VB1[1][nodeg]*E->data.scalev;
+<                   E->sphere.cap[m].VB[2][nodel] = VB1[2][nodeg]*E->data.scalev;
+<                   E->sphere.cap[m].VB[3][nodel] = VB1[3][nodeg]*E->data.scalev;
+<                   E->sphere.cap[m].slab_sten2[nodel] = (int)(VB1[4][nodeg]);
+<                 }
+<                 /* age is closest to newage2 */
+<                 else {
+<                   E->sphere.cap[m].VB[1][nodel] = VB2[1][nodeg]*E->data.scalev;
+<                   E->sphere.cap[m].VB[2][nodel] = VB2[2][nodeg]*E->data.scalev;
+<                   E->sphere.cap[m].VB[3][nodel] = VB2[3][nodeg]*E->data.scalev;
+<                   E->sphere.cap[m].slab_sten2[nodel] = (int)(VB2[4][nodeg]);
+<                 }
+<               }
+<               else { /* negative ages - don't do the interpolation */
+<                 E->sphere.cap[m].VB[1][nodel] = VB1[1][nodeg]*E->data.scalev;
+<                 E->sphere.cap[m].VB[2][nodel] = VB1[2][nodeg]*E->data.scalev;
+<                 E->sphere.cap[m].VB[3][nodel] = VB1[3][nodeg]*E->data.scalev;
+<                 E->sphere.cap[m].slab_sten2[nodel] = (int)VB1[4][nodeg];
+<               }
+< 
+<               /* for debugging */
+<               /* fprintf(stderr,"1 %d %d %d %d %d %f %f %f %f\n",noy1,nox1,noz1,nodel,nodeg,VB1[1][nodeg],VB1[2][nodeg],VB1[3][nodeg],VB1[4][nodeg]);
+<               fprintf(stderr,"2 %d %d %f %f %f %d\n",nodel,nodeg,E->sphere.cap[1].VB[1][nodel],E->sphere.cap[1].VB[2][nodel],E->sphere.cap[1].VB[3][nodel],E->sphere.cap[1].slab_sten2[nodel]);
+<               if((int)VB1[4][nodeg]==1) {
+<                 fprintf(stderr,"1 flag is ON\n");
+<               }
+<               if(E->sphere.cap[1].slab_sten2[nodel]==1) {
+<                 fprintf(stderr,"2 flag is ON\n");
+<               } */
+< 
+<             }
+< 
+<             /* else skip this node (do not update velocities) */
+<             /* but need stencil value for flags!!! */
+<             else {
+<               E->sphere.cap[m].slab_sten2[nodel] = (int)VB1[4][nodeg];
+<             }
+< 
+<       }
+< 
+<       for(i=1;i<=dims+1;i++) {
+<           free ((void *) VB1[i]);
+<           free ((void *) VB2[i]);
+<       }
+< 
+<       break;
+< 
+634d422
+<     /* required or not? - DJB */
+diff -r CitcomS-assim-r88-source/lib/Full_solver.c ../base/CitcomS-assim-base/lib/Full_solver.c
+45,46d44
+< void full_slab_temperature_read_files(struct All_variables *, int);
+< 
+78,79d75
+<     E->solver.slab_temperature_read_files = full_slab_temperature_read_files;
+< 
+diff -r CitcomS-assim-r88-source/lib/global_defs.h ../base/CitcomS-assim-base/lib/global_defs.h
+253d252
+< /* XXX DJB */
+259,261d257
+<     double *slab_temp;
+<     double *slab_sten;
+<     int *slab_sten2; // stencil (flags) for velo
+353,354c349
+<     int toplayerbc;		/* apply surface BC throughout top, or for a single internal node */
+<     float toplayerbc_r;		/* minimum r to apply BC to */
+---
+>     int toplayerbc;		/* apply surface BC throughout layer */
+421d415
+<     int ExitAtPresent;
+496d489
+<     int lith_age_depth_function; // DJB
+498,507d490
+<     float lith_age_exponent;
+<     float lith_age_stencil_value;
+<     float lith_age_stencil_value_nondim;
+<     float lith_age_min;
+< 
+<     int slab_assim; // XXX DJB
+< 
+<     // XXX DJB, for dynamic topography restarts
+<     int exclude_buoy_above_znode; // DJB
+<     int exclude_buoy_znode; // DJB
+538d520
+<     int internal_vbcs_file; // XXX DJB
+549d530
+<   float  ggrd_lower_depth_km,ggrd_lower_scale,ggrd_lower_offset;
+555d535
+<     char velocity_internal_file[1000];
+559d538
+<     char slab_assim_file[1000]; // XXX DJB
+583d561
+<     double *dis;
+669d646
+<     int tracer_dens;       /* whether to output tracer density at nodes */
+673,681d649
+<     int sten_temp;    /* whether to output slab temp stencil */
+<     int sten_velo;    /* whether to output slab velo stencil */
+<     int divv;         /* whether to output divergence on nodes */
+<     int temp_sph;     /* whether to output spherical harmonics for temperature */
+<     int comp_sph;     /* whether to output spherical harmonics for composition */
+< 
+<     int heating_visc_nd; /* DJB */
+<     int heating_adi_nd; /* DJB */
+<     int heating_latent_nd; /* DJB */
+702d669
+<     int hybrid_method; /* DJB */
+797,801d763
+<     float *heating_visc_nd[NCS]; // XXX DJB
+<     float *heating_adi_nd[NCS]; // XXX DJB
+<     float *heating_latent_nd[NCS]; // XXX DJB
+<     double *divv[NCS]; // XXX DJB
+< 
+831d792
+<     float *lith_age_depth_t; // DJB
+diff -r CitcomS-assim-r88-source/lib/Instructions.c ../base/CitcomS-assim-base/lib/Instructions.c
+311d310
+< 
+438,446c437
+<   input_int("toplayerbc",&(E->mesh.toplayerbc),"0",m); /* > 0: apply surface BC
+<                                                             throughout all nodes with r > toplayerbc_r
+< 
+< 							    < 0: apply to single node layer noz+toplayerbc
+< 
+< 						       */
+<   input_float("toplayerbc_r",&(E->mesh.toplayerbc_r),"0.984303876942",m); /* minimum r to apply BC to, 
+< 									     100 km depth */
+< 
+---
+>   input_int("toplayerbc",&(E->mesh.toplayerbc),"0",m); /* apply surface BC throughout all layer nodes  */
+468,470d458
+<   input_int("file_internal_vbcs",&(E->control.internal_vbcs_file),"0",m); // XXX DJB
+<   input_string("vel_internal_file",E->control.velocity_internal_file,"",m); // XXX DJB
+< 
+526,528d513
+< 
+<      in the example above, the input grid is a layer. if it's a 3D model, provide 
+<      ggrd_mat_depth_file, akin to temperature input
+915,921d899
+<   /* XXX DJB */
+<   /* assimilated slabs */
+<   E->divv[j] = (double *) malloc((npno+1)*sizeof(double));
+<   E->sphere.cap[j].slab_temp = (double *) malloc((nno+1)*sizeof(double));
+<   E->sphere.cap[j].slab_sten = (double *) malloc((nno+1)*sizeof(double));
+<   E->sphere.cap[j].slab_sten2 = (int *) malloc((nno+1)*sizeof(int));
+< 
+938,942d915
+<   /* DJB output heating quantities on nodes */
+<   E->heating_adi_nd[j] = (float *) malloc((nno+1)*sizeof(float));
+<   E->heating_visc_nd[j] = (float *) malloc((nno+1)*sizeof(float));
+<   E->heating_latent_nd[j] = (float *) malloc((nno+1)*sizeof(float));
+< 
+1186,1188d1158
+<     E->control.ExitAtPresent=1; // Exit at 1 Myrs after present age
+<     
+<   
+1193d1162
+<   
+1532d1500
+<     E->output.tracer_dens = 0;
+1536,1541d1503
+<     E->output.temp_sph = 0; /* XXX DJB */
+<     E->output.comp_sph = 0; /* XXX DJB */
+<     E->output.heating_visc_nd = 0; /* XXX DJB */
+<     E->output.heating_adi_nd = 0; /* XXX DJB */
+<     E->output.heating_latent_nd = 0; /* XXX DJB */
+<     E->output.divv = 0; /* XXX DJB */
+1599,1616d1560
+<         else if(strcmp(prev, "comp_sph")==0) // DJB
+<             E->output.comp_sph = 1;
+<         else if(strcmp(prev, "temp_sph")==0) //DJB
+<             E->output.temp_sph = 1;
+<         else if(strcmp(prev, "heating_visc_nd")==0) // DJB
+<             E->output.heating_visc_nd = 1;
+<         else if(strcmp(prev, "heating_adi_nd")==0) // DJB
+<             E->output.heating_adi_nd = 1;
+<         else if(strcmp(prev, "heating_latent_nd")==0) // DJB
+<             E->output.heating_latent_nd = 1;
+<         else if(strcmp(prev, "sten_temp")==0) // DJB
+<             E->output.sten_temp = 1;
+<         else if(strcmp(prev, "sten_velo")==0) // DJB
+<             E->output.sten_velo = 1;
+<         else if(strcmp(prev, "divv")==0) // DJB
+<             E->output.divv = 1;
+<         else if(strcmp(prev, "tracer_dens")==0)
+<             E->output.tracer_dens = 1;
+diff -r CitcomS-assim-r88-source/lib/Lith_age.c ../base/CitcomS-assim-base/lib/Lith_age.c
+83,85c83
+<   E->control.lith_age_min=E->control.lith_age_min/E->data.scalet;
+<   E->control.lith_age_stencil_value_nondim=E->control.lith_age_stencil_value/E->data.scalet;
+< 
+---
+>   if (E->parallel.me == 0 ) fprintf(stderr,"INSIDE lith_age_init\n");
+88,91d85
+<   /* DJB */
+<   /* age-dependent lith_age_depth */
+<   E->lith_age_depth_t=(float*) malloc((gnox*gnoy+1)*sizeof(float));
+< 
+114c108
+< 	E->age_t[node]=E->age_t[node]/E->data.scalet;
+---
+> 	E->age_t[node]=E->age_t[node]*E->data.scalet;
+147,150c141
+<               if(E->age_t[nodeg] <= E->control.lith_age_min)
+< 	          temp = (E->sphere.ro-r1) *0.5 /sqrt(E->control.lith_age_min);
+<               else 
+< 	          temp = (E->sphere.ro-r1) *0.5 /sqrt(E->age_t[nodeg]);
+---
+> 	      temp = (E->sphere.ro-r1) *0.5 /sqrt(E->age_t[nodeg]);
+197c188
+<   int m,j,node,nox,noz,noy,gnox,gnoy,gnoz,nodeg,i,k;
+---
+>   int j,node,nno;
+200,205c191
+<   gnox=E->mesh.nox;
+<   gnoy=E->mesh.noy;
+<   gnoz=E->mesh.noz;
+<   nox=E->lmesh.nox;
+<   noy=E->lmesh.noy;
+<   noz=E->lmesh.noz;
+---
+>   nno=E->lmesh.nno;
+219,257c205,216
+<       for(m=1;m<=E->sphere.caps_per_proc;m++)
+<           for(i=1;i<=noy;i++)
+< 	   for(j=1;j<=nox;j++)
+< 	    for(k=1;k<=noz;k++)  {
+< 	      nodeg=E->lmesh.nxs-1+j+(E->lmesh.nys+i-2)*gnox;
+< 	      node=k+(j-1)*noz+(i-1)*nox*noz;
+< 
+< 	       if( ((E->sx[m][1][node]<=ttt2) && (E->sx[m][3][node]>=E->sphere.ro-E->control.depth_bound_adj)) || ((E->sx[m][1][node]>=ttt3) && (E->sx[m][3][node]>=E->sphere.ro-E->control.depth_bound_adj)) )
+< 	        /* if < (width) from x bounds AND (depth) from top */
+< 	        {
+< 	          E->node[m][node]=E->node[m][node] | TBX;
+< 	          E->node[m][node]=E->node[m][node] & (~FBX);
+< 	          E->node[m][node]=E->node[m][node] | TBY;
+< 	          E->node[m][node]=E->node[m][node] & (~FBY);
+< 	          E->node[m][node]=E->node[m][node] | TBZ;
+< 	          E->node[m][node]=E->node[m][node] & (~FBZ);
+< 	        }
+< 
+< 	      if( ((E->sx[m][2][node]<=fff2) && (E->sx[m][3][node]>=E->sphere.ro-E->control.depth_bound_adj)) )
+< 	       /* if fi is < (width) from side AND z is < (depth) from top */
+< 	       {
+< 	         E->node[m][node]=E->node[m][node] | TBX;
+< 	         E->node[m][node]=E->node[m][node] & (~FBX);
+< 	         E->node[m][node]=E->node[m][node] | TBY;
+< 	         E->node[m][node]=E->node[m][node] & (~FBY);
+< 	         E->node[m][node]=E->node[m][node] | TBZ;
+< 	         E->node[m][node]=E->node[m][node] & (~FBZ);
+< 	       }
+< 
+< 	     if( ((E->sx[m][2][node]>=fff3) && (E->sx[m][3][node]>=E->sphere.ro-E->control.depth_bound_adj)) )
+< 	       /* if fi is < (width) from side AND z is < (depth) from top */
+< 	       {
+< 	         E->node[m][node]=E->node[m][node] | TBX;
+< 	         E->node[m][node]=E->node[m][node] & (~FBX);
+< 	         E->node[m][node]=E->node[m][node] | TBY;
+< 	         E->node[m][node]=E->node[m][node] & (~FBY);
+< 	         E->node[m][node]=E->node[m][node] | TBZ;
+< 	         E->node[m][node]=E->node[m][node] & (~FBZ);
+< 	       }
+---
+>       for(j=1;j<=E->sphere.caps_per_proc;j++)
+> 	for(node=1;node<=E->lmesh.nno;node++)  {
+> 	  if( ((E->sx[j][1][node]<=ttt2) && (E->sx[j][3][node]>=E->sphere.ro-E->control.depth_bound_adj)) || ((E->sx[j][1][node]>=ttt3) && (E->sx[j][3][node]>=E->sphere.ro-E->control.depth_bound_adj)) )
+> 	    /* if < (width) from x bounds AND (depth) from top */
+> 	    {
+> 	      E->node[j][node]=E->node[j][node] | TBX;
+> 	      E->node[j][node]=E->node[j][node] & (~FBX);
+> 	      E->node[j][node]=E->node[j][node] | TBY;
+> 	      E->node[j][node]=E->node[j][node] & (~FBY);
+> 	      E->node[j][node]=E->node[j][node] | TBZ;
+> 	      E->node[j][node]=E->node[j][node] & (~FBZ);
+> 	    }
+259,260c218,227
+< 	   }
+<   } /* end E->control.temperature_bound_adj */
+---
+> 	  if( ((E->sx[j][2][node]<=fff2) && (E->sx[j][3][node]>=E->sphere.ro-E->control.depth_bound_adj)) )
+> 	    /* if fi is < (width) from side AND z is < (depth) from top */
+> 	    {
+> 	      E->node[j][node]=E->node[j][node] | TBX;
+> 	      E->node[j][node]=E->node[j][node] & (~FBX);
+> 	      E->node[j][node]=E->node[j][node] | TBY;
+> 	      E->node[j][node]=E->node[j][node] & (~FBY);
+> 	      E->node[j][node]=E->node[j][node] | TBZ;
+> 	      E->node[j][node]=E->node[j][node] & (~FBZ);
+> 	    }
+261a229,238
+> 	  if( ((E->sx[j][2][node]>=fff3) && (E->sx[j][3][node]>=E->sphere.ro-E->control.depth_bound_adj)) )
+> 	    /* if fi is < (width) from side AND z is < (depth) from top */
+> 	    {
+> 	      E->node[j][node]=E->node[j][node] | TBX;
+> 	      E->node[j][node]=E->node[j][node] & (~FBX);
+> 	      E->node[j][node]=E->node[j][node] | TBY;
+> 	      E->node[j][node]=E->node[j][node] & (~FBY);
+> 	      E->node[j][node]=E->node[j][node] | TBZ;
+> 	      E->node[j][node]=E->node[j][node] & (~FBZ);
+> 	    }
+263,267c240,241
+<   /* XXX DJB */
+<   /* This sets the temperature flag(s) for lithosphere assimilation
+<      in the usual CIG version.  However, we do not use flags because
+<      they are more difficult to implement for deforming regions.
+<      Hence this code block is commented out */
+---
+> 	}
+>   } /* end E->control.temperature_bound_adj */
+269c243
+<   /* if (E->control.lith_age_time) {
+---
+>   if (E->control.lith_age_time) {
+271,285c245,255
+<       for(m=1;m<=E->sphere.caps_per_proc;m++)
+<           for(i=1;i<=noy;i++)
+< 	   for(j=1;j<=nox;j++)
+< 	    for(k=1;k<=noz;k++)  {
+< 	      nodeg=E->lmesh.nxs-1+j+(E->lmesh.nys+i-2)*gnox;
+< 	      node=k+(j-1)*noz+(i-1)*nox*noz;
+< 	      if(  E->sx[m][3][node]>=E->sphere.ro-E->control.lith_age_depth && E->age_t[nodeg]>=E->control.lith_age_stencil_value_nondim )
+< 	        {
+< 	          E->node[m][node]=E->node[m][node] | TBX;
+< 	          E->node[m][node]=E->node[m][node] & (~FBX);
+< 	          E->node[m][node]=E->node[m][node] | TBY;
+< 	          E->node[m][node]=E->node[m][node] & (~FBY);
+< 	          E->node[m][node]=E->node[m][node] | TBZ;
+< 	          E->node[m][node]=E->node[m][node] & (~FBZ);
+< 	        }
+---
+>       for(j=1;j<=E->sphere.caps_per_proc;j++)
+> 	for(node=1;node<=E->lmesh.nno;node++)  {
+> 	  if(E->sx[j][3][node]>=E->sphere.ro-E->control.lith_age_depth)
+> 	    { /* if closer than (lith_age_depth) from top */
+> 	      E->node[j][node]=E->node[j][node] | TBX;
+> 	      E->node[j][node]=E->node[j][node] & (~FBX);
+> 	      E->node[j][node]=E->node[j][node] | TBY;
+> 	      E->node[j][node]=E->node[j][node] & (~FBY);
+> 	      E->node[j][node]=E->node[j][node] | TBZ;
+> 	      E->node[j][node]=E->node[j][node] & (~FBZ);
+> 	    }
+288,341c258
+<   } */
+< /* end E->control.lith_age_time */
+< 
+<   return;
+< }
+< 
+< 
+< /* DJB */
+< static void get_lith_age_depth(struct All_variables *E)
+< {
+<   int m,i,j,nox,noy,nodeg,gnox;
+<   float age_t;
+< 
+<   gnox=E->mesh.nox;
+<   nox=E->lmesh.nox;
+<   noy=E->lmesh.noy;
+< 
+<   for(m=1;m<=E->sphere.caps_per_proc;m++)
+<     for(i=1;i<=noy;i++)
+<       for(j=1;j<=nox;j++) {
+<         nodeg=E->lmesh.nxs-1+j+(E->lmesh.nys+i-2)*gnox;
+< 
+<         age_t = E->age_t[nodeg];
+< 
+<         /* assimilation regions */
+<         if( age_t >= E->control.lith_age_stencil_value_nondim) {
+< 
+<           /* minimum age, which correlates to a minimum depth constraint */
+<           age_t = max( age_t, E->control.lith_age_min );
+< 
+<           if( E->control.lith_age_depth_function)
+<             /* from Turcotte and Schubert */
+<             /* here, E-control.lith_age_depth is a PREFACTOR */
+<             E->lith_age_depth_t[nodeg] = 2.32*sqrt(age_t);
+<           else
+<             /* to default to constant depth (lith_age_depth) */
+<             E->lith_age_depth_t[nodeg] = 1.0;
+< 
+<           /* for control.lith_age_depth_function, E->lith_age_depth is a PREFACTOR */
+<           E->lith_age_depth_t[nodeg] *= E->control.lith_age_depth;
+< 
+<         }
+<         /* for no assimilation regions */
+<         else
+<           E->lith_age_depth_t[nodeg] = -1.0; // arbitrary, but easy to spot problems
+< 
+<         /* for testing */
+<         /*if (E->parallel.me == 3){
+<           fprintf(stderr,"nodeg=%d, E->lith_age_depth_t[nodeg]=%f\n",nodeg,E->lith_age_depth_t[nodeg]);
+<           //fprintf(stderr,"slab_temp=%f, E->T[j][node]=%f\n",E->sphere.cap[j].slab_temp[node],E->T[j][node]);
+<         }*/
+< 
+< 
+<   }
+---
+>   } /* end E->control.lith_age_time */
+349,350d265
+<   void get_lith_age_depth(struct All_variables *E);
+< 
+359c274
+<   float lith_age_depth; // DJB age-dependent
+---
+> 
+402,405c317
+<                 if(E->age_t[nodeg] <= E->control.lith_age_min)
+< 	           temp = (E->sphere.ro-r1) *0.5 /sqrt(E->control.lith_age_min);
+<                 else
+< 		   temp = (E->sphere.ro-r1) *0.5 /sqrt(E->age_t[nodeg]);
+---
+> 		temp = (E->sphere.ro-r1) *0.5 /sqrt(E->age_t[nodeg]);
+418,422c330,331
+< 		/* keep the age the same ! */
+<                 if(E->age_t[nodeg] <= E->control.lith_age_min)
+< 	           temp = (E->sphere.ro-r1) *0.5 /sqrt(E->control.lith_age_min);
+<                 else
+< 		   temp = (E->sphere.ro-r1) *0.5 /sqrt(E->age_t[nodeg]);
+---
+> 		/* keep the age the same! */
+> 		temp = (E->sphere.ro-r1) *0.5 /sqrt(E->age_t[nodeg]);
+437,439d345
+<   /* DJB */
+<   get_lith_age_depth( E );
+< 
+453,456d358
+<             /* DJB */
+<             lith_age_depth = E->lith_age_depth_t[nodeg];
+< 
+<             /* XXX DJB */
+458c360,363
+<               depth = E->sphere.ro - r1;
+---
+> 	      if(  E->sx[m][3][node]>=E->sphere.ro-E->control.lith_age_depth ) {
+> 		/* if closer than (lith_age_depth) from top */
+> 
+>                 depth=E->sphere.ro - E->sx[m][3][node];
+460,461c365,367
+< 	      if(depth <= lith_age_depth && E->age_t[nodeg]>=E->control.lith_age_stencil_value_nondim) {
+< 		  /* if closer than (lith_age_depth) from top */
+---
+> 		/* set a new age from the file */
+> 		temp = (E->sphere.ro-r1) *0.5 /sqrt(E->age_t[nodeg]);
+> 		t0 = E->control.mantle_temp * erf(temp);
+463,469c369,371
+< 		       /* set a new age from the file */
+< 		        temp = depth * 0.5 /sqrt(E->age_t[nodeg]);
+< 		        t0 = E->control.mantle_temp * erf(temp);
+< 
+< 		        E->sphere.cap[m].TB[1][node]=t0;
+< 		        E->sphere.cap[m].TB[2][node]=t0;
+< 		        E->sphere.cap[m].TB[3][node]=t0;
+---
+> 		E->sphere.cap[m].TB[1][node]=t0;
+> 		E->sphere.cap[m].TB[2][node]=t0;
+> 		E->sphere.cap[m].TB[3][node]=t0;
+481,482d382
+<   void temperatures_conform_bcs2(struct All_variables *);
+< 
+486,543d385
+<   float znd;
+<   float lith_age_depth;
+< 
+<   nno=E->lmesh.nno;
+<   gnox=E->mesh.nox;
+<   gnoy=E->mesh.noy;
+<   gnoz=E->mesh.noz;
+<   nox=E->lmesh.nox;
+<   noy=E->lmesh.noy;
+<   noz=E->lmesh.noz;
+< 
+<   /* XXX DJB */
+<   /* First, assimilate lithosphere temperature for all depths less than lith_age_depth */
+< 
+<   for(m=1;m<=E->sphere.caps_per_proc;m++)
+<       for(i=1;i<=noy;i++)
+< 	for(j=1;j<=nox;j++)
+< 	  for(k=1;k<=noz;k++)  {
+< 	    nodeg=E->lmesh.nxs-1+j+(E->lmesh.nys+i-2)*gnox;
+< 	    node=k+(j-1)*noz+(i-1)*nox*noz;
+< 
+<             depth = E->sphere.ro - E->sx[m][3][node];
+< 
+<             lith_age_depth = E->lith_age_depth_t[nodeg];
+< 
+<             if(depth <= lith_age_depth && E->age_t[nodeg]>=E->control.lith_age_stencil_value_nondim) {
+<                 znd = depth/lith_age_depth;
+<                 daf = pow(znd,E->control.lith_age_exponent);
+<                 /* this depth assimilation factor was used prior to svn r29 */
+<                 /* daf = 0.5*depth/E->control.lith_age_depth; */
+<                 assimilate_new_temp = E->sphere.cap[m].TB[3][node];
+< 
+<                 E->T[m][node] = daf*E->T[m][node] + (1.0-daf)*assimilate_new_temp;
+<                 // for testing
+<                 // E->T[m][node] = assimilate_new_temp;
+<             }
+< 
+<           } /* next node */
+< 
+<   /* Second, apply thermal bcs to top and bottom surface.  This will over-ride
+<      E->T[m][node] for the uppermost nodes that was applied above. */
+<   temperatures_conform_bcs2(E);
+< 
+< return;
+< }
+< 
+< void assimilate_slab_conform_bcs(struct All_variables *E)
+< {
+<   float depth;
+<   int m,j,nno,node,nox,noz,noy,gnox,gnoy,gnoz,nodeg,ii,i,k;
+<   unsigned int type;
+<   float r1,t1,f1, assimilate_slab_temp;
+<   int output;
+<   double alpha;
+< 
+<   output = 1;
+< 
+<   (E->solver.slab_temperature_read_files)(E,output);
+556,557c398,439
+<         /* DJB - none of this is required */
+<         //type = (E->node[j][node] & (TBX | TBZ | TBY));
+---
+>         type = (E->node[j][node] & (TBX | TBZ | TBY));
+> 
+>         switch (type) {
+>         case 0:  /* no match, next node */
+>             break;
+>         case TBX:
+>             assimilate_new_temp = E->sphere.cap[j].TB[1][node];
+>             break;
+>         case TBZ:
+>             assimilate_new_temp = E->sphere.cap[j].TB[3][node];
+>             break;
+>         case TBY:
+>             assimilate_new_temp = E->sphere.cap[j].TB[2][node];
+>             break;
+>         case (TBX | TBZ):     /* clashes ! */
+>             assimilate_new_temp = 0.5 * (E->sphere.cap[j].TB[1][node] + E->sphere.cap[j].TB[3][node]);
+>             break;
+>         case (TBX | TBY):     /* clashes ! */
+>             assimilate_new_temp = 0.5 * (E->sphere.cap[j].TB[1][node] + E->sphere.cap[j].TB[2][node]);
+>             break;
+>         case (TBZ | TBY):     /* clashes ! */
+>             assimilate_new_temp = 0.5 * (E->sphere.cap[j].TB[3][node] + E->sphere.cap[j].TB[2][node]);
+>             break;
+>         case (TBZ | TBY | TBX):     /* clashes ! */
+>             assimilate_new_temp = 0.3333333 * (E->sphere.cap[j].TB[1][node] + E->sphere.cap[j].TB[2][node] + E->sphere.cap[j].TB[3][node]);
+>             break;
+>         } /* end switch */
+> 
+>         depth = E->sphere.ro - E->sx[j][3][node];
+> 
+>         switch (type) {
+>         case 0:  /* no match, next node */
+>             break;
+>         default:
+>             if(depth <= E->control.lith_age_depth) {
+>                 /* daf == depth_assimilation_factor */
+>                 daf = 0.5*depth/E->control.lith_age_depth;
+>                 E->T[j][node] = daf*E->T[j][node] + (1.0-daf)*assimilate_new_temp;
+>                }
+>             else
+>                 E->T[j][node] = assimilate_new_temp;
+>         } /* end switch */
+559,597d440
+<         //switch (type) {
+<         //case 0:  /* no match, next node */
+<         //    break;
+<         //case TBX:
+<             /* assimilate_new_temp = E->sphere.cap[j].TB[1][node]; */
+<         //    break;
+<         //case TBZ:
+<             /* assimilate_new_temp = E->sphere.cap[j].TB[3][node]; */
+<         //    break;
+<         //case TBY:
+<             /* assimilate_new_temp = E->sphere.cap[j].TB[2][node]; */
+<         //    break;
+<         //case (TBX | TBZ):     /* clashes ! */
+<             /* assimilate_new_temp = 0.5 * (E->sphere.cap[j].TB[1][node] + E->sphere.cap[j].TB[3][node]); */
+<         //    break;
+<         //case (TBX | TBY):     /* clashes ! */
+<             /* assimilate_new_temp = 0.5 * (E->sphere.cap[j].TB[1][node] + E->sphere.cap[j].TB[2][node]); */
+<         //    break;
+<         //case (TBZ | TBY):     /* clashes ! */
+<             /* assimilate_new_temp = 0.5 * (E->sphere.cap[j].TB[3][node] + E->sphere.cap[j].TB[2][node]); */
+<         //    break;
+<         //case (TBZ | TBY | TBX):     /* clashes ! */
+<             /* assimilate_new_temp = 0.3333333 * (E->sphere.cap[j].TB[1][node] + E->sphere.cap[j].TB[2][node] + E->sphere.cap[j].TB[3][node]); */
+<          //   break;
+<         //} /* end switch */
+< 
+<         /* MG slab assimilation work area */
+<         /* XXX DJB */
+<         alpha=E->sphere.cap[j].slab_sten[node];
+<         E->T[j][node] = (1.0-alpha)*E->T[j][node] + alpha*E->sphere.cap[j].slab_temp[node];
+< 
+<         /* for stencil debugging */
+<         /* E->T[j][node] = alpha;*/
+<         /* more debugging */
+<         /*if (E->parallel.me == 3){
+<             fprintf(stderr,"E->T[j][node]=%f, alpha=%f, node=%d\n",E->T[j][node],alpha,node);
+<             fprintf(stderr,"slab_temp=%f, E->T[j][node]=%f\n",E->sphere.cap[j].slab_temp[node],E->T[j][node]);
+<         } */                
+<         
+diff -r CitcomS-assim-r88-source/lib/Output.c ../base/CitcomS-assim-base/lib/Output.c
+53d52
+< void output_tracer_dens(struct All_variables *, int);
+56,63d54
+< void output_heating_visc_nd(struct All_variables *, int); /* XXX DJB */
+< void output_heating_adi_nd(struct All_variables *, int); /* XXX DJB */
+< void output_heating_latent_nd(struct All_variables *, int); /* XXX DJB */
+< void output_temp_sph(struct All_variables *, int);
+< void output_comp_sph(struct All_variables *, int);
+< void output_sten_temp(struct All_variables *, int); /* XXX DJB */
+< void output_sten_velo(struct All_variables *, int); /* XXX DJB */
+< void output_divv(struct All_variables *, int); /* XXX DJB */
+140,145d130
+<   if (E->output.comp_sph && E->composition.on) /* DJB */
+<       output_comp_sph(E, cycles);
+< 
+<   if (E->output.temp_sph) /* DJB */
+<       output_temp_sph(E, cycles);
+< 
+149,151d133
+<   if(E->output.tracer_dens && E->control.tracer)
+<       output_tracer_dens(E, cycles);
+< 
+161,178d142
+<   if (E->output.heating_visc_nd && E->control.disptn_number != 0)
+<       output_heating_visc_nd(E, cycles); /* DJB */
+< 
+<   if (E->output.heating_adi_nd && E->control.disptn_number != 0)
+<       output_heating_adi_nd(E, cycles); /* DJB */
+< 
+<   if (E->output.heating_latent_nd && E->control.disptn_number != 0)
+<       output_heating_latent_nd(E, cycles); /* DJB */
+< 
+<   if (E->output.sten_temp)
+<       output_sten_temp(E, cycles); /* DJB */
+< 
+<   if (E->output.sten_velo)
+<       output_sten_velo(E, cycles); /* DJB */
+< 
+<   if (E->output.divv)
+<       output_divv(E, cycles); /* DJB */
+< 
+350,440d313
+< /* XXX DJB */
+< void output_divv(struct All_variables *E, int cycles) /* DJB */
+< {
+<   void p_to_nodes();
+<   int i, j, m;
+<   float *divv_nd[NCS];
+<   char output_file[255];
+<   FILE *fp1;
+< 
+<   for(m=1;m<=E->sphere.caps_per_proc;m++)
+<     divv_nd[m] = (float *) malloc ((E->lmesh.nno+1)*sizeof(float));
+< 
+<   /* for(m=1;m<=E->sphere.caps_per_proc;m++) {
+<     for(i=1;i<=E->lmesh.nno;i++) {
+<       divv_nd[m][i] = 0.0;
+<     }
+<   } */
+< 
+<   p_to_nodes(E,E->divv,divv_nd,E->mesh.levmax);
+< 
+<   sprintf(output_file,"%s.divv.%d.%d", E->control.data_file,
+<           E->parallel.me, cycles);
+<   fp1 = output_open(output_file, "w");
+< 
+<   fprintf(fp1,"%d %d %.5e\n",cycles,E->lmesh.nno,E->monitor.elapsed_time);
+< 
+<   for(j=1;j<=E->sphere.caps_per_proc;j++) {
+<     fprintf(fp1,"%3d %7d\n",j,E->lmesh.nno);
+<     for(i=1;i<=E->lmesh.nno;i++)
+<       fprintf(fp1,"%.6e\n",divv_nd[j][i]);
+<   }
+< 
+<   fclose(fp1);
+< 
+<   for(m=1;m<=E->sphere.caps_per_proc;m++)
+<     free(divv_nd[m]);
+< 
+<   return;
+< }
+< 
+< 
+< /* XXX DJB */
+< void output_sten_temp(struct All_variables *E, int cycles)
+< {
+<   int i, j;
+<   char output_file[255];
+<   FILE *fp1;
+< 
+<   sprintf(output_file,"%s.sten_temp.%d.%d", E->control.data_file,
+<           E->parallel.me, cycles);
+<   fp1 = output_open(output_file, "w");
+< 
+<   fprintf(fp1,"%d %d %.5e\n",cycles,E->lmesh.nno,E->monitor.elapsed_time);
+< 
+<   for(j=1;j<=E->sphere.caps_per_proc;j++) {
+<     fprintf(fp1,"%3d %7d\n",j,E->lmesh.nno);
+<     for(i=1;i<=E->lmesh.nno;i++) {
+<         fprintf(fp1,"%.6e\n",E->sphere.cap[j].slab_sten[i]);
+<     }
+<   }
+< 
+<   fclose(fp1);
+< 
+<   return;
+< }
+< 
+< /* XXX DJB */
+< void output_sten_velo(struct All_variables *E, int cycles)
+< {
+<   int i, j;
+<   char output_file[255];
+<   FILE *fp1;
+< 
+<   sprintf(output_file,"%s.sten_velo.%d.%d", E->control.data_file,
+<           E->parallel.me, cycles);
+<   fp1 = output_open(output_file, "w");
+< 
+<   fprintf(fp1,"%d %d %.5e\n",cycles,E->lmesh.nno,E->monitor.elapsed_time);
+< 
+<   for(j=1;j<=E->sphere.caps_per_proc;j++) {
+<     fprintf(fp1,"%3d %7d\n",j,E->lmesh.nno);
+<     for(i=1;i<=E->lmesh.nno;i++) {
+<         fprintf(fp1,"%d\n",E->sphere.cap[j].slab_sten2[i]);
+<     }
+<   }
+< 
+<   fclose(fp1);
+< 
+<   return;
+< }
+< 
+786,810d658
+< void output_tracer_dens(struct All_variables *E, int cycles)
+< {
+<   int i, j;
+<   char output_file[255];
+<   FILE *fp1;
+< 
+<   sprintf(output_file,"%s.tracer_dens.%d.%d", E->control.data_file,
+<           E->parallel.me, cycles);
+<   fp1 = output_open(output_file, "w");
+< 
+<   fprintf(fp1,"%d %d %.5e\n",cycles,E->lmesh.nno,E->monitor.elapsed_time);
+< 
+<   for(j=1;j<=E->sphere.caps_per_proc;j++) {
+<     fprintf(fp1,"%3d %7d\n",j,E->lmesh.nno);
+<     for(i=1;i<=E->lmesh.nno;i++) {
+<         fprintf(fp1,"%.6e\n",E->trace.dens_node[j][i]);
+<     }
+<   }
+< 
+<   fclose(fp1);
+< 
+<   return;
+< }
+< 
+< 
+905,1102d752
+< void output_heating_adi_nd(struct All_variables *E, int cycles) /* DJB */
+< {
+<   void p_to_nodes();
+< 
+<   p_to_nodes(E,E->heating_adi,E->heating_adi_nd,E->mesh.levmax);
+< 
+<   int i, j;
+<   char output_file[255];
+<   FILE *fp1;
+< 
+<   sprintf(output_file,"%s.heating_adi_nd.%d.%d", E->control.data_file,
+<           E->parallel.me, cycles);
+<   fp1 = output_open(output_file, "w");
+< 
+<   fprintf(fp1,"%d %d %.5e\n",cycles,E->lmesh.nno,E->monitor.elapsed_time);
+< 
+<   for(j=1;j<=E->sphere.caps_per_proc;j++) {
+<     fprintf(fp1,"%3d %7d\n",j,E->lmesh.nno);
+<     for(i=1;i<=E->lmesh.nno;i++)
+<       fprintf(fp1,"%.4e\n",E->heating_adi_nd[j][i]);
+<   }
+< 
+<   fclose(fp1);
+< 
+<   return;
+< }
+< 
+< 
+< void output_heating_latent_nd(struct All_variables *E, int cycles) /* DJB */
+< {
+<   void p_to_nodes();
+< 
+<   p_to_nodes(E,E->heating_latent,E->heating_latent_nd,E->mesh.levmax);
+< 
+<   int i, j;
+<   char output_file[255];
+<   FILE *fp1;
+< 
+<   sprintf(output_file,"%s.heating_latent_nd.%d.%d", E->control.data_file,
+<           E->parallel.me, cycles);
+<   fp1 = output_open(output_file, "w");
+< 
+<   fprintf(fp1,"%d %d %.5e\n",cycles,E->lmesh.nno,E->monitor.elapsed_time);
+< 
+<   for(j=1;j<=E->sphere.caps_per_proc;j++) {
+<     fprintf(fp1,"%3d %7d\n",j,E->lmesh.nno);
+<     for(i=1;i<=E->lmesh.nno;i++)
+<       fprintf(fp1,"%.4e\n",E->heating_latent_nd[j][i]);
+<   }
+< 
+<   fclose(fp1);
+< 
+<   return;
+< }
+< 
+< 
+< void output_heating_visc_nd(struct All_variables *E, int cycles) /* DJB */
+< {
+<   void p_to_nodes();
+< 
+<   p_to_nodes(E,E->heating_visc,E->heating_visc_nd,E->mesh.levmax);
+< 
+<   int i, j;
+<   char output_file[255];
+<   FILE *fp1;
+< 
+<   sprintf(output_file,"%s.heating_visc_nd.%d.%d", E->control.data_file,
+<           E->parallel.me, cycles);
+<   fp1 = output_open(output_file, "w");
+< 
+<   fprintf(fp1,"%d %d %.5e\n",cycles,E->lmesh.nno,E->monitor.elapsed_time);
+< 
+<   for(j=1;j<=E->sphere.caps_per_proc;j++) {
+<     fprintf(fp1,"%3d %7d\n",j,E->lmesh.nno);
+<     for(i=1;i<=E->lmesh.nno;i++)
+<       fprintf(fp1,"%.4e\n",E->heating_visc_nd[j][i]);
+<   }
+< 
+<   fclose(fp1);
+< 
+<   return;
+< }
+< 
+< 
+< /* used template from debug_sphere_expansion */
+< void output_temp_sph(struct All_variables *E, int cycles)
+< {
+<     /* expand temperature field (which should be a sph. harm. load) */
+<     int m, i, j, k, p, node;
+<     int ll, mm;
+<     float *TT[NCS], *sph_harm[2];
+<     char output_file[255];
+<     FILE *fp1;
+< 
+<     for(m=1;m<=E->sphere.caps_per_proc;m++)
+<         TT[m] = (float *) malloc ((E->lmesh.nsf+1)*sizeof(float));
+< 
+<     /* sin coeff */
+<     sph_harm[0] = (float*)malloc(E->sphere.hindice*sizeof(float));
+<     /* cos coeff */
+<     sph_harm[1] = (float*)malloc(E->sphere.hindice*sizeof(float));
+< 
+<     if(E->parallel.me < E->parallel.nprocz) {
+<         sprintf(output_file,"%s.temp_sph.%d.%d", E->control.data_file,
+<                 E->parallel.me, cycles);
+<         fp1=fopen(output_file,"w");
+<     }
+< 
+<     for(k=1;k<=E->lmesh.noz;k++)  {
+<         for(m=1;m<=E->sphere.caps_per_proc;m++)
+<             for(i=1;i<=E->lmesh.noy;i++)
+<                 for(j=1;j<=E->lmesh.nox;j++)  {
+<                     node= k + (j-1)*E->lmesh.noz + (i-1)*E->lmesh.nox*E->lmesh.noz;
+<                     p = j + (i-1)*E->lmesh.nox;
+<                     TT[m][p] = E->T[m][node];
+<                 }
+< 
+<         /* expand TT into spherical harmonics */
+<         sphere_expansion(E, TT, sph_harm[0], sph_harm[1]);
+< 
+<         /* only the first nprocz CPU needs output */
+<         if(E->parallel.me < E->parallel.nprocz) {
+<             for (ll=0;ll<=E->output.llmax;ll++)
+<                 for (mm=0; mm<=ll; mm++)   {
+<                     p = E->sphere.hindex[ll][mm];
+<                     fprintf(fp1, "T expanded layer=%d ll=%d mm=%d -- %12g %12g\n",
+<                             k+E->lmesh.nzs-1, ll, mm,
+<                             sph_harm[0][p], sph_harm[1][p]);
+<                 }
+<         }
+<     }
+< 
+<     if(E->parallel.me < E->parallel.nprocz) {
+<         fclose(fp1);
+<     }
+< 
+<     return;
+< }
+< 
+< 
+< /* used template from debug_sphere_expansion */
+< void output_comp_sph(struct All_variables *E, int cycles)
+< {
+<     /* expand composition field (which should be a sph. harm. load) */
+<     int m, i, j, k, p, t, node;
+<     int ll, mm;
+<     float *CC[NCS], *sph_harm[2];
+<     char output_file[255];
+<     FILE *fp1;
+< 
+<     for(m=1;m<=E->sphere.caps_per_proc;m++)
+<         CC[m] = (float *) malloc ((E->lmesh.nsf+1)*sizeof(float));
+< 
+<     /* sin coeff */
+<     sph_harm[0] = (float*)malloc(E->sphere.hindice*sizeof(float));
+<     /* cos coeff */
+<     sph_harm[1] = (float*)malloc(E->sphere.hindice*sizeof(float));
+< 
+<     if(E->parallel.me < E->parallel.nprocz) {
+<         sprintf(output_file,"%s.comp_sph.%d.%d", E->control.data_file,
+<                 E->parallel.me, cycles);
+<         fp1=fopen(output_file,"w");
+<     }
+< 
+<     for(k=1;k<=E->lmesh.noz;k++)  {
+<         for(m=1;m<=E->sphere.caps_per_proc;m++)
+<             for(i=1;i<=E->lmesh.noy;i++)
+<                 for(j=1;j<=E->lmesh.nox;j++)  {
+<                     node= k + (j-1)*E->lmesh.noz + (i-1)*E->lmesh.nox*E->lmesh.noz;
+<                     p = j + (i-1)*E->lmesh.nox;
+<                     for(t=0;t<E->composition.ncomp;t++) {
+<                         CC[m][p] = E->composition.comp_node[m][t][node];
+<                     }
+<                 }
+< 
+<         /* expand TT into spherical harmonics */
+<         sphere_expansion(E, CC, sph_harm[0], sph_harm[1]);
+< 
+<         /* only the first nprocz CPU needs output */
+<         if(E->parallel.me < E->parallel.nprocz) {
+<             for (ll=0;ll<=E->output.llmax;ll++)
+<                 for (mm=0; mm<=ll; mm++)   {
+<                     p = E->sphere.hindex[ll][mm];
+<                     fprintf(fp1, "C expanded layer=%d ll=%d mm=%d -- %12g %12g\n",
+<                             k+E->lmesh.nzs-1, ll, mm,
+<                             sph_harm[0][p], sph_harm[1][p]);
+<                 }
+<         }
+<     }
+< 
+<     if(E->parallel.me < E->parallel.nprocz) {
+<         fclose(fp1);
+<     }
+< 
+<     return;
+< }
+< 
+< 
+1122,1127d771
+< /*Exit running if the current age is more than -1 Ma*/
+<   if ((E->control.ExitAtPresent == 1)&&(E->monitor.elapsed_time*E->data.scalet - E->control.start_age >=1)){
+< //  if (E->monitor.elapsed_time*E->data.scalet - E->control.start_age >=1){
+< 	fprintf(E->fp,"The age now is : %f\tThe start age is: %f\n",E->monitor.elapsed_time*E->data.scalet,E->control.start_age);
+< 	citcom_finalize(E, 0);
+<   }
+diff -r CitcomS-assim-r88-source/lib/Pan_problem_misc_functions.c ../base/CitcomS-assim-base/lib/Pan_problem_misc_functions.c
+239,350d238
+< void get_buoyancy_below_znode(struct All_variables *E, double **buoy)
+< {
+<     /* this function is essentially a clone of get_buoyancy(), except sources of buoyancy
+<        above a user-specified z node are not included XXX DJB */
+< 
+<     int i,j,m,n,nz,nxny,gz;
+<     int lev = E->mesh.levmax;
+<     double temp,temp2,rfac,cost2;
+<     void remove_horiz_ave2(struct All_variables*, double**);
+<     //char filename[100];FILE *out;
+< 
+<     nxny = E->lmesh.nox*E->lmesh.noy;
+<     /* Rayleigh number */
+<     temp = E->control.Atemp;
+< 
+<     /* thermal buoyancy */
+<     for(m=1;m<=E->sphere.caps_per_proc;m++)
+<       for(i=1;i<=E->lmesh.nno;i++) {
+<         nz = ((i-1) % E->lmesh.noz) + 1; // local znode
+<         gz = nz + E->lmesh.EZS[lev]; // global znode
+<         /* We don't need to substract adiabatic T profile from T here,
+<          * since the horizontal average of buoy will be removed.
+<          */
+<         if(gz <= E->control.exclude_buoy_znode){
+<           buoy[m][i] =  temp * E->refstate.rho[nz]
+<             * E->refstate.thermal_expansivity[nz] * E->T[m][i];
+<         }
+<         else{
+<           buoy[m][i] = 0.0; // do not include thermal buoyancy (and zero to be sure)
+<         }
+<       }
+< 
+<     /* chemical buoyancy */
+<     if(E->control.tracer &&
+<        (E->composition.ichemical_buoyancy)) {
+<       for(j=0;j<E->composition.ncomp;j++) {
+<         /* TODO: how to scale chemical buoyancy wrt reference density? */
+<         temp2 = E->composition.buoyancy_ratio[j] * temp;
+<             for(m=1;m<=E->sphere.caps_per_proc;m++)
+<               for(i=1;i<=E->lmesh.nno;i++){
+<                 nz = ((i-1) % E->lmesh.noz) + 1; // local znode
+<                 gz = nz + E->lmesh.EZS[lev]; // global znode
+<                 if(gz <= E->control.exclude_buoy_znode)
+<                   buoy[m][i] -= temp2 * E->composition.comp_node[m][j][i];
+<                 }
+<       }
+<     }
+< 
+<     /* XXX DJB, for testing */
+<     /* for(m=1;m<=E->sphere.caps_per_proc;m++)
+<       for(i=1;i<=E->lmesh.nno;i++) {
+<         nz = ((i-1) % E->lmesh.noz) + 1; // local znode
+<         gz = nz + E->lmesh.EZS[lev]; // global znode
+<         fprintf(stderr, "nz=%d, gz=%d, buoy=%e\n", nz,gz,buoy[m][i]);
+<     } */
+< 
+< #ifdef USE_GGRD
+<     /* surface layer Rayleigh modification? */
+<     if(E->control.ggrd.ray_control)
+<       ggrd_adjust_tbl_rayleigh(E,buoy);
+< #endif
+<     /* phase change buoyancy */
+<     phase_change_apply_410(E, buoy);
+<     phase_change_apply_670(E, buoy);
+<     phase_change_apply_cmb(E, buoy);
+< 
+<     /* 
+<        convert density to buoyancy 
+<     */
+< #ifdef ALLOW_ELLIPTICAL
+<     if(E->data.use_rotation_g){
+<       /* 
+< 
+<       rotational correction, the if should not add significant
+<       computational burden
+< 
+<       */
+<       /* g= g_e (1+(5/2m-f) cos^2(theta)) , not theta_g */
+<       rfac = E->data.ge*(5./2.*E->data.rotm-E->data.ellipticity);
+<       /*  */
+<       for(m=1;m<=E->sphere.caps_per_proc;m++)
+<         for(j=0;j < nxny;j++) {
+<           for(i=1;i<=E->lmesh.noz;i++)
+<             n = j*E->lmesh.noz + i; /* this could be improved by only
+<                                        computing the cos as a function
+<                                        of lat, but leave for now  */
+<             cost2 = cos(E->sx[m][1][n]);cost2 = cost2*cost2;        /* cos^2(theta) */
+<             /* correct gravity for rotation */
+<             buoy[m][n] *= E->refstate.gravity[i] * (E->data.ge+rfac*cost2);
+<           }
+<     }else{
+< #endif
+<       /* default */
+<       /* no latitude dependency of gravity */
+<       for(m=1;m<=E->sphere.caps_per_proc;m++)
+<         for(j=0;j < nxny;j++) {
+<           for(i=1;i<=E->lmesh.noz;i++){
+<             n = j*E->lmesh.noz + i;
+<             buoy[m][n] *= E->refstate.gravity[i];
+<           }
+<         }
+< #ifdef ALLOW_ELLIPTICAL
+<     }
+< #endif
+< 
+< 
+<     remove_horiz_ave2(E,buoy);
+< 
+<     return;
+< }
+< 
+< 
+diff -r CitcomS-assim-r88-source/lib/Problem_related.c ../base/CitcomS-assim-base/lib/Problem_related.c
+85,113d84
+<   read temperature and stencils for slab assimilation from files
+< =========================================================================*/
+< 
+< void read_slab_temperature_from_file(E)
+<      struct All_variables *E;
+< {
+<       if( E->parallel.me == 0)
+<                fprintf(stderr, "\nINSIDE read_slab_temperature_from_file just before call with 6,1 \n");
+< 
+<     (E->solver.read_input_files_for_timesteps)(E,6,1); /* read temperature and stencil (6) and output(1) */
+<     return;
+< }
+< 
+< /*=======================================================================
+<   read slab velocity from files
+< =========================================================================*/
+< /* XXX DJB */
+< 
+< void read_internal_velocity_from_file(E)
+<      struct All_variables *E;
+< {
+<       if( E->parallel.me == 0)
+<                fprintf(stderr, "\nINSIDE read_internal_velocity_from_file just before call with 7,1 \n");
+< 
+<     (E->solver.read_input_files_for_timesteps)(E,7,1); /* read velocity and stencil (7) and output(1) */
+<     return;
+< }
+< 
+< /*=======================================================================
+diff -r CitcomS-assim-r88-source/lib/Regional_boundary_conditions.c ../base/CitcomS-assim-base/lib/Regional_boundary_conditions.c
+43d42
+< void internal_velocity_bc(); // DJB
+56d54
+< 
+59d56
+< 
+123,129d119
+<       /* If any imposed internal velocity structure it goes here */
+<       /* DJB */
+<       if(E->control.internal_vbcs_file) {
+<         /* internal velocity boundary condition */
+<         internal_velocity_bc(E);
+<       }
+< 
+135a126,127
+>       /* If any imposed internal velocity structure it goes here */
+> 
+139a132
+> 
+468c461
+< /* $Id: Regional_boundary_conditions.c 16067 2009-12-04 17:44:24Z becker $ */
+---
+> /* $Id: Regional_boundary_conditions.c 15739 2009-10-02 23:16:39Z becker $ */
+diff -r CitcomS-assim-r88-source/lib/Regional_lith_age_read_files.c ../base/CitcomS-assim-base/lib/Regional_lith_age_read_files.c
+40,45d39
+< void regional_slab_temperature_read_files(struct All_variables *E, int output)
+< {
+<     void regional_read_input_files_for_timesteps();
+<     regional_read_input_files_for_timesteps(E,6,output); /*2 (=action) is for lith_age*/
+<     return;
+< }
+diff -r CitcomS-assim-r88-source/lib/Regional_read_input_from_files.c ../base/CitcomS-assim-base/lib/Regional_read_input_from_files.c
+53d52
+<     int mm1, mm2;
+63d61
+<     float *ST1,*ST2, *SS1, *SS2;
+68,69c66,67
+<     if( E->parallel.me == 0)  
+<         fprintf(stderr, "\nINSIDE regional_read_input_files_for_timesteps   action=%d output=%d\n",action,output);
+---
+>     /*if( E->parallel.me == 0)  
+>         fprintf(stderr, "\nINSIDE regional_read_input_files_for_timesteps   action=%d\n",action); */
+220,252d217
+< 
+<         break;
+< 
+<       case 6:  /* read temperature and stencil for slab assimilation */
+<         /* XXX DJB */
+<         if( E->parallel.me == 0)  
+<             fprintf(stderr, "\nTemperature and Slab assimilation action=%d output=%d\n",action,output);
+< 
+<         sprintf(output_file1,"%s%0.0f",E->control.slab_assim_file,newage1);
+<         sprintf(output_file2,"%s%0.0f",E->control.slab_assim_file,newage2);
+<         fprintf(stderr, "\nSlab Assimilation %s\n",output_file1);
+<         fp1=fopen(output_file1,"r");
+<         if (fp1 == NULL) {
+<             fprintf(E->fp,"(Problem_related #12) Cannot open %s\n",output_file1);
+<             exit(8);
+<         }
+<         if (pos_age) {
+<            fp2=fopen(output_file2,"r");
+<            if (fp2 == NULL) {
+<                fprintf(E->fp,"(Problem_related #13) Cannot open %s\n",output_file2);
+<             exit(8);
+<            }
+<         }
+<         if((E->parallel.me==0) && (output==1))   {
+<            fprintf(E->fp,"Slab Assimilation: Starting Age = %g, Elapsed time = %g, Current Age = %g\n",E->control.start_age,E->monitor.elapsed_time,age);
+<            fprintf(E->fp,"Slab Assimilation: File1 = %s\n",output_file1);
+<           if (pos_age)
+<              fprintf(E->fp,"Slab Assimilation: File2 = %s\n",output_file2);
+<           else
+<              fprintf(E->fp,"Slab Assimilation: File2 = No file inputted (negative age)\n");
+<         }
+< 
+< 
+255,284c220
+<       case 7:  /* read internal velocity */
+<         /* XXX DJB */
+<         if( E->parallel.me == 0)
+<             fprintf(stderr, "\nInternal Velocity, action=%d output=%d\n",action,output);
+< 
+<         sprintf(output_file1,"%s%0.0f",E->control.velocity_internal_file,newage1);
+<         sprintf(output_file2,"%s%0.0f",E->control.velocity_internal_file,newage2);
+<         fprintf(stderr, "\nInternal Velocity, %s\n",output_file1);
+<         fp1=fopen(output_file1,"r");
+<         if (fp1 == NULL) {
+<           fprintf(E->fp,"(Problem_related #14) Cannot open %s\n",output_file1);
+<           exit(8);
+<         }
+<         if (pos_age) {
+<            fp2=fopen(output_file2,"r");
+<            if (fp2 == NULL) {
+<              fprintf(E->fp,"(Problem_related #15) Cannot open %s\n",output_file2);
+<              exit(8);
+<            }
+<         }
+<         if((E->parallel.me==0) && (output==1))   {
+<            fprintf(E->fp,"Internal Velocity: Starting Age = %g, Elapsed time = %g, Current Age = %g\n",E->control.start_age,E->monitor.elapsed_time,age);
+<            fprintf(E->fp,"Internal Velocity: File1 = %s\n",output_file1);
+<           if (pos_age)
+<              fprintf(E->fp,"Internal Velocity: File2 = %s\n",output_file2);
+<           else
+<              fprintf(E->fp,"Internal Velocity: File2 = No file inputted (negative age)\n");
+<         }
+< 
+<         break;
+---
+> 	
+366,370d301
+<               if(inputage1 <= E->control.lith_age_stencil_value || inputage2 <= E->control.lith_age_stencil_value) {
+<                   inputage1=min(inputage1,inputage2);
+<                   inputage2=min(inputage1,inputage2);
+<                }
+<              
+496,543d426
+<       case 6:  /* read temperature and stencil for slab assimilation */
+<           /* XXX DJB */
+<           if( E->parallel.me == 0)  
+<                fprintf(stderr, "\nTemperature and Slab assimilation action=%d\n",action);
+<           nnn=nox*noy*noz;
+<           ST1=(float*) malloc ((nnn+1)*sizeof(float));
+<           ST2=(float*) malloc ((nnn+1)*sizeof(float));
+<           SS1=(float*) malloc ((nnn+1)*sizeof(float));
+<           SS2=(float*) malloc ((nnn+1)*sizeof(float));
+< 
+<           for(i=1;i<=nnn;i++)  {
+<               if(fscanf(fp1,"%g %g",&(ST1[i]),&(SS1[i])) != 2) {
+<                   fprintf(stderr,"Error while reading file '%s'\n", output_file1);
+<                   exit(8);
+<               }
+<               if (pos_age) {
+<                   if(fscanf(fp2,"%g %g",&(ST2[i]),&(SS2[i])) != 2) {
+<                       fprintf(stderr,"Error while reading file '%s'\n", output_file2);
+<                       exit(8);
+<                   }
+<               }
+<           }
+< 
+<           fclose(fp1);
+<           if (pos_age) fclose(fp2);
+< 
+<           for(j=1;j<=noy1;j++)
+<             for(i=1;i<=nox1;i++)
+<               for(k=1;k<=noz1;k++)    {
+<                 nodel = k + (i-1)*noz1 + (j-1)*nox1*noz1;
+<                 nodeg = (E->lmesh.nzs+k-1) + (E->lmesh.nxs+i-2)*noz + (E->lmesh.nys+j-2)*noz*nox;
+< 
+<                 if (pos_age) { /* positive ages - we must interpolate */
+<                     E->sphere.cap[1].slab_temp[nodel] = (ST1[nodeg] + (ST2[nodeg]-ST1[nodeg])/(newage2-newage1)*(age-newage1));
+<                     E->sphere.cap[1].slab_sten[nodel] = (SS1[nodeg] + (SS2[nodeg]-SS1[nodeg])/(newage2-newage1)*(age-newage1));
+< 	        }
+< 	        else { /* negative ages - don't do the interpolation */
+<                     E->sphere.cap[1].slab_temp[nodel] = ST1[nodeg];
+<                     E->sphere.cap[1].slab_sten[nodel] = SS1[nodeg];
+< 	        }
+< 
+<            } /* next node */
+< 
+< 
+<           free ((void *) ST1);
+<           free ((void *) ST2);
+<           free ((void *) SS1);
+<           free ((void *) SS2);
+546,636d428
+<   case 7: /* velocity assimilation */
+< 
+<       /* XXX DJB */
+<       nnn=nox*noy*noz;
+<       for(i=1;i<=dims+1;i++)  {
+<         VB1[i]=(float*) malloc ((nnn+1)*sizeof(float));
+<         VB2[i]=(float*) malloc ((nnn+1)*sizeof(float));
+<       }
+< 
+<       for(i=1;i<=nnn;i++)   {
+<          if(fscanf(fp1,"%f %f %f %f",&(VB1[1][i]),&(VB1[2][i]),&(VB1[3][i]),&(VB1[4][i])) != 4) {
+<            fprintf(stderr,"Error while reading file '%s'\n",output_file1);
+<            exit(8);
+<          }
+<          VB1[1][i]=E->data.timedir*VB1[1][i];
+<          VB1[2][i]=E->data.timedir*VB1[2][i];
+<          VB1[3][i]=E->data.timedir*VB1[3][i];
+<          if (pos_age) {
+<              if(fscanf(fp2,"%f %f %f %f",&(VB2[1][i]),&(VB2[2][i]),&(VB2[3][i]),&(VB2[4][i])) != 4) {
+<                  fprintf(stderr,"Error while reading file '%s'\n",output_file2);
+<                  exit(8);
+<              }
+<              VB2[1][i]=E->data.timedir*VB2[1][i];
+<              VB2[2][i]=E->data.timedir*VB2[2][i];
+<              VB2[3][i]=E->data.timedir*VB2[3][i];
+<          }
+<       }
+<       fclose(fp1);
+<       if (pos_age) fclose(fp2);
+< 
+<       for(j=1;j<=noy1;j++)
+<         for(i=1;i<=nox1;i++)
+<           for(k=1;k<=noz1;k++)    {
+<             nodel = k + (i-1)*noz1 + (j-1)*nox1*noz1;
+<             nodeg = (E->lmesh.nzs+k-1) + (E->lmesh.nxs+i-2)*noz + (E->lmesh.nys+j-2)*noz*nox;
+< 
+<             /* flag==2 means skip this node - required for upper and lower surface (all models)
+<                to avoid conflict with plate velocities and free slip CMB
+<                also required for side boundaries for regional models */
+< 
+<             /* no need to also evaluate VB2 since VB1 and VB2 are both 2 at the same nodes */
+<             if ((int)VB1[4][nodeg]!=2) { // && (int)VB2[4][nodeg]!=2) {
+<               if (pos_age) {
+<                 /* age is closest to newage1 */
+<                 if (abs(age-newage1) <= abs(age-newage2)) {
+<                   E->sphere.cap[1].VB[1][nodel] = VB1[1][nodeg]*E->data.scalev;
+<                   E->sphere.cap[1].VB[2][nodel] = VB1[2][nodeg]*E->data.scalev;
+<                   E->sphere.cap[1].VB[3][nodel] = VB1[3][nodeg]*E->data.scalev;
+<                   E->sphere.cap[1].slab_sten2[nodel] = (int)(VB1[4][nodeg]);
+<                 }
+<                 /* age is closest to newage2 */
+<                 else {
+<                   E->sphere.cap[1].VB[1][nodel] = VB2[1][nodeg]*E->data.scalev;
+<                   E->sphere.cap[1].VB[2][nodel] = VB2[2][nodeg]*E->data.scalev;
+<                   E->sphere.cap[1].VB[3][nodel] = VB2[3][nodeg]*E->data.scalev;
+<                   E->sphere.cap[1].slab_sten2[nodel] = (int)(VB2[4][nodeg]);
+<                 }
+<               }
+<               else { /* negative ages - don't do the interpolation */
+<                 E->sphere.cap[1].VB[1][nodel] = VB1[1][nodeg]*E->data.scalev;
+<                 E->sphere.cap[1].VB[2][nodel] = VB1[2][nodeg]*E->data.scalev;
+<                 E->sphere.cap[1].VB[3][nodel] = VB1[3][nodeg]*E->data.scalev;
+<                 E->sphere.cap[1].slab_sten2[nodel] = (int)VB1[4][nodeg];
+<               }
+< 
+<               /* for debugging */
+<               /* fprintf(stderr,"1 %d %d %d %d %d %f %f %f %f\n",noy1,nox1,noz1,nodel,nodeg,VB1[1][nodeg],VB1[2][nodeg],VB1[3][nodeg],VB1[4][nodeg]);
+<               fprintf(stderr,"2 %d %d %f %f %f %d\n",nodel,nodeg,E->sphere.cap[1].VB[1][nodel],E->sphere.cap[1].VB[2][nodel],E->sphere.cap[1].VB[3][nodel],E->sphere.cap[1].slab_sten2[nodel]);
+<               if((int)VB1[4][nodeg]==1) {
+<                 fprintf(stderr,"1 flag is ON\n");
+<               }
+<               if(E->sphere.cap[1].slab_sten2[nodel]==1) {
+<                 fprintf(stderr,"2 flag is ON\n");
+<               } */
+< 
+<             }
+< 
+<             /* else skip this node (do not update velocities) */
+<             /* but need stencil value for flags!!! */
+<             else {
+<               E->sphere.cap[1].slab_sten2[nodel] = (int)VB1[4][nodeg];
+<             }
+< 
+<       }
+< 
+<       for(i=1;i<=dims+1;i++) {
+<           free ((void *) VB1[i]);
+<           free ((void *) VB2[i]);
+<       }
+< 
+<       break;
+diff -r CitcomS-assim-r88-source/lib/Regional_solver.c ../base/CitcomS-assim-base/lib/Regional_solver.c
+45d44
+< void regional_slab_temperature_read_files(struct All_variables *, int);
+77d75
+<     E->solver.slab_temperature_read_files = regional_slab_temperature_read_files;
+diff -r CitcomS-assim-r88-source/lib/solver.h ../base/CitcomS-assim-base/lib/solver.h
+49d48
+<     void (*slab_temperature_read_files)(struct All_variables *, int);
+diff -r CitcomS-assim-r88-source/lib/Stokes_flow_Incomp.c ../base/CitcomS-assim-base/lib/Stokes_flow_Incomp.c
+430,433d429
+<     /* XXX DJB */
+<     /* this doesn't seem to do anything since z1 is immediately
+<        freed in subsequent lines */
+<     /* well, not any longer now that I am exporting divv */
+441,450d436
+<     /* XXX DJB */
+<     for(m=1;m<=E->sphere.caps_per_proc;m++)
+<         for(j=1;j<=npno;j++) {
+<             /* need to divide by volume to get divv? */
+<             /* Shijie says yes (CIG e-mail) */
+<             E->divv[m][j] = z1[m][j] / E->eco[m][j].area;
+<     }
+< 
+<     /* for debugging */
+<     /* fprintf(stderr,"XXX %f %f\n",E->monitor.vdotv, global_div_norm2(E, z1)); */
+diff -r CitcomS-assim-r88-source/lib/tracer_defs.h ../base/CitcomS-assim-base/lib/tracer_defs.h
+1,161c1,157
+< /*
+<  *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+<  *
+<  *<LicenseText>
+<  *
+<  * CitcomS by Louis Moresi, Shijie Zhong, Lijie Han, Eh Tan,
+<  * Clint Conrad, Michael Gurnis, and Eun-seo Choi.
+<  * Copyright (C) 1994-2005, California Institute of Technology.
+<  *
+<  * This program is free software; you can redistribute it and/or modify
+<  * it under the terms of the GNU General Public License as published by
+<  * the Free Software Foundation; either version 2 of the License, or
+<  * (at your option) any later version.
+<  *
+<  * This program is distributed in the hope that it will be useful,
+<  * but WITHOUT ANY WARRANTY; without even the implied warranty of
+<  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+<  * GNU General Public License for more details.
+<  *
+<  * You should have received a copy of the GNU General Public License
+<  * along with this program; if not, write to the Free Software
+<  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+<  *
+<  *</LicenseText>
+<  *
+<  *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+<  */
+< 
+< 
+< 
+< /* forward declaration */
+< struct All_variables;
+< 
+< 
+< struct TRACE{
+< 
+<     FILE *fpt;
+< 
+<     char tracer_file[200];
+< 
+<     int itracer_warnings;
+<     int ianalytical_tracer_test;
+<     int ic_method;
+<     int itperel;
+<     int itracer_interpolation_scheme;
+< 
+<     double box_cushion;
+< 
+<     /* tracer arrays */
+<     int number_of_basic_quantities;
+<     int number_of_extra_quantities;
+<     int number_of_tracer_quantities;
+< 
+<     double *basicq[13][100];
+<     double *extraq[13][100];
+< 
+<     int ntracers[13];
+<     int max_ntracers[13];
+<     int *ielement[13];
+< 
+<     int number_of_tracers;
+< 
+<     int ilatersize[13];
+<     int ilater[13];
+<     double *rlater[13][100];
+< 
+<     /* tracer flavors */
+<     int nflavors;
+<     int **ntracer_flavor[13];
+<     
+<    /* tracer density */
+<     double *dens_el[13];
+<     double *dens_node[13];
+< 
+<     int ic_method_for_flavors;
+<     double *z_interface;
+< 
+<     char ggrd_file[255];		/* for grd input */
+<     int ggrd_layers;
+< 
+< 
+< 
+<     /* statistical parameters */
+<     int istat_ichoice[13][5];
+<     int istat_isend;
+<     int istat_iempty;
+<     int istat1;
+<     int istat_elements_checked;
+<     int ilast_tracer_count;
+< 
+< 
+<     /* timing information */
+<     double advection_time;
+<     double find_tracers_time;
+<     double lost_souls_time;
+< 
+< 
+<     /* Mesh information */
+<     double xcap[13][5];
+<     double ycap[13][5];
+<     double zcap[13][5];
+<     double theta_cap[13][5];
+<     double phi_cap[13][5];
+<     double rad_cap[13][5];
+< 
+<     double cos_theta[13][5];
+<     double sin_theta[13][5];
+<     double cos_phi[13][5];
+<     double sin_phi[13][5];
+< 
+< 
+< 
+<     /*********************/
+<     /* for globall model */
+<     /*********************/
+< 
+<     /* regular mesh parameters */
+<     int numtheta[13];
+<     int numphi[13];
+<     unsigned int numregel[13];
+<     unsigned int numregnodes[13];
+<     double deltheta[13];
+<     double delphi[13];
+<     double thetamax[13];
+<     double thetamin[13];
+<     double phimax[13];
+<     double phimin[13];
+<     int *regnodetoel[13];
+<     int *regtoel[13][5];
+< 
+<     /* gnomonic shape functions */
+<     double *shape_coefs[13][3][10];
+< 
+< 
+< 
+< 
+<     /**********************/
+<     /* for regional model */
+<     /**********************/
+< 
+<     double *x_space;
+<     double *y_space;
+<     double *z_space;
+< 
+< 
+< 
+< 
+<     /*********************/
+<     /* function pointers */
+<     /*********************/
+< 
+<     int (* iget_element)(struct All_variables*, int, int,
+<                          double, double, double, double, double, double);
+< 
+<     void (* get_velocity)(struct All_variables*, int, int,
+<                           double, double, double, double*);
+< 
+<     void (* keep_within_bounds)(struct All_variables*,
+<                                 double*, double*, double*,
+<                                 double*, double*, double*);
+< };
+\ No newline at end of file
+---
+> /*
+>  *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+>  *
+>  *<LicenseText>
+>  *
+>  * CitcomS by Louis Moresi, Shijie Zhong, Lijie Han, Eh Tan,
+>  * Clint Conrad, Michael Gurnis, and Eun-seo Choi.
+>  * Copyright (C) 1994-2005, California Institute of Technology.
+>  *
+>  * This program is free software; you can redistribute it and/or modify
+>  * it under the terms of the GNU General Public License as published by
+>  * the Free Software Foundation; either version 2 of the License, or
+>  * (at your option) any later version.
+>  *
+>  * This program is distributed in the hope that it will be useful,
+>  * but WITHOUT ANY WARRANTY; without even the implied warranty of
+>  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+>  * GNU General Public License for more details.
+>  *
+>  * You should have received a copy of the GNU General Public License
+>  * along with this program; if not, write to the Free Software
+>  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+>  *
+>  *</LicenseText>
+>  *
+>  *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+>  */
+> 
+> 
+> 
+> /* forward declaration */
+> struct All_variables;
+> 
+> 
+> struct TRACE{
+> 
+>     FILE *fpt;
+> 
+>     char tracer_file[200];
+> 
+>     int itracer_warnings;
+>     int ianalytical_tracer_test;
+>     int ic_method;
+>     int itperel;
+>     int itracer_interpolation_scheme;
+> 
+>     double box_cushion;
+> 
+>     /* tracer arrays */
+>     int number_of_basic_quantities;
+>     int number_of_extra_quantities;
+>     int number_of_tracer_quantities;
+> 
+>     double *basicq[13][100];
+>     double *extraq[13][100];
+> 
+>     int ntracers[13];
+>     int max_ntracers[13];
+>     int *ielement[13];
+> 
+>     int number_of_tracers;
+> 
+>     int ilatersize[13];
+>     int ilater[13];
+>     double *rlater[13][100];
+> 
+>     /* tracer flavors */
+>     int nflavors;
+>     int **ntracer_flavor[13];
+> 
+>     int ic_method_for_flavors;
+>     double *z_interface;
+> 
+>     char ggrd_file[255];		/* for grd input */
+>     int ggrd_layers;
+> 
+> 
+> 
+>     /* statistical parameters */
+>     int istat_ichoice[13][5];
+>     int istat_isend;
+>     int istat_iempty;
+>     int istat1;
+>     int istat_elements_checked;
+>     int ilast_tracer_count;
+> 
+> 
+>     /* timing information */
+>     double advection_time;
+>     double find_tracers_time;
+>     double lost_souls_time;
+> 
+> 
+>     /* Mesh information */
+>     double xcap[13][5];
+>     double ycap[13][5];
+>     double zcap[13][5];
+>     double theta_cap[13][5];
+>     double phi_cap[13][5];
+>     double rad_cap[13][5];
+> 
+>     double cos_theta[13][5];
+>     double sin_theta[13][5];
+>     double cos_phi[13][5];
+>     double sin_phi[13][5];
+> 
+> 
+> 
+>     /*********************/
+>     /* for globall model */
+>     /*********************/
+> 
+>     /* regular mesh parameters */
+>     int numtheta[13];
+>     int numphi[13];
+>     unsigned int numregel[13];
+>     unsigned int numregnodes[13];
+>     double deltheta[13];
+>     double delphi[13];
+>     double thetamax[13];
+>     double thetamin[13];
+>     double phimax[13];
+>     double phimin[13];
+>     int *regnodetoel[13];
+>     int *regtoel[13][5];
+> 
+>     /* gnomonic shape functions */
+>     double *shape_coefs[13][3][10];
+> 
+> 
+> 
+> 
+>     /**********************/
+>     /* for regional model */
+>     /**********************/
+> 
+>     double *x_space;
+>     double *y_space;
+>     double *z_space;
+> 
+> 
+> 
+> 
+>     /*********************/
+>     /* function pointers */
+>     /*********************/
+> 
+>     int (* iget_element)(struct All_variables*, int, int,
+>                          double, double, double, double, double, double);
+> 
+>     void (* get_velocity)(struct All_variables*, int, int,
+>                           double, double, double, double*);
+> 
+>     void (* keep_within_bounds)(struct All_variables*,
+>                                 double*, double*, double*,
+>                                 double*, double*, double*);
+> };
+diff -r CitcomS-assim-r88-source/lib/Tracer_setup.c ../base/CitcomS-assim-base/lib/Tracer_setup.c
+938,939c938,939
+<     /* XXX DJB.  was originally 100, but number too low for Caltech cluster */
+<     icushion=100000;
+---
+> 
+>     icushion=100;
+944,945c944
+<     /* XXX DJB increase estimate by 20% */
+<     iestimate=number_of_tracers/E->parallel.nproc+number_of_tracers/(E->parallel.nproc*5) + icushion;
+---
+>     iestimate=number_of_tracers/E->parallel.nproc + icushion;
+diff -r CitcomS-assim-r88-source/lib/Viscosity_structures.c ../base/CitcomS-assim-base/lib/Viscosity_structures.c
+428d427
+< 
+457d455
+< 
+492d489
+< 
+673d669
+< 
+723,724d718
+< 
+< 
+751,752d744
+< 
+< 
+794,1000c786
+< 
+< 
+<     /* Cases in the 20s are modified for data assimilation work */
+<     case 20:
+<         /* eta = N_0 exp(E/(T+T_0) - E/(0.5+T_0)) 
+<            where T is normalized to be within 0...1
+<            
+<            Rheology used in Flament et al. (2013, 2014).
+<            Modification of case 3 for a background temperature of 0.5.
+< 
+<          */
+<         for(m=1;m<=E->sphere.caps_per_proc;m++)
+<             for(i=1;i<=nel;i++)   {
+<                 l = E->mat[m][i] - 1;
+<                 if(E->control.mat_control) /* switch moved up here TWB */
+<                   tempa = E->viscosity.N0[l] * E->VIP[m][i];
+<                 else
+<                   tempa = E->viscosity.N0[l];
+< 
+<                 for(kk=1;kk<=ends;kk++) {
+<                   TT[kk] = E->T[m][E->ien[m][i].node[kk]];
+<                 }
+< 
+<                 for(jj=1;jj<=vpts;jj++) {
+<                     temp=0.0;
+<                     for(kk=1;kk<=ends;kk++)   { /* took out
+<                                                    computation of
+<                                                    depth, not needed
+<                                                    TWB */
+<                       TT[kk]=max(TT[kk],zero);
+<                       temp += min(TT[kk],one) * E->N.vpt[GNVINDEX(kk,jj)];
+<                     }
+<                     EEta[m][ (i-1)*vpts + jj ] = tempa*
+<                       exp( E->viscosity.E[l]/(temp+E->viscosity.T[l])
+<                            - E->viscosity.E[l]/(0.5 +E->viscosity.T[l]) );
+<                 }
+<             }
+<         break;
+< 
+< 
+<     case 21:
+<         /* eta = N_0(r) exp(E/(T+T_0) - E/(0.5+T_0)) 
+<            where T is normalized to be within 0...1
+<                  N_0(r) increases linearly from 10 to 50 in the lower mantle
+< 		 (note that this is hard-coded)
+<            Rheology used in Flament et al. (2014), case TC8
+<          */
+<         for(m=1;m<=E->sphere.caps_per_proc;m++)
+<             for(i=1;i<=nel;i++)   {
+<                 l = E->mat[m][i] - 1;
+< 
+<                 if(E->control.mat_control) /* switch moved up here TWB */
+<                   tempa = E->viscosity.N0[l] * E->VIP[m][i];
+<                 else
+<                   tempa = E->viscosity.N0[l];
+< 
+<                 for(kk=1;kk<=ends;kk++) {
+<                   TT[kk] = E->T[m][E->ien[m][i].node[kk]];
+<                   zz[kk] = (1.-E->sx[m][3][E->ien[m][i].node[kk]]);
+<                 }
+< 
+<                 for(jj=1;jj<=vpts;jj++) {
+<                     temp=0.0;
+<                     zzz=0.0;
+<                     for(kk=1;kk<=ends;kk++)   {
+<                       TT[kk]=max(TT[kk],zero);
+<                       temp += min(TT[kk],one) * E->N.vpt[GNVINDEX(kk,jj)];
+<                       zzz += zz[kk] * E->N.vpt[GNVINDEX(kk,jj)];
+<                     }
+< 
+<                     if(l==3) {
+<                          tempa = 10.0+112.72814*(zzz-0.105164024);
+<                      }
+< 
+<                     EEta[m][ (i-1)*vpts + jj ] = tempa*
+<                       exp( E->viscosity.E[l]/(temp+E->viscosity.T[l])
+<                            - E->viscosity.E[l]/(0.5 +E->viscosity.T[l]) );
+<                 }
+<             }
+<         break;
+< 
+< 
+<     case 22:
+<         /* eta = N_0(r) exp(E/(T+T_0) - E/(0.5+T_0)) 
+<            where T is normalized to be within 0...1
+<                  N_0(r) increases linearly from 10 to 100 in the lower mantle
+<                  as suggested by Steinberger & Calderwood (2006), Zhang et al. (2010), etc...
+< 		 (note that this is hard-coded)
+<            Rheology used in Flament et al. (2014), case TC7
+<          */
+<         for(m=1;m<=E->sphere.caps_per_proc;m++)
+<             for(i=1;i<=nel;i++)   {
+<                 l = E->mat[m][i] - 1;
+< 
+<                 if(E->control.mat_control) /* switch moved up here TWB */
+<                   tempa = E->viscosity.N0[l] * E->VIP[m][i];
+<                 else
+<                   tempa = E->viscosity.N0[l];
+< 
+<                 for(kk=1;kk<=ends;kk++) {
+<                   TT[kk] = E->T[m][E->ien[m][i].node[kk]];
+<                   zz[kk] = (1.-E->sx[m][3][E->ien[m][i].node[kk]]);
+<                 }
+< 
+<                 for(jj=1;jj<=vpts;jj++) {
+<                     temp=0.0;
+<                     zzz=0.0;
+<                     for(kk=1;kk<=ends;kk++)   {
+<                       TT[kk]=max(TT[kk],zero);
+<                       temp += min(TT[kk],one) * E->N.vpt[GNVINDEX(kk,jj)];
+<                       zzz += zz[kk] * E->N.vpt[GNVINDEX(kk,jj)];
+<                     }
+< 
+<                     if(l==3) {
+<                          tempa = 10.0+253.638315*(zzz-0.105164024);
+<                      }
+< 
+<                     EEta[m][ (i-1)*vpts + jj ] = tempa*
+<                       exp( E->viscosity.E[l]/(temp+E->viscosity.T[l])
+<                            - E->viscosity.E[l]/(0.5 +E->viscosity.T[l]) );
+<                 }
+<             }
+<         break;
+< 
+< 
+<     case 23:
+<         /* eta = N_0(r) exp(E/(T+T_0) - E/(0.5+T_0)) 
+<            where T is normalized to be within 0...1
+<                  N_0(r) increases linearly from 10 to 30 in the lower mantle
+< 		 (note that this is hard-coded)
+<            Rheology used in Flament et al. (2014), case TC9
+<          */
+<         for(m=1;m<=E->sphere.caps_per_proc;m++)
+<             for(i=1;i<=nel;i++)   {
+<                 l = E->mat[m][i] - 1;
+< 
+<                 if(E->control.mat_control) /* switch moved up here TWB */
+<                   tempa = E->viscosity.N0[l] * E->VIP[m][i];
+<                 else
+<                   tempa = E->viscosity.N0[l];
+< 
+<                 for(kk=1;kk<=ends;kk++) {
+<                   TT[kk] = E->T[m][E->ien[m][i].node[kk]];
+<                   zz[kk] = (1.-E->sx[m][3][E->ien[m][i].node[kk]]);
+<                 }
+< 
+<                 for(jj=1;jj<=vpts;jj++) {
+<                     temp=0.0;
+<                     zzz=0.0;
+<                     for(kk=1;kk<=ends;kk++)   {
+<                       TT[kk]=max(TT[kk],zero);
+<                       temp += min(TT[kk],one) * E->N.vpt[GNVINDEX(kk,jj)];
+<                       zzz += zz[kk] * E->N.vpt[GNVINDEX(kk,jj)];
+<                     }
+< 
+<                     if(l==3) {
+<                          tempa = 10.0+56.36407*(zzz-0.105164024);
+<                      }
+< 
+<                     EEta[m][ (i-1)*vpts + jj ] = tempa*
+<                       exp( E->viscosity.E[l]/(temp+E->viscosity.T[l])
+<                            - E->viscosity.E[l]/(0.5 + E->viscosity.T[l]) );
+<                 }
+<             }
+<         break;
+< 
+< 
+<         case 24:
+<             /* Rheology used by Zhang et al. (2010)
+<                also explored in Bower et al. (2013)
+<                eta = N_0(r) exp( E * (T_0 - T)) 
+<                NOTE: THIS IS SOMEWHAT HARD-CODED, I.E. THE PRESSURE-DEP
+<                CONTRIBUTION AT THE TOP OF THE LOWER MANTLE IS ALWAYS 2
+<                MAY REQUIRE MODIFICATION FOR YOUR PURPOSES! */
+<             for(m=1;m<=E->sphere.caps_per_proc;m++)
+<                 for(i=1;i<=nel;i++)   {
+<                     l = E->mat[m][i] - 1;
+< 
+<                     if(E->control.mat_control==0)
+<                         tempa = E->viscosity.N0[l];
+<                     else if(E->control.mat_control==1)
+<                         tempa = E->viscosity.N0[l]*E->VIP[m][i];
+<     
+<                     for(kk=1;kk<=ends;kk++) {
+<                         TT[kk] = E->T[m][E->ien[m][i].node[kk]];
+<                         zz[kk] = (1.-E->sx[m][3][E->ien[m][i].node[kk]]);
+<                     }
+<     
+<                     for(jj=1;jj<=vpts;jj++) {
+<                         temp=0.0;
+<                         zzz=0.0;
+<                         for(kk=1;kk<=ends;kk++)   {
+<                             temp += TT[kk] * E->N.vpt[GNVINDEX(kk,jj)];
+<                             zzz += zz[kk] * E->N.vpt[GNVINDEX(kk,jj)];
+<                         }
+<     
+<                         if(l==3) {
+<                             tempa = 2.0+13.91966133*(zzz-0.105164024);
+<                         }
+<     
+<                         EEta[m][ (i-1)*vpts + jj ] = tempa *
+<                             exp( E->viscosity.E[l] * (E->viscosity.T[l] - temp));
+<     
+<                     }
+<                 }
+<         break;
+< 
+---
+> 	
+diff -r CitcomS-assim-r88-source/module/bindings.c ../base/CitcomS-assim-base/module/bindings.c
+113,118d112
+<     /* XXX DJB */
+<     {pyCitcom_BC_update_internal_velocity__name__,
+<      pyCitcom_BC_update_internal_velocity,
+<      METH_VARARGS,
+<      pyCitcom_BC_update_internal_velocity__doc__},
+< 
+diff -r CitcomS-assim-r88-source/module/misc.c ../base/CitcomS-assim-base/module/misc.c
+307,328d306
+< /* XXX DJB */
+< char pyCitcom_BC_update_internal_velocity__doc__[] = "";
+< char pyCitcom_BC_update_internal_velocity__name__[] = "BC_update_internal_velocity";
+< 
+< PyObject * pyCitcom_BC_update_internal_velocity(PyObject *self, PyObject *args)
+< {
+<     PyObject *obj;
+<     struct All_variables* E;
+< 
+<     if (!PyArg_ParseTuple(args, "O:BC_update_internal_velocity", &obj))
+<         return NULL;
+< 
+<     E = (struct All_variables*)(PyCObject_AsVoidPtr(obj));
+< 
+<     if(E->control.internal_vbcs_file==1)
+<         internal_velocity_bc(E);
+< 
+<     Py_INCREF(Py_None);
+<     return Py_None;
+< }
+< 
+< 
+diff -r CitcomS-assim-r88-source/module/misc.h ../base/CitcomS-assim-base/module/misc.h
+95,99d94
+< // DJB
+< extern char pyCitcom_BC_update_internal_velocity__name__[];
+< extern char pyCitcom_BC_update_internal_velocity__doc__[];
+< PyObject * pyCitcom_BC_update_internal_velocity(PyObject *, PyObject *);
+< 
+diff -r CitcomS-assim-r88-source/module/setProperties.c ../base/CitcomS-assim-base/module/setProperties.c
+163a164
+> 
+385,401d385
+<     getIntProperty(properties, "lith_age_depth_function", E->control.lith_age_depth_function, fp);
+<     getFloatProperty(properties, "lith_age_exponent", E->control.lith_age_exponent, fp);
+<     getFloatProperty(properties, "lith_age_stencil_value", E->control.lith_age_stencil_value, fp);
+<     getFloatProperty(properties, "lith_age_min", E->control.lith_age_min, fp);
+< 
+<     /* XXX DJB */
+<     getIntProperty(properties, "slab_assim", E->control.slab_assim, fp);
+<     getStringProperty(properties, "slab_assim_file", E->control.slab_assim_file, fp);
+<     /* getIntProperty(properties, "slab_assim_time", E->control.slab_assim_time, fp); */
+< 
+<     /* XXX DJB */
+<     getIntProperty(properties, "file_internal_vbcs", E->control.internal_vbcs_file, fp);
+<     getStringProperty(properties, "vel_internal_file", E->control.velocity_internal_file, fp);
+< 
+<     /* XXX DJB, for dynamic topography restarts */
+<     getIntProperty(properties, "exclude_buoy_above_znode", E->control.exclude_buoy_above_znode, fp);
+<     getIntProperty(properties, "exclude_buoy_znode", E->control.exclude_buoy_znode, fp);
+723d706
+< 
+726,732d708
+<         // DJB
+<         getIntProperty(properties, "hybrid_method", E->composition.hybrid_method, fp);
+<         // hybrid_method uses the same functions as the ratio method
+<         // so must make sure that ratio method is activated (ibuoy_type=1)
+<         if (E->composition.hybrid_method)
+<             E->composition.ibuoy_type==1;
+< 
+742d717
+< 

@@ -1,0 +1,29 @@
+K 25
+svn:wc:ra_dav:version-url
+V 73
+/svn/cig/!svn/ver/5561/mc/3D/CitcomS/trunk/visual/Mayavi2/citcoms_plugins
+END
+README
+K 25
+svn:wc:ra_dav:version-url
+V 80
+/svn/cig/!svn/ver/5558/mc/3D/CitcomS/trunk/visual/Mayavi2/citcoms_plugins/README
+END
+custom_ui.py
+K 25
+svn:wc:ra_dav:version-url
+V 86
+/svn/cig/!svn/ver/5549/mc/3D/CitcomS/trunk/visual/Mayavi2/citcoms_plugins/custom_ui.py
+END
+__init__.py
+K 25
+svn:wc:ra_dav:version-url
+V 85
+/svn/cig/!svn/ver/5542/mc/3D/CitcomS/trunk/visual/Mayavi2/citcoms_plugins/__init__.py
+END
+utils.py
+K 25
+svn:wc:ra_dav:version-url
+V 82
+/svn/cig/!svn/ver/5543/mc/3D/CitcomS/trunk/visual/Mayavi2/citcoms_plugins/utils.py
+END

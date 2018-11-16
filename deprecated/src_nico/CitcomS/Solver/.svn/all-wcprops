@@ -1,0 +1,59 @@
+K 25
+svn:wc:ra_dav:version-url
+V 58
+/svn/cig/!svn/ver/15644/mc/3D/CitcomS/trunk/CitcomS/Solver
+END
+MultiC_RegionalSolver.py
+K 25
+svn:wc:ra_dav:version-url
+V 82
+/svn/cig/!svn/ver/7683/mc/3D/CitcomS/trunk/CitcomS/Solver/MultiC_RegionalSolver.py
+END
+CoupledFullSolver.py
+K 25
+svn:wc:ra_dav:version-url
+V 79
+/svn/cig/!svn/ver/14642/mc/3D/CitcomS/trunk/CitcomS/Solver/CoupledFullSolver.py
+END
+MultiC_FullSolver.py
+K 25
+svn:wc:ra_dav:version-url
+V 78
+/svn/cig/!svn/ver/7683/mc/3D/CitcomS/trunk/CitcomS/Solver/MultiC_FullSolver.py
+END
+Solver.py
+K 25
+svn:wc:ra_dav:version-url
+V 68
+/svn/cig/!svn/ver/15644/mc/3D/CitcomS/trunk/CitcomS/Solver/Solver.py
+END
+RegionalSolver.py
+K 25
+svn:wc:ra_dav:version-url
+V 76
+/svn/cig/!svn/ver/14642/mc/3D/CitcomS/trunk/CitcomS/Solver/RegionalSolver.py
+END
+FullSolver.py
+K 25
+svn:wc:ra_dav:version-url
+V 72
+/svn/cig/!svn/ver/14642/mc/3D/CitcomS/trunk/CitcomS/Solver/FullSolver.py
+END
+__init__.py
+K 25
+svn:wc:ra_dav:version-url
+V 69
+/svn/cig/!svn/ver/7683/mc/3D/CitcomS/trunk/CitcomS/Solver/__init__.py
+END
+CoupledSolver.py
+K 25
+svn:wc:ra_dav:version-url
+V 75
+/svn/cig/!svn/ver/15643/mc/3D/CitcomS/trunk/CitcomS/Solver/CoupledSolver.py
+END
+CoupledRegionalSolver.py
+K 25
+svn:wc:ra_dav:version-url
+V 83
+/svn/cig/!svn/ver/14642/mc/3D/CitcomS/trunk/CitcomS/Solver/CoupledRegionalSolver.py
+END

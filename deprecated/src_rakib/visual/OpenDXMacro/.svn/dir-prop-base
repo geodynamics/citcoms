@@ -1,0 +1,17 @@
+K 10
+svn:ignore
+V 249
+Makefile.in
+Makefile
+CitcomSImport.net
+CitcomSImportHDF5.net
+CitcomSSurfaceImport.net
+CitcomSSurfaceHeatflux.net
+CitcomSSurfaceTopo.net
+CitcomSViscosity.net
+CitcomSFullImport.net
+CitcomSTemperature.net
+CitcomSVelocity.net
+CitcomSSurfaceVelocity.net
+
+END

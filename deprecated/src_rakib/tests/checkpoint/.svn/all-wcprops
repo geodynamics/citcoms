@@ -1,0 +1,23 @@
+K 25
+svn:wc:ra_dav:version-url
+V 59
+/svn/cig/!svn/ver/7843/mc/3D/CitcomS/trunk/tests/checkpoint
+END
+run.sh
+K 25
+svn:wc:ra_dav:version-url
+V 66
+/svn/cig/!svn/ver/7843/mc/3D/CitcomS/trunk/tests/checkpoint/run.sh
+END
+tracer.cfg
+K 25
+svn:wc:ra_dav:version-url
+V 70
+/svn/cig/!svn/ver/7840/mc/3D/CitcomS/trunk/tests/checkpoint/tracer.cfg
+END
+restart.cfg
+K 25
+svn:wc:ra_dav:version-url
+V 71
+/svn/cig/!svn/ver/7842/mc/3D/CitcomS/trunk/tests/checkpoint/restart.cfg
+END

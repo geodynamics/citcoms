@@ -1,0 +1,59 @@
+# CitcomS
+cpu_limits_in_seconds=360000000
+minstep=1100
+
+# CitcomS.controller
+storage_spacing=100
+
+# CitcomS.solver
+datadir_old=./ic
+datafile=cookbook5
+datafile_old=cookbook5
+rayleigh=4.07e+08
+
+# CitcomS.solver.mesher
+coor=1
+coor_file=./coor.dat
+fi_max=1
+fi_min=0
+nodex=17
+nodey=65
+nodez=33
+nprocx=1
+nprocy=2
+nprocz=1
+theta_max=2.0708
+theta_min=1.0708
+
+# CitcomS.solver.tsolver
+finetunedt=0.75
+monitor_max_T=on
+
+# CitcomS.solver.bc
+topvbc=1
+
+# CitcomS.solver.ic
+num_perturbations=1
+perturbl=1
+perturblayer=5
+perturbm=1
+perturbmag=0.05
+solution_cycles_init=0
+tic_method=-1
+
+# CitcomS.solver.param
+file_vbcs=on
+start_age=55
+vel_bound_file=./velocity/bvel.dat
+
+# CitcomS.solver.visc
+TDEPV=on
+VMAX=on
+VMIN=on
+num_mat=4
+visc0=100,0.003,1,2
+viscE=24,24,24,24
+viscT=0.182,0.182,0.182,0.182
+visc_max=100.0
+visc_min=0.01
+

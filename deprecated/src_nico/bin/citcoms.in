@@ -1,0 +1,71 @@
+#!@INTERPRETER@
+# -*- Python -*-
+#
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#
+#<LicenseText>
+#
+# CitcomS.py by Eh Tan, Eun-seo Choi, and Pururav Thoutireddy.
+# Copyright (C) 2002-2005, California Institute of Technology.
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+#
+#</LicenseText>
+#
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#
+
+__requires__ = "CitcomS"
+
+# re-create the PYTHONPATH at 'configure' time
+import os.path, sys, site
+path = '@PYTHONPATH@'.split(':')
+path.reverse()
+for directory in path:
+    if directory:
+        directory = os.path.abspath(directory)
+        sys.path.insert(1, directory)
+        site.addsitedir(directory)
+
+
+# Decide which application to run. The default is the single-solver (uncoupled)
+# application, which is right choice in most situaction.
+#
+# If the first command line argument is '--coupled' or '--multicoupled',
+# a different application (for coupled models) will be used. In this case, the
+# first command line argument will be removed, so it won't be interpreted as
+# an input parameter by the application.
+
+if len(sys.argv) < 2:
+    # no command line argument, use SimpleApp, a single solver application
+    from CitcomS.SimpleApp import SimpleApp as App
+elif sys.argv[1] == '--coupled':
+    # a dual solver application
+    from CitcomS.CoupledApp import CoupledApp as App
+    del sys.argv[1]
+elif sys.argv[1] == '--multicoupled':
+    # a triple solver application
+    from CitcomS.MultiCoupledApp import MultiCoupledApp as App
+    del sys.argv[1]
+else:
+    # use SimpleApp by default
+    from CitcomS.SimpleApp import SimpleApp as App
+
+
+# start the application
+from pyre.applications import start
+start(applicationClass=App)
+
+#  end of file

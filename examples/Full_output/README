@@ -1,0 +1,5 @@
+Modified version of ../Full/ to test the modified output routine.
+Data is output in increments of 150 Myr (using a step-over approach) and the start age is 1000 Ma
+Also uses 33 x 33 x 33 nodes per cap and the multigrid solver
+
+This is a useful unit test for output routines

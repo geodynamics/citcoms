@@ -1,0 +1,10 @@
+Metadata-Version: 1.0
+Name: CitcomS
+Version: 3.1
+Summary: A finite element mantle convection code.
+Home-page: http://www.geodynamics.org/cig/software/packages/mc/citcoms/
+Author: Louis Moresi, et al.
+Author-email: cig-mc@geodynamics.org
+License: GPL
+Description: CitcomS is a finite element code designed to solve thermal convection problems relevant to Earth's mantle. Written in C, the code runs on a variety of parallel processing computers, including shared and distributed memory platforms.
+Platform: UNKNOWN

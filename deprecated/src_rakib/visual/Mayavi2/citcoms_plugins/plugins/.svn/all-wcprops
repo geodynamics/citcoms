@@ -1,0 +1,29 @@
+K 25
+svn:wc:ra_dav:version-url
+V 81
+/svn/cig/!svn/ver/5550/mc/3D/CitcomS/trunk/visual/Mayavi2/citcoms_plugins/plugins
+END
+CitcomS_hdf_file_reader.py
+K 25
+svn:wc:ra_dav:version-url
+V 108
+/svn/cig/!svn/ver/5550/mc/3D/CitcomS/trunk/visual/Mayavi2/citcoms_plugins/plugins/CitcomS_hdf_file_reader.py
+END
+OpenCitcomSFILES.py
+K 25
+svn:wc:ra_dav:version-url
+V 101
+/svn/cig/!svn/ver/5550/mc/3D/CitcomS/trunk/visual/Mayavi2/citcoms_plugins/plugins/OpenCitcomSFILES.py
+END
+CitcomSHDFUgrid.py
+K 25
+svn:wc:ra_dav:version-url
+V 100
+/svn/cig/!svn/ver/5543/mc/3D/CitcomS/trunk/visual/Mayavi2/citcoms_plugins/plugins/CitcomSHDFUgrid.py
+END
+__init__.py
+K 25
+svn:wc:ra_dav:version-url
+V 93
+/svn/cig/!svn/ver/5542/mc/3D/CitcomS/trunk/visual/Mayavi2/citcoms_plugins/plugins/__init__.py
+END

@@ -1,0 +1,5 @@
+import sys; sys.__plen = len(sys.path)
+./merlin-1.8.egg
+./pythia-0.8.1.11-py2.6.egg
+/short/q97/shared/soft/CitcomSModDtopoRelease
+import sys; new=sys.path[sys.__plen:]; del sys.path[sys.__plen:]; p=getattr(sys,'__egginsert',0); sys.path[p:p]=new; sys.__egginsert = p+len(new)

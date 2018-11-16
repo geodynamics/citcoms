@@ -1,0 +1,20 @@
+#!/usr/bin/env python
+
+def get_var():
+    # get your username on this machine, and make it upper case
+    import os
+    var = os.environ.get("USER")
+    return var.upper()
+
+
+# invariant prefix of datadir
+prefix = "/scratch/"
+
+# invariant suffix of datadir
+suffix = ""
+
+# get the machine-dependent part of datadir
+var_path = get_var()
+
+# construct the full string for datadir
+print "%s%s%s" % ( prefix, var_path, suffix )

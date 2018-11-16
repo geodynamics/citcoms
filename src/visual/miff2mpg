@@ -1,0 +1,92 @@
+#!/bin/bash
+
+function usage ()
+{
+echo 1>&2
+echo "Usage: miff2mpg [-f frames_per_second]" 1>&2
+echo "                 [-o outfile.mpg]" 1>&2
+echo "                 file.miff" 1>&2
+echo 1>&2
+echo "  Converts file.miff to file.mpg (or outfile.mpg if -o is given)" 1>&2
+echo "  using frames_per_second as framerate (defaults to 25)" 1>&2
+echo 1>&2
+echo "  Assumes mjpeg tools and \"convert\" (ImageMagick) is installed." 1>&2
+echo  1>&2
+echo "  file.miff should contain all the frames to be animated. " 1>&2
+echo "  $0 does not accept a file list (e.g. file*.miff) as an argument. " 1>&2
+echo  1>&2
+echo "  This script was originally written by Ulrich Oelmann <Ulrich.Oelmann@iws.uni-stuttgart.de>. " 1>&2
+echo "  See http://opendx.npaci.edu/mail/opendx-users/2004.10/msg00026.html" 1>&2
+echo  1>&2
+exit 0
+}
+
+if [ $[$# < 1 ] = 1 ]; then
+    usage
+fi
+
+FOPTION=25;
+OOPTION="";
+
+while getopts "f:o:" OPTION; do
+    case $OPTION in
+	f) FOPTION=$OPTARG;;
+	o) OOPTION=$OPTARG;;
+	?) usage;;
+    esac
+done
+
+shift $[$OPTIND-1]
+
+if [ x"$OOPTION" == "x" ]; then
+    OOPTION=`basename $1 .miff`
+    OOPTION=`basename $OOPTION .MIFF`
+    OOPTION=`dirname $1`/$OOPTION".mpg"
+fi
+
+TMPDIR=`mktemp -d miff2xvid.XXXXXXXXXX`
+mkdir -p $TMPDIR
+
+declare -i FRAMES X Y
+
+echo "######### Analyzing $1"
+
+IDENTIFY=`identify -format "%n %w %h" $1 | \
+    tail -n 2 | head -n 1`
+FRAMES=`echo $IDENTIFY | gawk '{ print $1 }'`
+X=`echo $IDENTIFY | gawk '{ print $2 }'`
+Y=`echo $IDENTIFY | gawk '{ print $3 }'`
+
+FRAMES=$(( FRAMES-1 ))
+
+echo "######### Extracting $(( FRAMES+1 )) frames out of $1"
+
+convert -quality 9 $1 $TMPDIR/frame.ppm
+
+echo "######### Encoding animation to $OOPTION"
+echo
+
+ppmtoy4m -F $FOPTION:1 $TMPDIR/frame.ppm | mpeg2enc -o $OOPTION --video-bitrate 1151 --format 3 --motion-search-radius 32 --no-constraints
+
+#echo "######### Extracting $(( FRAMES+1 )) frames out of $1"#
+#
+#convert -quality 9 $1 $TMPDIR/frame.png
+#
+#NUMFMT='%06d'
+#for ZAHL in `seq 0 $FRAMES`; do
+#  FNAME=`printf "$TMPDIR/frame.$NUMFMT.png" $ZAHL`
+#  mv $TMPDIR/frame.png.$ZAHL $FNAME
+#done
+#
+#echo "######### Encoding animation to $OOPTION"
+#echo
+#
+#png2yuv -n $(( FRAMES+1 )) -f30 -L0 -Ip -j $TMPDIR/frame.$NUMFMT.png | mpeg2enc -o $OOPTION --video-bitrate 1151 --format 3 --motion-search-radius 32 --no-constraints
+
+rm -rf $TMPDIR
+
+
+# version
+# $Id$
+
+# End of file

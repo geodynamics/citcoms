@@ -1,0 +1,29 @@
+K 25
+svn:wc:ra_dav:version-url
+V 69
+/svn/cig/!svn/ver/15744/mc/3D/CitcomS/trunk/CitcomS/Components/Sphere
+END
+__init__.py
+K 25
+svn:wc:ra_dav:version-url
+V 80
+/svn/cig/!svn/ver/3976/mc/3D/CitcomS/trunk/CitcomS/Components/Sphere/__init__.py
+END
+Sphere.py
+K 25
+svn:wc:ra_dav:version-url
+V 79
+/svn/cig/!svn/ver/15744/mc/3D/CitcomS/trunk/CitcomS/Components/Sphere/Sphere.py
+END
+RegionalSphere.py
+K 25
+svn:wc:ra_dav:version-url
+V 86
+/svn/cig/!svn/ver/5368/mc/3D/CitcomS/trunk/CitcomS/Components/Sphere/RegionalSphere.py
+END
+FullSphere.py
+K 25
+svn:wc:ra_dav:version-url
+V 82
+/svn/cig/!svn/ver/5368/mc/3D/CitcomS/trunk/CitcomS/Components/Sphere/FullSphere.py
+END

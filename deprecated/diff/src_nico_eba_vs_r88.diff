@@ -1,0 +1,280 @@
+diff -r use_these_for_eba_runs/Advection_diffusion.c /home/ubelix/csh/bower/mc/CitcomS/citcoms_assim/legacy/release/CitcomS-assim-r88-source/lib/Advection_diffusion.c
+782,783c782,783
+<     int e, ez, i;
+<     double visc, temp, matprop;
+---
+>     int e, i;
+>     double visc, temp;
+793,796d792
+<         ez = (e - 1) % E->lmesh.elz + 1;
+<         matprop = 0.5
+<             * (E->refstate.dis[ez] +
+< 			   E->refstate.dis[ez + 1]);
+801c797
+<         heating[e] = matprop * temp * visc * strain_sqr[e];
+---
+>         heating[e] = temp * visc * strain_sqr[e];
+820c816
+<         matprop = 0.0625
+---
+>         matprop = 0.125
+824,825c820
+<             * (E->refstate.gravity[ez] + E->refstate.gravity[ez + 1])
+<             * (E->refstate.dis[ez] + E->refstate.dis[ez + 1]);;
+---
+>             * (E->refstate.gravity[ez] + E->refstate.gravity[ez + 1]);
+855c850
+<         matprop = 0.0625
+---
+>         matprop = 0.125
+859,860c854
+<             * (E->refstate.gravity[ez] + E->refstate.gravity[ez + 1])
+<             * (E->refstate.dis[ez] + E->refstate.dis[ez + 1]);
+---
+>             * (E->refstate.gravity[ez] + E->refstate.gravity[ez + 1]);
+diff -r use_these_for_eba_runs/Material_properties.c /home/ubelix/csh/bower/mc/CitcomS/citcoms_assim/legacy/release/CitcomS-assim-r88-source/lib/Material_properties.c
+51d50
+< 	int i;
+71,80d69
+<     /* The high-bulk modullus code only works for ncomposition==1 */
+<     /*if (!(E->control.tracer && (E->composition.ncomp==1))) {
+<             E->composition.ncomp=1;
+<     } */
+< 
+<     /* reference profile to scale dissipation number */
+<     E->refstate.dis = (double *) malloc((noz+1)*sizeof(double));
+< 
+<     return;
+< 
+115c104
+<       fprintf(stderr, " nz     radius      depth    rho          dis           layer\n");
+---
+>       fprintf(stderr, "   nz     radius      depth    rho              layer\n");
+119c108
+<             fprintf(stderr, "%4d %11f %11f %11e %e %4i\n",
+---
+>             fprintf(stderr, "%6d %11f %11f %11e %5i\n",
+121,122c110
+<                     E->refstate.rho[i],E->refstate.dis[i],
+<                     layers_r(E,E->sx[1][3][i]));
+---
+>                     E->refstate.rho[i],layers_r(E,E->sx[1][3][i]));
+155c143
+<                   &(E->refstate.dis[i]),
+---
+>                   &not_used1,
+162c150
+<         fprintf(stderr, "%d %f %f %f %f %f\n",
+---
+>         fprintf(stderr, "%d %f %f %f %f\n",
+167,168c155
+<                 E->refstate.heat_capacity[i],
+<                 E->refstate.dis[i]);
+---
+>                 E->refstate.heat_capacity[i]);
+191d177
+< 	E->refstate.dis[i] = 1;
+diff -r use_these_for_eba_runs/Viscosity_structures.c /home/ubelix/csh/bower/mc/CitcomS/citcoms_assim/legacy/release/CitcomS-assim-r88-source/lib/Viscosity_structures.c
+1002,1203d1001
+<     case 25:
+<         /* eta = N_0(r) exp(E/(T+T_0) - E/(0.5+T_0)) 
+<         where T is normalized to be within 0...1
+<         N_0(r) increases linearly from 5 to 100 in the lower mantle
+<         (note that this is hard-coded) */
+<         for(m=1;m<=E->sphere.caps_per_proc;m++)
+<             for(i=1;i<=nel;i++)   {
+<                 l = E->mat[m][i] - 1;
+< 
+<                 if(E->control.mat_control) /* switch moved up here TWB */
+<                   tempa = E->viscosity.N0[l] * E->VIP[m][i];
+<                 else
+<                   tempa = E->viscosity.N0[l];
+< 
+<                 for(kk=1;kk<=ends;kk++) {
+<                   TT[kk] = E->T[m][E->ien[m][i].node[kk]];
+<                   zz[kk] = (1.-E->sx[m][3][E->ien[m][i].node[kk]]);
+<                 }
+< 
+<                 for(jj=1;jj<=vpts;jj++) {
+<                     temp=0.0;
+<                     zzz=0.0;
+<                     for(kk=1;kk<=ends;kk++)   {
+<                       TT[kk]=max(TT[kk],zero);
+<                       temp += min(TT[kk],one) * E->N.vpt[GNVINDEX(kk,jj)];
+<                       zzz += zz[kk] * E->N.vpt[GNVINDEX(kk,jj)];
+<                     }
+< 
+<                     if(l==3) {
+<                          tempa = 5.0+275.493297*(zzz-0.105164024);
+<                      }    
+< 
+<                     EEta[m][ (i-1)*vpts + jj ] = tempa*
+<                       exp( E->viscosity.E[l]/(temp+E->viscosity.T[l])
+<                            - E->viscosity.E[l]/(0.5 + E->viscosity.T[l]) );
+<                 }    
+<             }    
+<         break;
+< 
+<         case 26:
+<         /* eta = N_0(r) exp(E/(T+T_0) - E/(0.5+T_0)) 
+<  *         where T is normalized to be within 0...1
+<  *                 N_0(r) increases linearly from 5 to 80 in the lower mantle
+<  *                         (note that this is hard-coded) */
+<         for(m=1;m<=E->sphere.caps_per_proc;m++)
+<             for(i=1;i<=nel;i++)   {
+<                 l = E->mat[m][i] - 1; 
+< 
+<                 if(E->control.mat_control) /* switch moved up here TWB */
+<                   tempa = E->viscosity.N0[l] * E->VIP[m][i];
+<                 else 
+<                   tempa = E->viscosity.N0[l];
+< 
+<                 for(kk=1;kk<=ends;kk++) {
+<                   TT[kk] = E->T[m][E->ien[m][i].node[kk]];
+<                   zz[kk] = (1.-E->sx[m][3][E->ien[m][i].node[kk]]);
+<                 }    
+< 
+<                 for(jj=1;jj<=vpts;jj++) {
+<                     temp=0.0;
+<                     zzz=0.0;
+<                     for(kk=1;kk<=ends;kk++)   {
+<                       TT[kk]=max(TT[kk],zero);
+<                       temp += min(TT[kk],one) * E->N.vpt[GNVINDEX(kk,jj)];
+<                       zzz += zz[kk] * E->N.vpt[GNVINDEX(kk,jj)];
+<                     }    
+< 
+<                     if(l==3) {
+<                          tempa = 5.0+217.494708*(zzz-0.105164024);
+<                      }    
+< 
+<                     EEta[m][ (i-1)*vpts + jj ] = tempa*
+<                       exp( E->viscosity.E[l]/(temp+E->viscosity.T[l])
+<                            - E->viscosity.E[l]/(0.5 + E->viscosity.T[l]) );
+<                 }    
+<             }    
+<         break;
+< 
+<         case 27:
+<         /* eta = N_0(r) exp(E/(T+T_0) - E/(0.5+T_0)) 
+<  *            where T is normalized to be within 0...1
+<  *                             N_0(r) increases linearly from 10 to 100 between 1000 and 2867 km depth (Rudolph et al., 2015)
+<  *                                              as suggested by Steinberger & Calderwood (2006), Zhang et al. (2010), etc...
+<  *                                                               (note that this is hard-coded)
+<  *                                                                                   */
+<         for(m=1;m<=E->sphere.caps_per_proc;m++)
+<             for(i=1;i<=nel;i++)   {
+<                 l = E->mat[m][i] - 1; 
+< 
+<                 if(E->control.mat_control) /* switch moved up here TWB */
+<                   tempa = E->viscosity.N0[l] * E->VIP[m][i];
+<                 else 
+<                   tempa = E->viscosity.N0[l];
+< 
+<                 for(kk=1;kk<=ends;kk++) {
+<                   TT[kk] = E->T[m][E->ien[m][i].node[kk]];
+<                   zz[kk] = (1.-E->sx[m][3][E->ien[m][i].node[kk]]);
+<                 }    
+< 
+<                 for(jj=1;jj<=vpts;jj++) {
+<                     temp=0.0;
+<                     zzz=0.0;
+<                     for(kk=1;kk<=ends;kk++)   {
+<                       TT[kk]=max(TT[kk],zero);
+<                       temp += min(TT[kk],one) * E->N.vpt[GNVINDEX(kk,jj)];
+<                       zzz += zz[kk] * E->N.vpt[GNVINDEX(kk,jj)];
+<                     }
+< 
+<                     if(l==3) {
+<                          tempa = 10.0+307.125307*(zzz-0.15696);
+<                      }
+< 
+<                     EEta[m][ (i-1)*vpts + jj ] = tempa*
+<                       exp( E->viscosity.E[l]/(temp+E->viscosity.T[l])
+<                            - E->viscosity.E[l]/(0.5 +E->viscosity.T[l]) );
+<                 }
+<             }
+<         break;
+< 
+<     case 28:
+<         /* eta = N_0(r) exp(E/(T+T_0) - E/(0.5+T_0)) 
+<            where T is normalized to be within 0...1
+<                  N_0(r) increases linearly from 2 to 100 in the lower mantle
+<                  as suggested by Steinberger & Calderwood (2006), Zhang et al. (2010), etc...
+< 		 (note that this is hard-coded)
+<          */
+<         for(m=1;m<=E->sphere.caps_per_proc;m++)
+<             for(i=1;i<=nel;i++)   {
+<                 l = E->mat[m][i] - 1;
+< 
+<                 if(E->control.mat_control) /* switch moved up here TWB */
+<                   tempa = E->viscosity.N0[l] * E->VIP[m][i];
+<                 else
+<                   tempa = E->viscosity.N0[l];
+< 
+<                 for(kk=1;kk<=ends;kk++) {
+<                   TT[kk] = E->T[m][E->ien[m][i].node[kk]];
+<                   zz[kk] = (1.-E->sx[m][3][E->ien[m][i].node[kk]]);
+<                 }
+< 
+<                 for(jj=1;jj<=vpts;jj++) {
+<                     temp=0.0;
+<                     zzz=0.0;
+<                     for(kk=1;kk<=ends;kk++)   {
+<                       TT[kk]=max(TT[kk],zero);
+<                       temp += min(TT[kk],one) * E->N.vpt[GNVINDEX(kk,jj)];
+<                       zzz += zz[kk] * E->N.vpt[GNVINDEX(kk,jj)];
+<                     }
+< 
+<                     if(l==3) {
+<                          tempa = 2.0+220.305922*(zzz-0.105164024);
+<                      }
+< 
+<                     EEta[m][ (i-1)*vpts + jj ] = tempa*
+<                       exp( E->viscosity.E[l]/(temp+E->viscosity.T[l])
+<                            - E->viscosity.E[l]/(0.5 +E->viscosity.T[l]) );
+<                 }
+<             }
+<         break;
+< 
+<     case 29:
+<         /* eta = N_0(r) exp(E/(T+T_0) - E/(0.5+T_0)) 
+<            where T is normalized to be within 0...1
+<                  N_0(r) increases linearly from 10 to 100 in the lower mantle
+<                  as suggested by Steinberger & Calderwood (2006), Zhang et al. (2010), etc...
+< 		 (note that this is hard-coded)
+<            This is a tweak to the implementation of Flament et al. (2014); see case 22
+<          */
+<         for(m=1;m<=E->sphere.caps_per_proc;m++)
+<             for(i=1;i<=nel;i++)   {
+<                 l = E->mat[m][i] - 1;
+< 
+<                 if(E->control.mat_control) /* switch moved up here TWB */
+<                   tempa = E->viscosity.N0[l] * E->VIP[m][i];
+<                 else
+<                   tempa = E->viscosity.N0[l];
+< 
+<                 for(kk=1;kk<=ends;kk++) {
+<                   TT[kk] = E->T[m][E->ien[m][i].node[kk]];
+<                   zz[kk] = (1.-E->sx[m][3][E->ien[m][i].node[kk]]);
+<                 }
+< 
+<                 for(jj=1;jj<=vpts;jj++) {
+<                     temp=0.0;
+<                     zzz=0.0;
+<                     for(kk=1;kk<=ends;kk++)   {
+<                       TT[kk]=max(TT[kk],zero);
+<                       temp += min(TT[kk],one) * E->N.vpt[GNVINDEX(kk,jj)];
+<                       zzz += zz[kk] * E->N.vpt[GNVINDEX(kk,jj)];
+<                     }
+< 
+<                     if(l==3) {
+<                          tempa = 10.0+202.321766*(zzz-0.105164024);
+<                      }
+< 
+<                     EEta[m][ (i-1)*vpts + jj ] = tempa*
+<                       exp( E->viscosity.E[l]/(temp+E->viscosity.T[l])
+<                            - E->viscosity.E[l]/(0.5 +E->viscosity.T[l]) );
+<                 }
+<             }
+<         break;
+< 

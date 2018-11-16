@@ -1,0 +1,46 @@
+# -*- Python -*-
+
+def template():
+    from pyre.schedulers import BatchScriptTemplate
+
+    class SGEBatchScriptTemplate(BatchScriptTemplate):
+
+        def __init__(self):
+            BatchScriptTemplate.__init__(self, "sge")
+        
+        def render(self):
+            from StringIO import StringIO
+
+            out = StringIO()
+            scheduler = self.scheduler
+            job = self.job
+            
+            print >>out, "#!%s" % scheduler.shell
+            print >>out, "#$ -S", scheduler.shell
+            print >>out, "#$ -cwd"
+            print >>out, "#$ -N", job.task
+            if job.queue:
+                print >>out, "#$ -q", job.queue
+            if max(job.walltime):
+                print >>out, "#$ -l h_rt=%d:%02d:%02d" % job.walltime[0:3]
+            print >>out, "#$ -pe", scheduler.peName, eval(scheduler.peNumber, dict(n = job.nodes))
+            if job.stdout:
+                print >>out, "#$ -o", job.stdout
+            if job.stderr:
+                print >>out, "#$ -e", job.stderr
+            for option in scheduler.qsubOptions:
+                print >>out, "#$", option
+            print >>out
+            print >>out, job.executable, ' '.join(job.arguments)
+            print >>out
+            if job.comments:
+                print >>out, "# ~~~~ comments ~~~~"
+                for line in job.comments:
+                    print >>out, "#", line
+            print >>out
+            print >>out, "# ~~~~ submit command ~~~~"
+            print >>out, "# %s < [script]" % scheduler.command
+            
+            return out.getvalue()
+    
+    return SGEBatchScriptTemplate()

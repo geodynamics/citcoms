@@ -1,0 +1,41 @@
+K 25
+svn:wc:ra_dav:version-url
+V 74
+/svn/cig/!svn/ver/5541/mc/3D/CitcomS/trunk/visual/Mayavi2/original_plugins
+END
+Citcoms_Hdf2Vtk.c
+K 25
+svn:wc:ra_dav:version-url
+V 92
+/svn/cig/!svn/ver/5541/mc/3D/CitcomS/trunk/visual/Mayavi2/original_plugins/Citcoms_Hdf2Vtk.c
+END
+README
+K 25
+svn:wc:ra_dav:version-url
+V 81
+/svn/cig/!svn/ver/5541/mc/3D/CitcomS/trunk/visual/Mayavi2/original_plugins/README
+END
+Citcoms_HdfDisplay.py
+K 25
+svn:wc:ra_dav:version-url
+V 96
+/svn/cig/!svn/ver/5541/mc/3D/CitcomS/trunk/visual/Mayavi2/original_plugins/Citcoms_HdfDisplay.py
+END
+Citcoms_Hdf2Vtk.py
+K 25
+svn:wc:ra_dav:version-url
+V 93
+/svn/cig/!svn/ver/5541/mc/3D/CitcomS/trunk/visual/Mayavi2/original_plugins/Citcoms_Hdf2Vtk.py
+END
+Citcoms_VtkDisplay.py
+K 25
+svn:wc:ra_dav:version-url
+V 96
+/svn/cig/!svn/ver/5541/mc/3D/CitcomS/trunk/visual/Mayavi2/original_plugins/Citcoms_VtkDisplay.py
+END
+__init__.py
+K 25
+svn:wc:ra_dav:version-url
+V 86
+/svn/cig/!svn/ver/5541/mc/3D/CitcomS/trunk/visual/Mayavi2/original_plugins/__init__.py
+END

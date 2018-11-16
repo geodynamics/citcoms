@@ -1,0 +1,45 @@
+# -*- Python -*-
+
+def template():
+    from pyre.schedulers import BatchScriptTemplate
+
+    class PBSBatchScriptTemplate(BatchScriptTemplate):
+
+        def __init__(self):
+            BatchScriptTemplate.__init__(self, "pbs")
+        
+        def render(self):
+            from StringIO import StringIO
+
+            out = StringIO()
+            scheduler = self.scheduler
+            job = self.job
+            
+            print >>out, "#!%s" % scheduler.shell
+            print >>out, "#PBS -S", scheduler.shell
+            print >>out, "#PBS -N", job.task
+            if job.queue:
+                print >>out, "#PBS -q", job.queue
+            if job.stdout:
+                print >>out, "#PBS -o", job.stdout
+            if job.stderr:
+                print >>out, "#PBS -e", job.stderr
+            if job.resourceList:
+                print >>out, "#PBS -l", ','.join(job.resourceList)
+            for option in scheduler.qsubOptions:
+                print >>out, "#PBS", option
+            print >>out
+            print >>out, "cd $PBS_O_WORKDIR"
+            print >>out, job.executable, ' '.join(job.arguments)
+            print >>out
+            if job.comments:
+                print >>out, "# ~~~~ comments ~~~~"
+                for line in job.comments:
+                    print >>out, "#", line
+            print >>out
+            print >>out, "# ~~~~ submit command ~~~~"
+            print >>out, "# %s < [script]" % scheduler.command
+            
+            return out.getvalue()
+    
+    return PBSBatchScriptTemplate()

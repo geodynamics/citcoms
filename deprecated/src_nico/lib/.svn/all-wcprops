@@ -1,0 +1,533 @@
+K 25
+svn:wc:ra_dav:version-url
+V 47
+/svn/cig/!svn/ver/16781/mc/3D/CitcomS/trunk/lib
+END
+Full_obsolete.c
+K 25
+svn:wc:ra_dav:version-url
+V 62
+/svn/cig/!svn/ver/8275/mc/3D/CitcomS/trunk/lib/Full_obsolete.c
+END
+Problem_related.c
+K 25
+svn:wc:ra_dav:version-url
+V 65
+/svn/cig/!svn/ver/14360/mc/3D/CitcomS/trunk/lib/Problem_related.c
+END
+Determine_net_rotation.c
+K 25
+svn:wc:ra_dav:version-url
+V 72
+/svn/cig/!svn/ver/14275/mc/3D/CitcomS/trunk/lib/Determine_net_rotation.c
+END
+parallel_related.h
+K 25
+svn:wc:ra_dav:version-url
+V 66
+/svn/cig/!svn/ver/14641/mc/3D/CitcomS/trunk/lib/parallel_related.h
+END
+Regional_geometry_cartesian.c
+K 25
+svn:wc:ra_dav:version-url
+V 77
+/svn/cig/!svn/ver/14352/mc/3D/CitcomS/trunk/lib/Regional_geometry_cartesian.c
+END
+Full_geometry_cartesian.c
+K 25
+svn:wc:ra_dav:version-url
+V 73
+/svn/cig/!svn/ver/14352/mc/3D/CitcomS/trunk/lib/Full_geometry_cartesian.c
+END
+Initial_temperature.c
+K 25
+svn:wc:ra_dav:version-url
+V 69
+/svn/cig/!svn/ver/16778/mc/3D/CitcomS/trunk/lib/Initial_temperature.c
+END
+global_defs.h
+K 25
+svn:wc:ra_dav:version-url
+V 61
+/svn/cig/!svn/ver/16778/mc/3D/CitcomS/trunk/lib/global_defs.h
+END
+parsing.h
+K 25
+svn:wc:ra_dav:version-url
+V 56
+/svn/cig/!svn/ver/3979/mc/3D/CitcomS/trunk/lib/parsing.h
+END
+phase_change.h
+K 25
+svn:wc:ra_dav:version-url
+V 61
+/svn/cig/!svn/ver/3979/mc/3D/CitcomS/trunk/lib/phase_change.h
+END
+Checkpoints.c
+K 25
+svn:wc:ra_dav:version-url
+V 61
+/svn/cig/!svn/ver/14233/mc/3D/CitcomS/trunk/lib/Checkpoints.c
+END
+Obsolete.c
+K 25
+svn:wc:ra_dav:version-url
+V 58
+/svn/cig/!svn/ver/14359/mc/3D/CitcomS/trunk/lib/Obsolete.c
+END
+Regional_read_input_from_files.c
+K 25
+svn:wc:ra_dav:version-url
+V 80
+/svn/cig/!svn/ver/16067/mc/3D/CitcomS/trunk/lib/Regional_read_input_from_files.c
+END
+advection.h
+K 25
+svn:wc:ra_dav:version-url
+V 58
+/svn/cig/!svn/ver/7875/mc/3D/CitcomS/trunk/lib/advection.h
+END
+Advection_diffusion.c
+K 25
+svn:wc:ra_dav:version-url
+V 69
+/svn/cig/!svn/ver/11757/mc/3D/CitcomS/trunk/lib/Advection_diffusion.c
+END
+Sphere_util.c
+K 25
+svn:wc:ra_dav:version-url
+V 60
+/svn/cig/!svn/ver/8976/mc/3D/CitcomS/trunk/lib/Sphere_util.c
+END
+Ggrd_handling.c
+K 25
+svn:wc:ra_dav:version-url
+V 63
+/svn/cig/!svn/ver/16778/mc/3D/CitcomS/trunk/lib/Ggrd_handling.c
+END
+Regional_tracer_advection.c
+K 25
+svn:wc:ra_dav:version-url
+V 75
+/svn/cig/!svn/ver/14233/mc/3D/CitcomS/trunk/lib/Regional_tracer_advection.c
+END
+Full_boundary_conditions.c
+K 25
+svn:wc:ra_dav:version-url
+V 74
+/svn/cig/!svn/ver/16402/mc/3D/CitcomS/trunk/lib/Full_boundary_conditions.c
+END
+Full_tracer_advection.c
+K 25
+svn:wc:ra_dav:version-url
+V 71
+/svn/cig/!svn/ver/15742/mc/3D/CitcomS/trunk/lib/Full_tracer_advection.c
+END
+Viscosity_structures.c
+K 25
+svn:wc:ra_dav:version-url
+V 70
+/svn/cig/!svn/ver/16204/mc/3D/CitcomS/trunk/lib/Viscosity_structures.c
+END
+Output.c
+K 25
+svn:wc:ra_dav:version-url
+V 56
+/svn/cig/!svn/ver/14648/mc/3D/CitcomS/trunk/lib/Output.c
+END
+Citcom_init.c
+K 25
+svn:wc:ra_dav:version-url
+V 61
+/svn/cig/!svn/ver/14641/mc/3D/CitcomS/trunk/lib/Citcom_init.c
+END
+Instructions.c
+K 25
+svn:wc:ra_dav:version-url
+V 62
+/svn/cig/!svn/ver/16778/mc/3D/CitcomS/trunk/lib/Instructions.c
+END
+Material_properties.c
+K 25
+svn:wc:ra_dav:version-url
+V 69
+/svn/cig/!svn/ver/16019/mc/3D/CitcomS/trunk/lib/Material_properties.c
+END
+initial_temperature.h
+K 25
+svn:wc:ra_dav:version-url
+V 68
+/svn/cig/!svn/ver/7837/mc/3D/CitcomS/trunk/lib/initial_temperature.h
+END
+Full_lith_age_read_files.c
+K 25
+svn:wc:ra_dav:version-url
+V 73
+/svn/cig/!svn/ver/7894/mc/3D/CitcomS/trunk/lib/Full_lith_age_read_files.c
+END
+Lith_age.c
+K 25
+svn:wc:ra_dav:version-url
+V 58
+/svn/cig/!svn/ver/14735/mc/3D/CitcomS/trunk/lib/Lith_age.c
+END
+checkpoints.h
+K 25
+svn:wc:ra_dav:version-url
+V 60
+/svn/cig/!svn/ver/7837/mc/3D/CitcomS/trunk/lib/checkpoints.h
+END
+solver.h
+K 25
+svn:wc:ra_dav:version-url
+V 56
+/svn/cig/!svn/ver/13273/mc/3D/CitcomS/trunk/lib/solver.h
+END
+sphere_communication.h
+K 25
+svn:wc:ra_dav:version-url
+V 69
+/svn/cig/!svn/ver/4957/mc/3D/CitcomS/trunk/lib/sphere_communication.h
+END
+tracer_defs.h
+K 25
+svn:wc:ra_dav:version-url
+V 61
+/svn/cig/!svn/ver/16139/mc/3D/CitcomS/trunk/lib/tracer_defs.h
+END
+Drive_solvers.c
+K 25
+svn:wc:ra_dav:version-url
+V 63
+/svn/cig/!svn/ver/16088/mc/3D/CitcomS/trunk/lib/Drive_solvers.c
+END
+advection_diffusion.h
+K 25
+svn:wc:ra_dav:version-url
+V 68
+/svn/cig/!svn/ver/3979/mc/3D/CitcomS/trunk/lib/advection_diffusion.h
+END
+Shape_functions.c
+K 25
+svn:wc:ra_dav:version-url
+V 65
+/svn/cig/!svn/ver/12297/mc/3D/CitcomS/trunk/lib/Shape_functions.c
+END
+element_definitions.h
+K 25
+svn:wc:ra_dav:version-url
+V 68
+/svn/cig/!svn/ver/4718/mc/3D/CitcomS/trunk/lib/element_definitions.h
+END
+Sphere_harmonics.c
+K 25
+svn:wc:ra_dav:version-url
+V 66
+/svn/cig/!svn/ver/12799/mc/3D/CitcomS/trunk/lib/Sphere_harmonics.c
+END
+hdf5_related.h
+K 25
+svn:wc:ra_dav:version-url
+V 61
+/svn/cig/!svn/ver/5323/mc/3D/CitcomS/trunk/lib/hdf5_related.h
+END
+ggrd_handling.h
+K 25
+svn:wc:ra_dav:version-url
+V 63
+/svn/cig/!svn/ver/16778/mc/3D/CitcomS/trunk/lib/ggrd_handling.h
+END
+Output_h5.c
+K 25
+svn:wc:ra_dav:version-url
+V 59
+/svn/cig/!svn/ver/14735/mc/3D/CitcomS/trunk/lib/Output_h5.c
+END
+Mineral_physics_models.c
+K 25
+svn:wc:ra_dav:version-url
+V 72
+/svn/cig/!svn/ver/14838/mc/3D/CitcomS/trunk/lib/Mineral_physics_models.c
+END
+Full_version_dependent.c
+K 25
+svn:wc:ra_dav:version-url
+V 72
+/svn/cig/!svn/ver/16014/mc/3D/CitcomS/trunk/lib/Full_version_dependent.c
+END
+Pan_problem_misc_functions.c
+K 25
+svn:wc:ra_dav:version-url
+V 76
+/svn/cig/!svn/ver/15702/mc/3D/CitcomS/trunk/lib/Pan_problem_misc_functions.c
+END
+Global_operations.c
+K 25
+svn:wc:ra_dav:version-url
+V 67
+/svn/cig/!svn/ver/16014/mc/3D/CitcomS/trunk/lib/Global_operations.c
+END
+Composition_related.c
+K 25
+svn:wc:ra_dav:version-url
+V 69
+/svn/cig/!svn/ver/16139/mc/3D/CitcomS/trunk/lib/Composition_related.c
+END
+convection_variables.h
+K 25
+svn:wc:ra_dav:version-url
+V 70
+/svn/cig/!svn/ver/15054/mc/3D/CitcomS/trunk/lib/convection_variables.h
+END
+Construct_arrays.c
+K 25
+svn:wc:ra_dav:version-url
+V 66
+/svn/cig/!svn/ver/15702/mc/3D/CitcomS/trunk/lib/Construct_arrays.c
+END
+output.h
+K 25
+svn:wc:ra_dav:version-url
+V 56
+/svn/cig/!svn/ver/14356/mc/3D/CitcomS/trunk/lib/output.h
+END
+cgrad_kernel.cu
+K 25
+svn:wc:ra_dav:version-url
+V 63
+/svn/cig/!svn/ver/15432/mc/3D/CitcomS/trunk/lib/cgrad_kernel.cu
+END
+citcom_init.h
+K 25
+svn:wc:ra_dav:version-url
+V 61
+/svn/cig/!svn/ver/14642/mc/3D/CitcomS/trunk/lib/citcom_init.h
+END
+Regional_sphere_related.c
+K 25
+svn:wc:ra_dav:version-url
+V 73
+/svn/cig/!svn/ver/14639/mc/3D/CitcomS/trunk/lib/Regional_sphere_related.c
+END
+Convection.c
+K 25
+svn:wc:ra_dav:version-url
+V 60
+/svn/cig/!svn/ver/16020/mc/3D/CitcomS/trunk/lib/Convection.c
+END
+Full_sphere_related.c
+K 25
+svn:wc:ra_dav:version-url
+V 69
+/svn/cig/!svn/ver/14352/mc/3D/CitcomS/trunk/lib/Full_sphere_related.c
+END
+Nodal_mesh.c
+K 25
+svn:wc:ra_dav:version-url
+V 60
+/svn/cig/!svn/ver/16138/mc/3D/CitcomS/trunk/lib/Nodal_mesh.c
+END
+Regional_parallel_related.c
+K 25
+svn:wc:ra_dav:version-url
+V 75
+/svn/cig/!svn/ver/14639/mc/3D/CitcomS/trunk/lib/Regional_parallel_related.c
+END
+Full_parallel_related.c
+K 25
+svn:wc:ra_dav:version-url
+V 71
+/svn/cig/!svn/ver/14639/mc/3D/CitcomS/trunk/lib/Full_parallel_related.c
+END
+material_properties.h
+K 25
+svn:wc:ra_dav:version-url
+V 68
+/svn/cig/!svn/ver/7835/mc/3D/CitcomS/trunk/lib/material_properties.h
+END
+Solver_conj_grad.c
+K 25
+svn:wc:ra_dav:version-url
+V 66
+/svn/cig/!svn/ver/14639/mc/3D/CitcomS/trunk/lib/Solver_conj_grad.c
+END
+Interuption.c
+K 25
+svn:wc:ra_dav:version-url
+V 60
+/svn/cig/!svn/ver/4719/mc/3D/CitcomS/trunk/lib/Interuption.c
+END
+lith_age.h
+K 25
+svn:wc:ra_dav:version-url
+V 57
+/svn/cig/!svn/ver/7837/mc/3D/CitcomS/trunk/lib/lith_age.h
+END
+Full_read_input_from_files.c
+K 25
+svn:wc:ra_dav:version-url
+V 76
+/svn/cig/!svn/ver/16067/mc/3D/CitcomS/trunk/lib/Full_read_input_from_files.c
+END
+BC_util.c
+K 25
+svn:wc:ra_dav:version-url
+V 57
+/svn/cig/!svn/ver/16781/mc/3D/CitcomS/trunk/lib/BC_util.c
+END
+General_matrix_functions.c
+K 25
+svn:wc:ra_dav:version-url
+V 74
+/svn/cig/!svn/ver/15432/mc/3D/CitcomS/trunk/lib/General_matrix_functions.c
+END
+Parallel_util.c
+K 25
+svn:wc:ra_dav:version-url
+V 63
+/svn/cig/!svn/ver/14641/mc/3D/CitcomS/trunk/lib/Parallel_util.c
+END
+Element_calculations.c
+K 25
+svn:wc:ra_dav:version-url
+V 70
+/svn/cig/!svn/ver/16087/mc/3D/CitcomS/trunk/lib/Element_calculations.c
+END
+drive_solvers.h
+K 25
+svn:wc:ra_dav:version-url
+V 62
+/svn/cig/!svn/ver/3979/mc/3D/CitcomS/trunk/lib/drive_solvers.h
+END
+Regional_boundary_conditions.c
+K 25
+svn:wc:ra_dav:version-url
+V 78
+/svn/cig/!svn/ver/16402/mc/3D/CitcomS/trunk/lib/Regional_boundary_conditions.c
+END
+Output_gzdir.c
+K 25
+svn:wc:ra_dav:version-url
+V 62
+/svn/cig/!svn/ver/14360/mc/3D/CitcomS/trunk/lib/Output_gzdir.c
+END
+Size_does_matter.c
+K 25
+svn:wc:ra_dav:version-url
+V 66
+/svn/cig/!svn/ver/14639/mc/3D/CitcomS/trunk/lib/Size_does_matter.c
+END
+Tracer_setup.c
+K 25
+svn:wc:ra_dav:version-url
+V 62
+/svn/cig/!svn/ver/16139/mc/3D/CitcomS/trunk/lib/Tracer_setup.c
+END
+output_h5.h
+K 25
+svn:wc:ra_dav:version-url
+V 58
+/svn/cig/!svn/ver/5323/mc/3D/CitcomS/trunk/lib/output_h5.h
+END
+Parsing.c
+K 25
+svn:wc:ra_dav:version-url
+V 57
+/svn/cig/!svn/ver/16020/mc/3D/CitcomS/trunk/lib/Parsing.c
+END
+Stokes_flow_Incomp.c
+K 25
+svn:wc:ra_dav:version-url
+V 68
+/svn/cig/!svn/ver/16138/mc/3D/CitcomS/trunk/lib/Stokes_flow_Incomp.c
+END
+Phase_change.c
+K 25
+svn:wc:ra_dav:version-url
+V 61
+/svn/cig/!svn/ver/8163/mc/3D/CitcomS/trunk/lib/Phase_change.c
+END
+composition_related.h
+K 25
+svn:wc:ra_dav:version-url
+V 68
+/svn/cig/!svn/ver/8037/mc/3D/CitcomS/trunk/lib/composition_related.h
+END
+Regional_lith_age_read_files.c
+K 25
+svn:wc:ra_dav:version-url
+V 77
+/svn/cig/!svn/ver/7894/mc/3D/CitcomS/trunk/lib/Regional_lith_age_read_files.c
+END
+Output_vtk.c
+K 25
+svn:wc:ra_dav:version-url
+V 60
+/svn/cig/!svn/ver/13196/mc/3D/CitcomS/trunk/lib/Output_vtk.c
+END
+multigrid_kernel.cu
+K 25
+svn:wc:ra_dav:version-url
+V 67
+/svn/cig/!svn/ver/15515/mc/3D/CitcomS/trunk/lib/multigrid_kernel.cu
+END
+interuption.h
+K 25
+svn:wc:ra_dav:version-url
+V 60
+/svn/cig/!svn/ver/3979/mc/3D/CitcomS/trunk/lib/interuption.h
+END
+Topo_gravity.c
+K 25
+svn:wc:ra_dav:version-url
+V 62
+/svn/cig/!svn/ver/16403/mc/3D/CitcomS/trunk/lib/Topo_gravity.c
+END
+viscosity_descriptions.h
+K 25
+svn:wc:ra_dav:version-url
+V 72
+/svn/cig/!svn/ver/16204/mc/3D/CitcomS/trunk/lib/viscosity_descriptions.h
+END
+Process_buoyancy.c
+K 25
+svn:wc:ra_dav:version-url
+V 66
+/svn/cig/!svn/ver/15455/mc/3D/CitcomS/trunk/lib/Process_buoyancy.c
+END
+Makefile.am
+K 25
+svn:wc:ra_dav:version-url
+V 59
+/svn/cig/!svn/ver/15396/mc/3D/CitcomS/trunk/lib/Makefile.am
+END
+Regional_solver.c
+K 25
+svn:wc:ra_dav:version-url
+V 65
+/svn/cig/!svn/ver/13273/mc/3D/CitcomS/trunk/lib/Regional_solver.c
+END
+Solver_multigrid.c
+K 25
+svn:wc:ra_dav:version-url
+V 66
+/svn/cig/!svn/ver/14639/mc/3D/CitcomS/trunk/lib/Solver_multigrid.c
+END
+Regional_version_dependent.c
+K 25
+svn:wc:ra_dav:version-url
+V 76
+/svn/cig/!svn/ver/16014/mc/3D/CitcomS/trunk/lib/Regional_version_dependent.c
+END
+Regional_obsolete.c
+K 25
+svn:wc:ra_dav:version-url
+V 66
+/svn/cig/!svn/ver/8205/mc/3D/CitcomS/trunk/lib/Regional_obsolete.c
+END
+Full_solver.c
+K 25
+svn:wc:ra_dav:version-url
+V 61
+/svn/cig/!svn/ver/13273/mc/3D/CitcomS/trunk/lib/Full_solver.c
+END

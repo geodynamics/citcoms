@@ -1,0 +1,32 @@
+-------
+Citation: Dan J. Bower, Michael Gurnis, and Nicolas Flament (2015), Assimilating lithosphere and slab history in 4-D Earth models, Phys. Earth Planet. Inter., 238, 8--22, doi:10.1016/j.pepi.2014.10.013
+-------
+
+You must build CitcomS with pyre to use data assimilation, and historically we have used python 2.4 at Caltech (specifically python 2.4.3, download from here: https://www.python.org/download/releases/2.4.3/).  Python 2.5 does not seem to work, but Python 2.6 does (at least some versions).
+
+-------
+
+CitcomS/:
+contains all of the modified files for data assimilation in their correct location.  You can manually copy each file to exactly the same (relative) path in your CitcomS `base code' (see base/ below).  See data assimilation manual for specific details.
+
+other/:
+other resources (probably not required, older versions of pythia, etc.)
+
+base/:
+``base code'' for patching.  Static copy (svn export) of r16400 with merlin-1.8.egg, archimedes/, and deps/ copied in.  Furthermore, the following files have been rolled back to r16022 to avoid problems with the mechanical boundary conditions in r16400:
+          Ggrd_handling.c
+          Full_boundary_conditions.c
+          BC_util.c
+          Topo_gravity.c
+          Regional_boundary_conditions.c
+
+release/:
+base code that is already patched with the files necessary for data assimilation.  Extract this tar.gz and then 'autoreconf -i', 'configure', 'make'.  Then the code should be compiled and ready to run data assimilation models.
+
+
+---------------
+DEVELOPER NOTES
+---------------
+
+- CitcomS/Components/Tracer.py contains itracer_warnings (default True)
+- CitcomS/lib/Tracer_Setup.py, around line 939, 'icushion' must be a large integer to prevent the code from crashing on the Caltech cluster when tracers are read in from a file.  This problem does not seem to affect the Sydney cluster.  Usually icushion=100000 is OK but sometimes a larger value is necessary.  The problem arises because the code has to initially allocate memory for the tracer arrays and uses an estimate for the number of tracers.  This estimate appears to be insufficient when tracers are not uniformly distributed, such as when tracers are used to model continents and are thus restricted to a few processors at the top of the domain.  In short, it may be possible to improve / optimise the memory management in future releases of the code.

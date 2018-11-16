@@ -1,0 +1,11 @@
+  * To convert pseudo-free-surface B.C. to free-slip B.C., do the following:
+      1) --solver.bc.topvbc=2 --> --solver.bc.topvbc=0
+      2) --solver.bc.pseudo_free_surf=on --> --solver.bc.pseudo_free_surf=off
+
+  * To try a different hot blob, one can specify three parameters:
+    1. solver.ic.blob_center: Coordinates(theta,fi,r) of the center.
+    2. solver.ic.blob_radius: Radius as non-dimensional distance.
+    3. solver.ic.blob_dT:     The amount of temperature increase/decrease 
+	                          within the blob as non-dimensional temperature.
+	
+    Note: It is required to keep "solver.ic.tic_method=2" to have the initial hot blob. 
