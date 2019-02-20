@@ -1,5 +1,9 @@
 # CitcomS with Data Assimilation
 
+## Reference
+
+Bower, D.J., M. Gurnis, and N. Flament (2015), Assimilating lithosphere and slab history in 4-D Earth models, Phys. Earth Planet. Inter., 238, 8-22, doi: 10.1016/j.pepi.2014.10.013.
+
 ## Installation
 
 ### Quick start for a cluster
