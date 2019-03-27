@@ -1,0 +1,324 @@
+<?xml version='1.0' encoding='utf-8'?>
+<gpml:FeatureCollection xmlns:gml="http://www.opengis.net/gml" xmlns:gpml="http://www.gplates.org/gplates" xmlns:xsi="http://www.w3.org/XMLSchema-instance" gpml:version="1.6.0322" xsi:schemaLocation="http://www.gplates.org/gplates ../xsd/gpml.xsd http://www.opengis.net/gml ../../../gml/current/base">
+    <gml:featureMember>
+    </gml:featureMember>
+<gml:featureMember><gpml:DisplacementPoint>
+            <gpml:identity>GPlates-6b032481-3a5a-45a6-881d-4de2ebd43c7e</gpml:identity>
+            <gml:name>west_mesh_westside_boundary_point_0</gml:name>
+            <gml:description>displacement point: west_mesh_westside_boundary_point_0</gml:description>
+            <gml:validTime>
+                <gml:TimePeriod>
+                    <gml:begin>
+                        <gml:TimeInstant>
+                            <gml:timePosition gml:frame="http://gplates.org/TRS/flat">100</gml:timePosition>
+                        </gml:TimeInstant>
+                    </gml:begin>
+                    <gml:end>
+                        <gml:TimeInstant>
+                            <gml:timePosition gml:frame="http://gplates.org/TRS/flat">0</gml:timePosition>
+                        </gml:TimeInstant>
+                    </gml:end>
+                </gml:TimePeriod>
+            </gml:validTime>
+            <gpml:reconstructionPlateId>
+                <gpml:ConstantValue>
+                    <gpml:value>0</gpml:value>
+                    <gpml:valueType>gpml:plateId</gpml:valueType>
+                </gpml:ConstantValue>
+            </gpml:reconstructionPlateId>
+            <gpml:position>
+                <gml:Point>
+                    <gml:pos>1e-05 -15</gml:pos>
+                </gml:Point>
+            </gpml:position>
+        </gpml:DisplacementPoint></gml:featureMember><gml:featureMember><gpml:DisplacementPoint>
+            <gpml:identity>GPlates-48234fa1-3c34-4a49-9331-f5eefab711fa</gpml:identity>
+            <gml:name>west_mesh_westside_boundary_point_1</gml:name>
+            <gml:description>displacement point: west_mesh_westside_boundary_point_1</gml:description>
+            <gml:validTime>
+                <gml:TimePeriod>
+                    <gml:begin>
+                        <gml:TimeInstant>
+                            <gml:timePosition gml:frame="http://gplates.org/TRS/flat">100</gml:timePosition>
+                        </gml:TimeInstant>
+                    </gml:begin>
+                    <gml:end>
+                        <gml:TimeInstant>
+                            <gml:timePosition gml:frame="http://gplates.org/TRS/flat">0</gml:timePosition>
+                        </gml:TimeInstant>
+                    </gml:end>
+                </gml:TimePeriod>
+            </gml:validTime>
+            <gpml:reconstructionPlateId>
+                <gpml:ConstantValue>
+                    <gpml:value>0</gpml:value>
+                    <gpml:valueType>gpml:plateId</gpml:valueType>
+                </gpml:ConstantValue>
+            </gpml:reconstructionPlateId>
+            <gpml:position>
+                <gml:Point>
+                    <gml:pos>1.00001 -15</gml:pos>
+                </gml:Point>
+            </gpml:position>
+        </gpml:DisplacementPoint></gml:featureMember><gml:featureMember><gpml:DisplacementPoint>
+            <gpml:identity>GPlates-7a76ee5e-7d1c-468e-89cf-2a26d00032ba</gpml:identity>
+            <gml:name>west_mesh_westside_boundary_point_2</gml:name>
+            <gml:description>displacement point: west_mesh_westside_boundary_point_2</gml:description>
+            <gml:validTime>
+                <gml:TimePeriod>
+                    <gml:begin>
+                        <gml:TimeInstant>
+                            <gml:timePosition gml:frame="http://gplates.org/TRS/flat">100</gml:timePosition>
+                        </gml:TimeInstant>
+                    </gml:begin>
+                    <gml:end>
+                        <gml:TimeInstant>
+                            <gml:timePosition gml:frame="http://gplates.org/TRS/flat">0</gml:timePosition>
+                        </gml:TimeInstant>
+                    </gml:end>
+                </gml:TimePeriod>
+            </gml:validTime>
+            <gpml:reconstructionPlateId>
+                <gpml:ConstantValue>
+                    <gpml:value>0</gpml:value>
+                    <gpml:valueType>gpml:plateId</gpml:valueType>
+                </gpml:ConstantValue>
+            </gpml:reconstructionPlateId>
+            <gpml:position>
+                <gml:Point>
+                    <gml:pos>2.00001 -15</gml:pos>
+                </gml:Point>
+            </gpml:position>
+        </gpml:DisplacementPoint></gml:featureMember><gml:featureMember><gpml:DisplacementPoint>
+            <gpml:identity>GPlates-2e658ba7-2340-487f-89ab-a5bcd3560738</gpml:identity>
+            <gml:name>west_mesh_westside_boundary_point_3</gml:name>
+            <gml:description>displacement point: west_mesh_westside_boundary_point_3</gml:description>
+            <gml:validTime>
+                <gml:TimePeriod>
+                    <gml:begin>
+                        <gml:TimeInstant>
+                            <gml:timePosition gml:frame="http://gplates.org/TRS/flat">100</gml:timePosition>
+                        </gml:TimeInstant>
+                    </gml:begin>
+                    <gml:end>
+                        <gml:TimeInstant>
+                            <gml:timePosition gml:frame="http://gplates.org/TRS/flat">0</gml:timePosition>
+                        </gml:TimeInstant>
+                    </gml:end>
+                </gml:TimePeriod>
+            </gml:validTime>
+            <gpml:reconstructionPlateId>
+                <gpml:ConstantValue>
+                    <gpml:value>0</gpml:value>
+                    <gpml:valueType>gpml:plateId</gpml:valueType>
+                </gpml:ConstantValue>
+            </gpml:reconstructionPlateId>
+            <gpml:position>
+                <gml:Point>
+                    <gml:pos>3.00001 -15</gml:pos>
+                </gml:Point>
+            </gpml:position>
+        </gpml:DisplacementPoint></gml:featureMember><gml:featureMember><gpml:DisplacementPoint>
+            <gpml:identity>GPlates-6c9bb9b8-5e73-42d5-bd95-d2b8733bc80b</gpml:identity>
+            <gml:name>west_mesh_westside_boundary_point_4</gml:name>
+            <gml:description>displacement point: west_mesh_westside_boundary_point_4</gml:description>
+            <gml:validTime>
+                <gml:TimePeriod>
+                    <gml:begin>
+                        <gml:TimeInstant>
+                            <gml:timePosition gml:frame="http://gplates.org/TRS/flat">100</gml:timePosition>
+                        </gml:TimeInstant>
+                    </gml:begin>
+                    <gml:end>
+                        <gml:TimeInstant>
+                            <gml:timePosition gml:frame="http://gplates.org/TRS/flat">0</gml:timePosition>
+                        </gml:TimeInstant>
+                    </gml:end>
+                </gml:TimePeriod>
+            </gml:validTime>
+            <gpml:reconstructionPlateId>
+                <gpml:ConstantValue>
+                    <gpml:value>0</gpml:value>
+                    <gpml:valueType>gpml:plateId</gpml:valueType>
+                </gpml:ConstantValue>
+            </gpml:reconstructionPlateId>
+            <gpml:position>
+                <gml:Point>
+                    <gml:pos>4.00001 -15</gml:pos>
+                </gml:Point>
+            </gpml:position>
+        </gpml:DisplacementPoint></gml:featureMember><gml:featureMember><gpml:DisplacementPoint>
+            <gpml:identity>GPlates-7fa5c4ff-6efd-4ee7-bc9f-fa8121f5202f</gpml:identity>
+            <gml:name>west_mesh_eastside_boundary_point_4</gml:name>
+            <gml:description>displacement point: west_mesh_eastside_boundary_point_4</gml:description>
+            <gml:validTime>
+                <gml:TimePeriod>
+                    <gml:begin>
+                        <gml:TimeInstant>
+                            <gml:timePosition gml:frame="http://gplates.org/TRS/flat">100</gml:timePosition>
+                        </gml:TimeInstant>
+                    </gml:begin>
+                    <gml:end>
+                        <gml:TimeInstant>
+                            <gml:timePosition gml:frame="http://gplates.org/TRS/flat">0</gml:timePosition>
+                        </gml:TimeInstant>
+                    </gml:end>
+                </gml:TimePeriod>
+            </gml:validTime>
+            <gpml:reconstructionPlateId>
+                <gpml:ConstantValue>
+                    <gpml:value>1011115</gpml:value>
+                    <gpml:valueType>gpml:plateId</gpml:valueType>
+                </gpml:ConstantValue>
+            </gpml:reconstructionPlateId>
+            <gpml:position>
+                <gml:Point>
+                    <gml:pos>4.00001 -5</gml:pos>
+                </gml:Point>
+            </gpml:position>
+        </gpml:DisplacementPoint></gml:featureMember><gml:featureMember><gpml:DisplacementPoint>
+            <gpml:identity>GPlates-11aa334c-d50a-4533-b49a-ba05472ae944</gpml:identity>
+            <gml:name>west_mesh_eastside_boundary_point_3</gml:name>
+            <gml:description>displacement point: west_mesh_eastside_boundary_point_3</gml:description>
+            <gml:validTime>
+                <gml:TimePeriod>
+                    <gml:begin>
+                        <gml:TimeInstant>
+                            <gml:timePosition gml:frame="http://gplates.org/TRS/flat">100</gml:timePosition>
+                        </gml:TimeInstant>
+                    </gml:begin>
+                    <gml:end>
+                        <gml:TimeInstant>
+                            <gml:timePosition gml:frame="http://gplates.org/TRS/flat">0</gml:timePosition>
+                        </gml:TimeInstant>
+                    </gml:end>
+                </gml:TimePeriod>
+            </gml:validTime>
+            <gpml:reconstructionPlateId>
+                <gpml:ConstantValue>
+                    <gpml:value>1011114</gpml:value>
+                    <gpml:valueType>gpml:plateId</gpml:valueType>
+                </gpml:ConstantValue>
+            </gpml:reconstructionPlateId>
+            <gpml:position>
+                <gml:Point>
+                    <gml:pos>3.00001 -5</gml:pos>
+                </gml:Point>
+            </gpml:position>
+        </gpml:DisplacementPoint></gml:featureMember><gml:featureMember><gpml:DisplacementPoint>
+            <gpml:identity>GPlates-76863a19-2ebe-4c62-abcf-8ee86855186a</gpml:identity>
+            <gml:name>west_mesh_eastside_boundary_point_2</gml:name>
+            <gml:description>displacement point: west_mesh_eastside_boundary_point_2</gml:description>
+            <gml:validTime>
+                <gml:TimePeriod>
+                    <gml:begin>
+                        <gml:TimeInstant>
+                            <gml:timePosition gml:frame="http://gplates.org/TRS/flat">100</gml:timePosition>
+                        </gml:TimeInstant>
+                    </gml:begin>
+                    <gml:end>
+                        <gml:TimeInstant>
+                            <gml:timePosition gml:frame="http://gplates.org/TRS/flat">0</gml:timePosition>
+                        </gml:TimeInstant>
+                    </gml:end>
+                </gml:TimePeriod>
+            </gml:validTime>
+            <gpml:reconstructionPlateId>
+                <gpml:ConstantValue>
+                    <gpml:value>1011113</gpml:value>
+                    <gpml:valueType>gpml:plateId</gpml:valueType>
+                </gpml:ConstantValue>
+            </gpml:reconstructionPlateId>
+            <gpml:position>
+                <gml:Point>
+                    <gml:pos>2.00001 -5</gml:pos>
+                </gml:Point>
+            </gpml:position>
+        </gpml:DisplacementPoint></gml:featureMember><gml:featureMember><gpml:DisplacementPoint>
+            <gpml:identity>GPlates-a63f871e-4806-4fa1-9ebc-3e856603ab99</gpml:identity>
+            <gml:name>west_mesh_eastside_boundary_point_1</gml:name>
+            <gml:description>displacement point: west_mesh_eastside_boundary_point_1</gml:description>
+            <gml:validTime>
+                <gml:TimePeriod>
+                    <gml:begin>
+                        <gml:TimeInstant>
+                            <gml:timePosition gml:frame="http://gplates.org/TRS/flat">100</gml:timePosition>
+                        </gml:TimeInstant>
+                    </gml:begin>
+                    <gml:end>
+                        <gml:TimeInstant>
+                            <gml:timePosition gml:frame="http://gplates.org/TRS/flat">0</gml:timePosition>
+                        </gml:TimeInstant>
+                    </gml:end>
+                </gml:TimePeriod>
+            </gml:validTime>
+            <gpml:reconstructionPlateId>
+                <gpml:ConstantValue>
+                    <gpml:value>1011112</gpml:value>
+                    <gpml:valueType>gpml:plateId</gpml:valueType>
+                </gpml:ConstantValue>
+            </gpml:reconstructionPlateId>
+            <gpml:position>
+                <gml:Point>
+                    <gml:pos>1.00001 -5</gml:pos>
+                </gml:Point>
+            </gpml:position>
+        </gpml:DisplacementPoint></gml:featureMember><gml:featureMember><gpml:DisplacementPoint>
+            <gpml:identity>GPlates-388b8613-de3a-405f-b9a4-79bbc16f4bc7</gpml:identity>
+            <gml:name>west_mesh_eastside_boundary_point_0</gml:name>
+            <gml:description>displacement point: west_mesh_eastside_boundary_point_0</gml:description>
+            <gml:validTime>
+                <gml:TimePeriod>
+                    <gml:begin>
+                        <gml:TimeInstant>
+                            <gml:timePosition gml:frame="http://gplates.org/TRS/flat">100</gml:timePosition>
+                        </gml:TimeInstant>
+                    </gml:begin>
+                    <gml:end>
+                        <gml:TimeInstant>
+                            <gml:timePosition gml:frame="http://gplates.org/TRS/flat">0</gml:timePosition>
+                        </gml:TimeInstant>
+                    </gml:end>
+                </gml:TimePeriod>
+            </gml:validTime>
+            <gpml:reconstructionPlateId>
+                <gpml:ConstantValue>
+                    <gpml:value>1011111</gpml:value>
+                    <gpml:valueType>gpml:plateId</gpml:valueType>
+                </gpml:ConstantValue>
+            </gpml:reconstructionPlateId>
+            <gpml:position>
+                <gml:Point>
+                    <gml:pos>1e-05 -5</gml:pos>
+                </gml:Point>
+            </gpml:position>
+        </gpml:DisplacementPoint></gml:featureMember><gml:featureMember><gpml:DisplacementPoint>
+            <gpml:identity>GPlates-bf7e9cac-c0dc-4174-8b7c-074e5ac43971</gpml:identity>
+            <gml:name>west_interior_point_0</gml:name>
+            <gml:description>displacement point: west_mesh_eastside_boundary_point_4</gml:description>
+            <gml:validTime>
+                <gml:TimePeriod>
+                    <gml:begin>
+                        <gml:TimeInstant>
+                            <gml:timePosition gml:frame="http://gplates.org/TRS/flat">100</gml:timePosition>
+                        </gml:TimeInstant>
+                    </gml:begin>
+                    <gml:end>
+                        <gml:TimeInstant>
+                            <gml:timePosition gml:frame="http://gplates.org/TRS/flat">0</gml:timePosition>
+                        </gml:TimeInstant>
+                    </gml:end>
+                </gml:TimePeriod>
+            </gml:validTime>
+            <gpml:reconstructionPlateId>
+                <gpml:ConstantValue>
+                    <gpml:value>1012222</gpml:value>
+                    <gpml:valueType>gpml:plateId</gpml:valueType>
+                </gpml:ConstantValue>
+            </gpml:reconstructionPlateId>
+            <gpml:position>
+                <gml:Point>
+                    <gml:pos>0.0001 -10</gml:pos>
+                </gml:Point>
+            </gpml:position>
+        </gpml:DisplacementPoint></gml:featureMember></gpml:FeatureCollection>

@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mets:METS xmlns:mets="http://www.loc.gov/METS/" xmlns:xlink="http://www.w3.org/TR/xlink/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:dim="http://www.dspace.org/xmlns/dspace/dim" LABEL="DSpace Item" OBJID="/handle/10672/22" PROFILE="DSPACE METS SIP Profile 1.0" OBJEDIT="/admin/item?itemID=55" ID="hdl:10672/22">
+<mets:dmdSec GROUPID="group_dmd_0" ID="dmd_1">
+<mets:mdWrap OTHERMDTYPE="DIM" MDTYPE="OTHER">
+<mets:xmlData>
+<dim:dim dspaceType="ITEM">
+<dim:field element="contributor" mdschema="dc" language="">McGarva, Guy</dim:field>
+<dim:field element="contributor" mdschema="dc" qualifier="other" language="en">University of Edinburgh</dim:field>
+<dim:field element="coverage" mdschema="dc" qualifier="spatial" language="en">northlimit=82.4115;eastlimit=179.3164;southlimit=-81.6078;westlimit=-178.35;</dim:field>
+<dim:field element="coverage" mdschema="dc" qualifier="temporal" language="">2009-08-12</dim:field>
+<dim:field element="date" mdschema="dc" qualifier="accessioned" language="">2010-07-01T08:48:23Z</dim:field>
+<dim:field element="date" mdschema="dc" qualifier="available" language="">2010-07-01T08:48:23Z</dim:field>
+<dim:field element="date" mdschema="dc" qualifier="issued" language="">2010-07-01</dim:field>
+<dim:field element="identifier" mdschema="dc" language="">http://www.sharegeo.ac.uk/bitstream/handle/10672/22/World_Political_Boundaries.zip?sequence=1</dim:field>
+<dim:field element="identifier" mdschema="dc" qualifier="uri" language="">http://hdl.handle.net/10672/22</dim:field>
+<dim:field element="description" mdschema="dc" language="en">World Boundary Databank; PC ARC/INFO 'EXPORT' Version The data is based on the "PC World Data Base" product from ESRI (April 1990), having been significantly modified and enhanced ... at GRID-Geneva. The data has been converted to ESRI Shapefiles by EDINA for ease of use in GIS.</dim:field>
+<dim:field element="description" mdschema="dc" qualifier="abstract" language="en">This file contains coarse world political boundaries in Shapefile format. If you require more detailed boundaries, please see "World Political Boundaries - Detailed" (http://hdl.handle.net/10672/124) on ShareGeo. The data is based on the "World Boundary Data bank - PC ARC/INFO 'Export' version from UNEP/GRID-Geneva" dataset: http://gcmd.nasa.gov/records/GCMD_GNV00019.html</dim:field>
+<dim:field element="format" mdschema="dc" language="en">ESRI Shapefile</dim:field>
+<dim:field element="language" mdschema="dc" qualifier="iso" language="en">en</dim:field>
+<dim:field element="rights" mdschema="dc" language="en">UNEP and GRID wish to express to the users of this product "WBDTEMP3" that we take final responsibility for neither the placement of boundaries in this data set, nor for the place names used, but that they reflect the best available sources of information available to UNEP/GRID at this time.</dim:field>
+<dim:field element="rights" mdschema="dc" qualifier="uri" language="en">This data is made available under the Public Domain Dedication and License v1.0 whose full text can be found at http://www.opendatacommons.org/licenses/pddl/1.0/</dim:field>
+<dim:field element="subject" mdschema="dc" language="">Country</dim:field>
+<dim:field element="subject" mdschema="dc" language="">World</dim:field>
+<dim:field element="subject" mdschema="dc" language="">Political</dim:field>
+<dim:field element="subject" mdschema="dc" language="">Boundary</dim:field>
+<dim:field element="subject" mdschema="dc" qualifier="classification" language="en">Boundaries</dim:field>
+<dim:field element="title" mdschema="dc" language="en">World Political Boundaries - Coarse</dim:field>
+<dim:field element="type" mdschema="dc" language="en">GIS vector data</dim:field>
+</dim:dim>
+</mets:xmlData>
+</mets:mdWrap>
+</mets:dmdSec>
+<mets:fileSec>
+<mets:fileGrp USE="CONTENT">
+<mets:file GROUPID="group_file_47" SIZE="1993105" CHECKSUM="c38e5e7dfefb729549efa5d94f060019" MIMETYPE="application/zip" CHECKSUMTYPE="MD5" ID="file_47">
+<mets:FLocat LOCTYPE="URL" xlink:href="/bitstream/handle/10672/22/World_Political_Boundaries.zip?sequence=1" xlink:title="World_Political_Boundaries.zip" xlink:type="locator"/>
+</mets:file>
+</mets:fileGrp>
+<mets:fileGrp USE="LICENSE">
+<mets:file GROUPID="group_file_48" SIZE="120" CHECKSUM="c965f18aef54dac4a56e6b4d18f2d4e0" MIMETYPE="text/plain; charset=utf-8" CHECKSUMTYPE="MD5" ID="file_48">
+<mets:FLocat LOCTYPE="URL" xlink:href="/bitstream/handle/10672/22/license.txt?sequence=2" xlink:title="license.txt" xlink:type="locator"/>
+</mets:file>
+</mets:fileGrp>
+</mets:fileSec>
+<mets:structMap TYPE="LOGICAL" LABEL="DSpace">
+<mets:div TYPE="DSpace Item" DMDID="dmd_1">
+<mets:div TYPE="DSpace Content Bitstream" ID="div_2">
+<mets:fptr FILEID="file_47"/>
+</mets:div>
+</mets:div>
+</mets:structMap>
+</mets:METS>

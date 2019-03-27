@@ -1,0 +1,1993 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<gpml:FeatureCollection xmlns:gpml="http://www.gplates.org/gplates" xmlns:gml="http://www.opengis.net/gml" xmlns:xsi="http://www.w3.org/XMLSchema-instance" gpml:version="1.6" xsi:schemaLocation="http://www.gplates.org/gplates ../xsd/gpml.xsd http://www.opengis.net/gml ../../../gml/current/base">
+    <gml:featureMember>
+        <gpml:MotionPath>
+            <gpml:identity>GPlates-7b2644f3-84c9-4f62-a80c-cb2b4e8d1de9</gpml:identity>
+            <gpml:revision>GPlates-aa00449a-c972-49e5-bcc5-9ddc984fb99f</gpml:revision>
+            <gpml:reconstructionPlateId>
+                <gpml:ConstantValue>
+                    <gpml:value>201</gpml:value>
+                    <gpml:valueType xmlns:gpml="http://www.gplates.org/gplates">gpml:plateId</gpml:valueType>
+                </gpml:ConstantValue>
+            </gpml:reconstructionPlateId>
+            <gml:validTime>
+                <gml:TimePeriod>
+                    <gml:begin>
+                        <gml:TimeInstant>
+                            <gml:timePosition gml:frame="http://gplates.org/TRS/flat">http://gplates.org/times/distantPast</gml:timePosition>
+                        </gml:TimeInstant>
+                    </gml:begin>
+                    <gml:end>
+                        <gml:TimeInstant>
+                            <gml:timePosition gml:frame="http://gplates.org/TRS/flat">http://gplates.org/times/distantFuture</gml:timePosition>
+                        </gml:TimeInstant>
+                    </gml:end>
+                </gml:TimePeriod>
+            </gml:validTime>
+            <gml:name>Seed Point for Motion Tracker</gml:name>
+            <gpml:relativePlate>701</gpml:relativePlate>
+            <gpml:times>
+                <gpml:Array>
+                    <gpml:valueType xmlns:gml="http://www.opengis.net/gml">gml:TimePeriod</gpml:valueType>
+                    <gpml:member>
+                        <gml:TimePeriod>
+                            <gml:begin>
+                                <gml:TimeInstant>
+                                    <gml:timePosition gml:frame="http://gplates.org/TRS/flat">10</gml:timePosition>
+                                </gml:TimeInstant>
+                            </gml:begin>
+                            <gml:end>
+                                <gml:TimeInstant>
+                                    <gml:timePosition gml:frame="http://gplates.org/TRS/flat">0</gml:timePosition>
+                                </gml:TimeInstant>
+                            </gml:end>
+                        </gml:TimePeriod>
+                    </gpml:member>
+                    <gpml:member>
+                        <gml:TimePeriod>
+                            <gml:begin>
+                                <gml:TimeInstant>
+                                    <gml:timePosition gml:frame="http://gplates.org/TRS/flat">20</gml:timePosition>
+                                </gml:TimeInstant>
+                            </gml:begin>
+                            <gml:end>
+                                <gml:TimeInstant>
+                                    <gml:timePosition gml:frame="http://gplates.org/TRS/flat">10</gml:timePosition>
+                                </gml:TimeInstant>
+                            </gml:end>
+                        </gml:TimePeriod>
+                    </gpml:member>
+                    <gpml:member>
+                        <gml:TimePeriod>
+                            <gml:begin>
+                                <gml:TimeInstant>
+                                    <gml:timePosition gml:frame="http://gplates.org/TRS/flat">30</gml:timePosition>
+                                </gml:TimeInstant>
+                            </gml:begin>
+                            <gml:end>
+                                <gml:TimeInstant>
+                                    <gml:timePosition gml:frame="http://gplates.org/TRS/flat">20</gml:timePosition>
+                                </gml:TimeInstant>
+                            </gml:end>
+                        </gml:TimePeriod>
+                    </gpml:member>
+                    <gpml:member>
+                        <gml:TimePeriod>
+                            <gml:begin>
+                                <gml:TimeInstant>
+                                    <gml:timePosition gml:frame="http://gplates.org/TRS/flat">40</gml:timePosition>
+                                </gml:TimeInstant>
+                            </gml:begin>
+                            <gml:end>
+                                <gml:TimeInstant>
+                                    <gml:timePosition gml:frame="http://gplates.org/TRS/flat">30</gml:timePosition>
+                                </gml:TimeInstant>
+                            </gml:end>
+                        </gml:TimePeriod>
+                    </gpml:member>
+                    <gpml:member>
+                        <gml:TimePeriod>
+                            <gml:begin>
+                                <gml:TimeInstant>
+                                    <gml:timePosition gml:frame="http://gplates.org/TRS/flat">50</gml:timePosition>
+                                </gml:TimeInstant>
+                            </gml:begin>
+                            <gml:end>
+                                <gml:TimeInstant>
+                                    <gml:timePosition gml:frame="http://gplates.org/TRS/flat">40</gml:timePosition>
+                                </gml:TimeInstant>
+                            </gml:end>
+                        </gml:TimePeriod>
+                    </gpml:member>
+                    <gpml:member>
+                        <gml:TimePeriod>
+                            <gml:begin>
+                                <gml:TimeInstant>
+                                    <gml:timePosition gml:frame="http://gplates.org/TRS/flat">60</gml:timePosition>
+                                </gml:TimeInstant>
+                            </gml:begin>
+                            <gml:end>
+                                <gml:TimeInstant>
+                                    <gml:timePosition gml:frame="http://gplates.org/TRS/flat">50</gml:timePosition>
+                                </gml:TimeInstant>
+                            </gml:end>
+                        </gml:TimePeriod>
+                    </gpml:member>
+                    <gpml:member>
+                        <gml:TimePeriod>
+                            <gml:begin>
+                                <gml:TimeInstant>
+                                    <gml:timePosition gml:frame="http://gplates.org/TRS/flat">70</gml:timePosition>
+                                </gml:TimeInstant>
+                            </gml:begin>
+                            <gml:end>
+                                <gml:TimeInstant>
+                                    <gml:timePosition gml:frame="http://gplates.org/TRS/flat">60</gml:timePosition>
+                                </gml:TimeInstant>
+                            </gml:end>
+                        </gml:TimePeriod>
+                    </gpml:member>
+                    <gpml:member>
+                        <gml:TimePeriod>
+                            <gml:begin>
+                                <gml:TimeInstant>
+                                    <gml:timePosition gml:frame="http://gplates.org/TRS/flat">80</gml:timePosition>
+                                </gml:TimeInstant>
+                            </gml:begin>
+                            <gml:end>
+                                <gml:TimeInstant>
+                                    <gml:timePosition gml:frame="http://gplates.org/TRS/flat">70</gml:timePosition>
+                                </gml:TimeInstant>
+                            </gml:end>
+                        </gml:TimePeriod>
+                    </gpml:member>
+                    <gpml:member>
+                        <gml:TimePeriod>
+                            <gml:begin>
+                                <gml:TimeInstant>
+                                    <gml:timePosition gml:frame="http://gplates.org/TRS/flat">90</gml:timePosition>
+                                </gml:TimeInstant>
+                            </gml:begin>
+                            <gml:end>
+                                <gml:TimeInstant>
+                                    <gml:timePosition gml:frame="http://gplates.org/TRS/flat">80</gml:timePosition>
+                                </gml:TimeInstant>
+                            </gml:end>
+                        </gml:TimePeriod>
+                    </gpml:member>
+                    <gpml:member>
+                        <gml:TimePeriod>
+                            <gml:begin>
+                                <gml:TimeInstant>
+                                    <gml:timePosition gml:frame="http://gplates.org/TRS/flat">100</gml:timePosition>
+                                </gml:TimeInstant>
+                            </gml:begin>
+                            <gml:end>
+                                <gml:TimeInstant>
+                                    <gml:timePosition gml:frame="http://gplates.org/TRS/flat">90</gml:timePosition>
+                                </gml:TimeInstant>
+                            </gml:end>
+                        </gml:TimePeriod>
+                    </gpml:member>
+                </gpml:Array>
+            </gpml:times>
+            <gpml:seedPoints>
+                <gpml:ConstantValue>
+                    <gpml:value>
+                        <gml:Point>
+                            <gml:pos>-0.50173000000000001 -55.826599999999999</gml:pos>
+                        </gml:Point>
+                    </gpml:value>
+                    <gpml:valueType xmlns:gml="http://www.opengis.net/gml">gml:Point</gpml:valueType>
+                </gpml:ConstantValue>
+            </gpml:seedPoints>
+        </gpml:MotionPath>
+    </gml:featureMember>
+    <gml:featureMember>
+        <gpml:MotionPath>
+            <gpml:identity>GPlates-fbc94425-d4c0-4e19-9c43-1711a8ab57a0</gpml:identity>
+            <gpml:revision>GPlates-b31986dc-466f-45a5-843e-4c1d336d3597</gpml:revision>
+            <gpml:reconstructionPlateId>
+                <gpml:ConstantValue>
+                    <gpml:value>201</gpml:value>
+                    <gpml:valueType xmlns:gpml="http://www.gplates.org/gplates">gpml:plateId</gpml:valueType>
+                </gpml:ConstantValue>
+            </gpml:reconstructionPlateId>
+            <gml:validTime>
+                <gml:TimePeriod>
+                    <gml:begin>
+                        <gml:TimeInstant>
+                            <gml:timePosition gml:frame="http://gplates.org/TRS/flat">http://gplates.org/times/distantPast</gml:timePosition>
+                        </gml:TimeInstant>
+                    </gml:begin>
+                    <gml:end>
+                        <gml:TimeInstant>
+                            <gml:timePosition gml:frame="http://gplates.org/TRS/flat">http://gplates.org/times/distantFuture</gml:timePosition>
+                        </gml:TimeInstant>
+                    </gml:end>
+                </gml:TimePeriod>
+            </gml:validTime>
+            <gml:name>test motion track</gml:name>
+            <gpml:relativePlate>0</gpml:relativePlate>
+            <gpml:times>
+                <gpml:Array>
+                    <gpml:valueType xmlns:gml="http://www.opengis.net/gml">gml:TimePeriod</gpml:valueType>
+                    <gpml:member>
+                        <gml:TimePeriod>
+                            <gml:begin>
+                                <gml:TimeInstant>
+                                    <gml:timePosition gml:frame="http://gplates.org/TRS/flat">10</gml:timePosition>
+                                </gml:TimeInstant>
+                            </gml:begin>
+                            <gml:end>
+                                <gml:TimeInstant>
+                                    <gml:timePosition gml:frame="http://gplates.org/TRS/flat">0</gml:timePosition>
+                                </gml:TimeInstant>
+                            </gml:end>
+                        </gml:TimePeriod>
+                    </gpml:member>
+                    <gpml:member>
+                        <gml:TimePeriod>
+                            <gml:begin>
+                                <gml:TimeInstant>
+                                    <gml:timePosition gml:frame="http://gplates.org/TRS/flat">20</gml:timePosition>
+                                </gml:TimeInstant>
+                            </gml:begin>
+                            <gml:end>
+                                <gml:TimeInstant>
+                                    <gml:timePosition gml:frame="http://gplates.org/TRS/flat">10</gml:timePosition>
+                                </gml:TimeInstant>
+                            </gml:end>
+                        </gml:TimePeriod>
+                    </gpml:member>
+                    <gpml:member>
+                        <gml:TimePeriod>
+                            <gml:begin>
+                                <gml:TimeInstant>
+                                    <gml:timePosition gml:frame="http://gplates.org/TRS/flat">30</gml:timePosition>
+                                </gml:TimeInstant>
+                            </gml:begin>
+                            <gml:end>
+                                <gml:TimeInstant>
+                                    <gml:timePosition gml:frame="http://gplates.org/TRS/flat">20</gml:timePosition>
+                                </gml:TimeInstant>
+                            </gml:end>
+                        </gml:TimePeriod>
+                    </gpml:member>
+                    <gpml:member>
+                        <gml:TimePeriod>
+                            <gml:begin>
+                                <gml:TimeInstant>
+                                    <gml:timePosition gml:frame="http://gplates.org/TRS/flat">40</gml:timePosition>
+                                </gml:TimeInstant>
+                            </gml:begin>
+                            <gml:end>
+                                <gml:TimeInstant>
+                                    <gml:timePosition gml:frame="http://gplates.org/TRS/flat">30</gml:timePosition>
+                                </gml:TimeInstant>
+                            </gml:end>
+                        </gml:TimePeriod>
+                    </gpml:member>
+                    <gpml:member>
+                        <gml:TimePeriod>
+                            <gml:begin>
+                                <gml:TimeInstant>
+                                    <gml:timePosition gml:frame="http://gplates.org/TRS/flat">50</gml:timePosition>
+                                </gml:TimeInstant>
+                            </gml:begin>
+                            <gml:end>
+                                <gml:TimeInstant>
+                                    <gml:timePosition gml:frame="http://gplates.org/TRS/flat">40</gml:timePosition>
+                                </gml:TimeInstant>
+                            </gml:end>
+                        </gml:TimePeriod>
+                    </gpml:member>
+                    <gpml:member>
+                        <gml:TimePeriod>
+                            <gml:begin>
+                                <gml:TimeInstant>
+                                    <gml:timePosition gml:frame="http://gplates.org/TRS/flat">60</gml:timePosition>
+                                </gml:TimeInstant>
+                            </gml:begin>
+                            <gml:end>
+                                <gml:TimeInstant>
+                                    <gml:timePosition gml:frame="http://gplates.org/TRS/flat">50</gml:timePosition>
+                                </gml:TimeInstant>
+                            </gml:end>
+                        </gml:TimePeriod>
+                    </gpml:member>
+                    <gpml:member>
+                        <gml:TimePeriod>
+                            <gml:begin>
+                                <gml:TimeInstant>
+                                    <gml:timePosition gml:frame="http://gplates.org/TRS/flat">70</gml:timePosition>
+                                </gml:TimeInstant>
+                            </gml:begin>
+                            <gml:end>
+                                <gml:TimeInstant>
+                                    <gml:timePosition gml:frame="http://gplates.org/TRS/flat">60</gml:timePosition>
+                                </gml:TimeInstant>
+                            </gml:end>
+                        </gml:TimePeriod>
+                    </gpml:member>
+                    <gpml:member>
+                        <gml:TimePeriod>
+                            <gml:begin>
+                                <gml:TimeInstant>
+                                    <gml:timePosition gml:frame="http://gplates.org/TRS/flat">80</gml:timePosition>
+                                </gml:TimeInstant>
+                            </gml:begin>
+                            <gml:end>
+                                <gml:TimeInstant>
+                                    <gml:timePosition gml:frame="http://gplates.org/TRS/flat">70</gml:timePosition>
+                                </gml:TimeInstant>
+                            </gml:end>
+                        </gml:TimePeriod>
+                    </gpml:member>
+                    <gpml:member>
+                        <gml:TimePeriod>
+                            <gml:begin>
+                                <gml:TimeInstant>
+                                    <gml:timePosition gml:frame="http://gplates.org/TRS/flat">90</gml:timePosition>
+                                </gml:TimeInstant>
+                            </gml:begin>
+                            <gml:end>
+                                <gml:TimeInstant>
+                                    <gml:timePosition gml:frame="http://gplates.org/TRS/flat">80</gml:timePosition>
+                                </gml:TimeInstant>
+                            </gml:end>
+                        </gml:TimePeriod>
+                    </gpml:member>
+                    <gpml:member>
+                        <gml:TimePeriod>
+                            <gml:begin>
+                                <gml:TimeInstant>
+                                    <gml:timePosition gml:frame="http://gplates.org/TRS/flat">100</gml:timePosition>
+                                </gml:TimeInstant>
+                            </gml:begin>
+                            <gml:end>
+                                <gml:TimeInstant>
+                                    <gml:timePosition gml:frame="http://gplates.org/TRS/flat">90</gml:timePosition>
+                                </gml:TimeInstant>
+                            </gml:end>
+                        </gml:TimePeriod>
+                    </gpml:member>
+                </gpml:Array>
+            </gpml:times>
+            <gpml:seedPoints>
+                <gpml:ConstantValue>
+                    <gpml:value>
+                        <gml:Point>
+                            <gml:pos>-5.4642400000000002 -57.026600000000002</gml:pos>
+                        </gml:Point>
+                    </gpml:value>
+                    <gpml:valueType xmlns:gml="http://www.opengis.net/gml">gml:Point</gpml:valueType>
+                </gpml:ConstantValue>
+            </gpml:seedPoints>
+        </gpml:MotionPath>
+    </gml:featureMember>
+    <gml:featureMember>
+        <gpml:MotionPath>
+            <gpml:identity>GPlates-c83828cf-2255-44ab-ae97-13c743fad199</gpml:identity>
+            <gpml:revision>GPlates-e465cdb9-5b5c-4d67-9dd7-517ffbe8b7e4</gpml:revision>
+            <gpml:reconstructionPlateId>
+                <gpml:ConstantValue>
+                    <gpml:value>701</gpml:value>
+                    <gpml:valueType xmlns:gpml="http://www.gplates.org/gplates">gpml:plateId</gpml:valueType>
+                </gpml:ConstantValue>
+            </gpml:reconstructionPlateId>
+            <gml:validTime>
+                <gml:TimePeriod>
+                    <gml:begin>
+                        <gml:TimeInstant>
+                            <gml:timePosition gml:frame="http://gplates.org/TRS/flat">http://gplates.org/times/distantPast</gml:timePosition>
+                        </gml:TimeInstant>
+                    </gml:begin>
+                    <gml:end>
+                        <gml:TimeInstant>
+                            <gml:timePosition gml:frame="http://gplates.org/TRS/flat">http://gplates.org/times/distantFuture</gml:timePosition>
+                        </gml:TimeInstant>
+                    </gml:end>
+                </gml:TimePeriod>
+            </gml:validTime>
+            <gml:name>Motion Path Seed Point 1</gml:name>
+            <gpml:relativePlate>0</gpml:relativePlate>
+            <gpml:times>
+                <gpml:Array>
+                    <gpml:valueType xmlns:gml="http://www.opengis.net/gml">gml:TimePeriod</gpml:valueType>
+                    <gpml:member>
+                        <gml:TimePeriod>
+                            <gml:begin>
+                                <gml:TimeInstant>
+                                    <gml:timePosition gml:frame="http://gplates.org/TRS/flat">10</gml:timePosition>
+                                </gml:TimeInstant>
+                            </gml:begin>
+                            <gml:end>
+                                <gml:TimeInstant>
+                                    <gml:timePosition gml:frame="http://gplates.org/TRS/flat">0</gml:timePosition>
+                                </gml:TimeInstant>
+                            </gml:end>
+                        </gml:TimePeriod>
+                    </gpml:member>
+                    <gpml:member>
+                        <gml:TimePeriod>
+                            <gml:begin>
+                                <gml:TimeInstant>
+                                    <gml:timePosition gml:frame="http://gplates.org/TRS/flat">20</gml:timePosition>
+                                </gml:TimeInstant>
+                            </gml:begin>
+                            <gml:end>
+                                <gml:TimeInstant>
+                                    <gml:timePosition gml:frame="http://gplates.org/TRS/flat">10</gml:timePosition>
+                                </gml:TimeInstant>
+                            </gml:end>
+                        </gml:TimePeriod>
+                    </gpml:member>
+                    <gpml:member>
+                        <gml:TimePeriod>
+                            <gml:begin>
+                                <gml:TimeInstant>
+                                    <gml:timePosition gml:frame="http://gplates.org/TRS/flat">30</gml:timePosition>
+                                </gml:TimeInstant>
+                            </gml:begin>
+                            <gml:end>
+                                <gml:TimeInstant>
+                                    <gml:timePosition gml:frame="http://gplates.org/TRS/flat">20</gml:timePosition>
+                                </gml:TimeInstant>
+                            </gml:end>
+                        </gml:TimePeriod>
+                    </gpml:member>
+                    <gpml:member>
+                        <gml:TimePeriod>
+                            <gml:begin>
+                                <gml:TimeInstant>
+                                    <gml:timePosition gml:frame="http://gplates.org/TRS/flat">40</gml:timePosition>
+                                </gml:TimeInstant>
+                            </gml:begin>
+                            <gml:end>
+                                <gml:TimeInstant>
+                                    <gml:timePosition gml:frame="http://gplates.org/TRS/flat">30</gml:timePosition>
+                                </gml:TimeInstant>
+                            </gml:end>
+                        </gml:TimePeriod>
+                    </gpml:member>
+                    <gpml:member>
+                        <gml:TimePeriod>
+                            <gml:begin>
+                                <gml:TimeInstant>
+                                    <gml:timePosition gml:frame="http://gplates.org/TRS/flat">50</gml:timePosition>
+                                </gml:TimeInstant>
+                            </gml:begin>
+                            <gml:end>
+                                <gml:TimeInstant>
+                                    <gml:timePosition gml:frame="http://gplates.org/TRS/flat">40</gml:timePosition>
+                                </gml:TimeInstant>
+                            </gml:end>
+                        </gml:TimePeriod>
+                    </gpml:member>
+                    <gpml:member>
+                        <gml:TimePeriod>
+                            <gml:begin>
+                                <gml:TimeInstant>
+                                    <gml:timePosition gml:frame="http://gplates.org/TRS/flat">60</gml:timePosition>
+                                </gml:TimeInstant>
+                            </gml:begin>
+                            <gml:end>
+                                <gml:TimeInstant>
+                                    <gml:timePosition gml:frame="http://gplates.org/TRS/flat">50</gml:timePosition>
+                                </gml:TimeInstant>
+                            </gml:end>
+                        </gml:TimePeriod>
+                    </gpml:member>
+                    <gpml:member>
+                        <gml:TimePeriod>
+                            <gml:begin>
+                                <gml:TimeInstant>
+                                    <gml:timePosition gml:frame="http://gplates.org/TRS/flat">70</gml:timePosition>
+                                </gml:TimeInstant>
+                            </gml:begin>
+                            <gml:end>
+                                <gml:TimeInstant>
+                                    <gml:timePosition gml:frame="http://gplates.org/TRS/flat">60</gml:timePosition>
+                                </gml:TimeInstant>
+                            </gml:end>
+                        </gml:TimePeriod>
+                    </gpml:member>
+                    <gpml:member>
+                        <gml:TimePeriod>
+                            <gml:begin>
+                                <gml:TimeInstant>
+                                    <gml:timePosition gml:frame="http://gplates.org/TRS/flat">80</gml:timePosition>
+                                </gml:TimeInstant>
+                            </gml:begin>
+                            <gml:end>
+                                <gml:TimeInstant>
+                                    <gml:timePosition gml:frame="http://gplates.org/TRS/flat">70</gml:timePosition>
+                                </gml:TimeInstant>
+                            </gml:end>
+                        </gml:TimePeriod>
+                    </gpml:member>
+                    <gpml:member>
+                        <gml:TimePeriod>
+                            <gml:begin>
+                                <gml:TimeInstant>
+                                    <gml:timePosition gml:frame="http://gplates.org/TRS/flat">90</gml:timePosition>
+                                </gml:TimeInstant>
+                            </gml:begin>
+                            <gml:end>
+                                <gml:TimeInstant>
+                                    <gml:timePosition gml:frame="http://gplates.org/TRS/flat">80</gml:timePosition>
+                                </gml:TimeInstant>
+                            </gml:end>
+                        </gml:TimePeriod>
+                    </gpml:member>
+                    <gpml:member>
+                        <gml:TimePeriod>
+                            <gml:begin>
+                                <gml:TimeInstant>
+                                    <gml:timePosition gml:frame="http://gplates.org/TRS/flat">100</gml:timePosition>
+                                </gml:TimeInstant>
+                            </gml:begin>
+                            <gml:end>
+                                <gml:TimeInstant>
+                                    <gml:timePosition gml:frame="http://gplates.org/TRS/flat">90</gml:timePosition>
+                                </gml:TimeInstant>
+                            </gml:end>
+                        </gml:TimePeriod>
+                    </gpml:member>
+                </gpml:Array>
+            </gpml:times>
+            <gpml:seedPoints>
+                <gpml:ConstantValue>
+                    <gpml:value>
+                        <gml:Point>
+                            <gml:pos>-21.180199999999999 9.6678599999999992</gml:pos>
+                        </gml:Point>
+                    </gpml:value>
+                    <gpml:valueType xmlns:gml="http://www.opengis.net/gml">gml:Point</gpml:valueType>
+                </gpml:ConstantValue>
+            </gpml:seedPoints>
+        </gpml:MotionPath>
+    </gml:featureMember>
+    <gml:featureMember>
+        <gpml:MotionPath>
+            <gpml:identity>GPlates-c15ad068-4fc2-4814-ac62-f0f0e2c77ff9</gpml:identity>
+            <gpml:revision>GPlates-8a4ad2c1-ed63-4109-9172-0a9726286e7d</gpml:revision>
+            <gpml:reconstructionPlateId>
+                <gpml:ConstantValue>
+                    <gpml:value>701</gpml:value>
+                    <gpml:valueType xmlns:gpml="http://www.gplates.org/gplates">gpml:plateId</gpml:valueType>
+                </gpml:ConstantValue>
+            </gpml:reconstructionPlateId>
+            <gml:validTime>
+                <gml:TimePeriod>
+                    <gml:begin>
+                        <gml:TimeInstant>
+                            <gml:timePosition gml:frame="http://gplates.org/TRS/flat">http://gplates.org/times/distantPast</gml:timePosition>
+                        </gml:TimeInstant>
+                    </gml:begin>
+                    <gml:end>
+                        <gml:TimeInstant>
+                            <gml:timePosition gml:frame="http://gplates.org/TRS/flat">http://gplates.org/times/distantFuture</gml:timePosition>
+                        </gml:TimeInstant>
+                    </gml:end>
+                </gml:TimePeriod>
+            </gml:validTime>
+            <gml:name>Motion Path Seed Point 1</gml:name>
+            <gpml:relativePlate>0</gpml:relativePlate>
+            <gpml:times>
+                <gpml:Array>
+                    <gpml:valueType xmlns:gml="http://www.opengis.net/gml">gml:TimePeriod</gpml:valueType>
+                    <gpml:member>
+                        <gml:TimePeriod>
+                            <gml:begin>
+                                <gml:TimeInstant>
+                                    <gml:timePosition gml:frame="http://gplates.org/TRS/flat">10</gml:timePosition>
+                                </gml:TimeInstant>
+                            </gml:begin>
+                            <gml:end>
+                                <gml:TimeInstant>
+                                    <gml:timePosition gml:frame="http://gplates.org/TRS/flat">0</gml:timePosition>
+                                </gml:TimeInstant>
+                            </gml:end>
+                        </gml:TimePeriod>
+                    </gpml:member>
+                    <gpml:member>
+                        <gml:TimePeriod>
+                            <gml:begin>
+                                <gml:TimeInstant>
+                                    <gml:timePosition gml:frame="http://gplates.org/TRS/flat">20</gml:timePosition>
+                                </gml:TimeInstant>
+                            </gml:begin>
+                            <gml:end>
+                                <gml:TimeInstant>
+                                    <gml:timePosition gml:frame="http://gplates.org/TRS/flat">10</gml:timePosition>
+                                </gml:TimeInstant>
+                            </gml:end>
+                        </gml:TimePeriod>
+                    </gpml:member>
+                    <gpml:member>
+                        <gml:TimePeriod>
+                            <gml:begin>
+                                <gml:TimeInstant>
+                                    <gml:timePosition gml:frame="http://gplates.org/TRS/flat">30</gml:timePosition>
+                                </gml:TimeInstant>
+                            </gml:begin>
+                            <gml:end>
+                                <gml:TimeInstant>
+                                    <gml:timePosition gml:frame="http://gplates.org/TRS/flat">20</gml:timePosition>
+                                </gml:TimeInstant>
+                            </gml:end>
+                        </gml:TimePeriod>
+                    </gpml:member>
+                    <gpml:member>
+                        <gml:TimePeriod>
+                            <gml:begin>
+                                <gml:TimeInstant>
+                                    <gml:timePosition gml:frame="http://gplates.org/TRS/flat">40</gml:timePosition>
+                                </gml:TimeInstant>
+                            </gml:begin>
+                            <gml:end>
+                                <gml:TimeInstant>
+                                    <gml:timePosition gml:frame="http://gplates.org/TRS/flat">30</gml:timePosition>
+                                </gml:TimeInstant>
+                            </gml:end>
+                        </gml:TimePeriod>
+                    </gpml:member>
+                    <gpml:member>
+                        <gml:TimePeriod>
+                            <gml:begin>
+                                <gml:TimeInstant>
+                                    <gml:timePosition gml:frame="http://gplates.org/TRS/flat">50</gml:timePosition>
+                                </gml:TimeInstant>
+                            </gml:begin>
+                            <gml:end>
+                                <gml:TimeInstant>
+                                    <gml:timePosition gml:frame="http://gplates.org/TRS/flat">40</gml:timePosition>
+                                </gml:TimeInstant>
+                            </gml:end>
+                        </gml:TimePeriod>
+                    </gpml:member>
+                    <gpml:member>
+                        <gml:TimePeriod>
+                            <gml:begin>
+                                <gml:TimeInstant>
+                                    <gml:timePosition gml:frame="http://gplates.org/TRS/flat">60</gml:timePosition>
+                                </gml:TimeInstant>
+                            </gml:begin>
+                            <gml:end>
+                                <gml:TimeInstant>
+                                    <gml:timePosition gml:frame="http://gplates.org/TRS/flat">50</gml:timePosition>
+                                </gml:TimeInstant>
+                            </gml:end>
+                        </gml:TimePeriod>
+                    </gpml:member>
+                    <gpml:member>
+                        <gml:TimePeriod>
+                            <gml:begin>
+                                <gml:TimeInstant>
+                                    <gml:timePosition gml:frame="http://gplates.org/TRS/flat">70</gml:timePosition>
+                                </gml:TimeInstant>
+                            </gml:begin>
+                            <gml:end>
+                                <gml:TimeInstant>
+                                    <gml:timePosition gml:frame="http://gplates.org/TRS/flat">60</gml:timePosition>
+                                </gml:TimeInstant>
+                            </gml:end>
+                        </gml:TimePeriod>
+                    </gpml:member>
+                    <gpml:member>
+                        <gml:TimePeriod>
+                            <gml:begin>
+                                <gml:TimeInstant>
+                                    <gml:timePosition gml:frame="http://gplates.org/TRS/flat">80</gml:timePosition>
+                                </gml:TimeInstant>
+                            </gml:begin>
+                            <gml:end>
+                                <gml:TimeInstant>
+                                    <gml:timePosition gml:frame="http://gplates.org/TRS/flat">70</gml:timePosition>
+                                </gml:TimeInstant>
+                            </gml:end>
+                        </gml:TimePeriod>
+                    </gpml:member>
+                    <gpml:member>
+                        <gml:TimePeriod>
+                            <gml:begin>
+                                <gml:TimeInstant>
+                                    <gml:timePosition gml:frame="http://gplates.org/TRS/flat">90</gml:timePosition>
+                                </gml:TimeInstant>
+                            </gml:begin>
+                            <gml:end>
+                                <gml:TimeInstant>
+                                    <gml:timePosition gml:frame="http://gplates.org/TRS/flat">80</gml:timePosition>
+                                </gml:TimeInstant>
+                            </gml:end>
+                        </gml:TimePeriod>
+                    </gpml:member>
+                    <gpml:member>
+                        <gml:TimePeriod>
+                            <gml:begin>
+                                <gml:TimeInstant>
+                                    <gml:timePosition gml:frame="http://gplates.org/TRS/flat">100</gml:timePosition>
+                                </gml:TimeInstant>
+                            </gml:begin>
+                            <gml:end>
+                                <gml:TimeInstant>
+                                    <gml:timePosition gml:frame="http://gplates.org/TRS/flat">90</gml:timePosition>
+                                </gml:TimeInstant>
+                            </gml:end>
+                        </gml:TimePeriod>
+                    </gpml:member>
+                </gpml:Array>
+            </gpml:times>
+            <gpml:seedPoints>
+                <gpml:ConstantValue>
+                    <gpml:value>
+                        <gml:Point>
+                            <gml:pos>-16.394100000000002 9.2509200000000007</gml:pos>
+                        </gml:Point>
+                    </gpml:value>
+                    <gpml:valueType xmlns:gml="http://www.opengis.net/gml">gml:Point</gpml:valueType>
+                </gpml:ConstantValue>
+            </gpml:seedPoints>
+        </gpml:MotionPath>
+    </gml:featureMember>
+    <gml:featureMember>
+        <gpml:Flowline>
+            <gpml:identity>GPlates-22eca482-da19-4e20-b759-5b90d190e86d</gpml:identity>
+            <gpml:revision>GPlates-d65030a6-98a3-4b8c-bd34-20e6082d4147</gpml:revision>
+            <gpml:reconstructionPlateId>
+                <gpml:ConstantValue>
+                    <gpml:value>0</gpml:value>
+                    <gpml:valueType xmlns:gpml="http://www.gplates.org/gplates">gpml:plateId</gpml:valueType>
+                </gpml:ConstantValue>
+            </gpml:reconstructionPlateId>
+            <gpml:rightPlate>702</gpml:rightPlate>
+            <gpml:leftPlate>201</gpml:leftPlate>
+            <gpml:reconstructionMethod>HalfStageRotation</gpml:reconstructionMethod>
+            <gml:validTime>
+                <gml:TimePeriod>
+                    <gml:begin>
+                        <gml:TimeInstant>
+                            <gml:timePosition gml:frame="http://gplates.org/TRS/flat">http://gplates.org/times/distantPast</gml:timePosition>
+                        </gml:TimeInstant>
+                    </gml:begin>
+                    <gml:end>
+                        <gml:TimeInstant>
+                            <gml:timePosition gml:frame="http://gplates.org/TRS/flat">http://gplates.org/times/distantFuture</gml:timePosition>
+                        </gml:TimeInstant>
+                    </gml:end>
+                </gml:TimePeriod>
+            </gml:validTime>
+            <gml:name>Flow Line Seed Point</gml:name>
+            <gpml:times>
+                <gpml:Array>
+                    <gpml:valueType xmlns:gml="http://www.opengis.net/gml">gml:TimePeriod</gpml:valueType>
+                    <gpml:member>
+                        <gml:TimePeriod>
+                            <gml:begin>
+                                <gml:TimeInstant>
+                                    <gml:timePosition gml:frame="http://gplates.org/TRS/flat">10</gml:timePosition>
+                                </gml:TimeInstant>
+                            </gml:begin>
+                            <gml:end>
+                                <gml:TimeInstant>
+                                    <gml:timePosition gml:frame="http://gplates.org/TRS/flat">0</gml:timePosition>
+                                </gml:TimeInstant>
+                            </gml:end>
+                        </gml:TimePeriod>
+                    </gpml:member>
+                    <gpml:member>
+                        <gml:TimePeriod>
+                            <gml:begin>
+                                <gml:TimeInstant>
+                                    <gml:timePosition gml:frame="http://gplates.org/TRS/flat">20</gml:timePosition>
+                                </gml:TimeInstant>
+                            </gml:begin>
+                            <gml:end>
+                                <gml:TimeInstant>
+                                    <gml:timePosition gml:frame="http://gplates.org/TRS/flat">10</gml:timePosition>
+                                </gml:TimeInstant>
+                            </gml:end>
+                        </gml:TimePeriod>
+                    </gpml:member>
+                    <gpml:member>
+                        <gml:TimePeriod>
+                            <gml:begin>
+                                <gml:TimeInstant>
+                                    <gml:timePosition gml:frame="http://gplates.org/TRS/flat">30</gml:timePosition>
+                                </gml:TimeInstant>
+                            </gml:begin>
+                            <gml:end>
+                                <gml:TimeInstant>
+                                    <gml:timePosition gml:frame="http://gplates.org/TRS/flat">20</gml:timePosition>
+                                </gml:TimeInstant>
+                            </gml:end>
+                        </gml:TimePeriod>
+                    </gpml:member>
+                    <gpml:member>
+                        <gml:TimePeriod>
+                            <gml:begin>
+                                <gml:TimeInstant>
+                                    <gml:timePosition gml:frame="http://gplates.org/TRS/flat">40</gml:timePosition>
+                                </gml:TimeInstant>
+                            </gml:begin>
+                            <gml:end>
+                                <gml:TimeInstant>
+                                    <gml:timePosition gml:frame="http://gplates.org/TRS/flat">30</gml:timePosition>
+                                </gml:TimeInstant>
+                            </gml:end>
+                        </gml:TimePeriod>
+                    </gpml:member>
+                    <gpml:member>
+                        <gml:TimePeriod>
+                            <gml:begin>
+                                <gml:TimeInstant>
+                                    <gml:timePosition gml:frame="http://gplates.org/TRS/flat">50</gml:timePosition>
+                                </gml:TimeInstant>
+                            </gml:begin>
+                            <gml:end>
+                                <gml:TimeInstant>
+                                    <gml:timePosition gml:frame="http://gplates.org/TRS/flat">40</gml:timePosition>
+                                </gml:TimeInstant>
+                            </gml:end>
+                        </gml:TimePeriod>
+                    </gpml:member>
+                    <gpml:member>
+                        <gml:TimePeriod>
+                            <gml:begin>
+                                <gml:TimeInstant>
+                                    <gml:timePosition gml:frame="http://gplates.org/TRS/flat">60</gml:timePosition>
+                                </gml:TimeInstant>
+                            </gml:begin>
+                            <gml:end>
+                                <gml:TimeInstant>
+                                    <gml:timePosition gml:frame="http://gplates.org/TRS/flat">50</gml:timePosition>
+                                </gml:TimeInstant>
+                            </gml:end>
+                        </gml:TimePeriod>
+                    </gpml:member>
+                    <gpml:member>
+                        <gml:TimePeriod>
+                            <gml:begin>
+                                <gml:TimeInstant>
+                                    <gml:timePosition gml:frame="http://gplates.org/TRS/flat">70</gml:timePosition>
+                                </gml:TimeInstant>
+                            </gml:begin>
+                            <gml:end>
+                                <gml:TimeInstant>
+                                    <gml:timePosition gml:frame="http://gplates.org/TRS/flat">60</gml:timePosition>
+                                </gml:TimeInstant>
+                            </gml:end>
+                        </gml:TimePeriod>
+                    </gpml:member>
+                    <gpml:member>
+                        <gml:TimePeriod>
+                            <gml:begin>
+                                <gml:TimeInstant>
+                                    <gml:timePosition gml:frame="http://gplates.org/TRS/flat">80</gml:timePosition>
+                                </gml:TimeInstant>
+                            </gml:begin>
+                            <gml:end>
+                                <gml:TimeInstant>
+                                    <gml:timePosition gml:frame="http://gplates.org/TRS/flat">70</gml:timePosition>
+                                </gml:TimeInstant>
+                            </gml:end>
+                        </gml:TimePeriod>
+                    </gpml:member>
+                    <gpml:member>
+                        <gml:TimePeriod>
+                            <gml:begin>
+                                <gml:TimeInstant>
+                                    <gml:timePosition gml:frame="http://gplates.org/TRS/flat">90</gml:timePosition>
+                                </gml:TimeInstant>
+                            </gml:begin>
+                            <gml:end>
+                                <gml:TimeInstant>
+                                    <gml:timePosition gml:frame="http://gplates.org/TRS/flat">80</gml:timePosition>
+                                </gml:TimeInstant>
+                            </gml:end>
+                        </gml:TimePeriod>
+                    </gpml:member>
+                    <gpml:member>
+                        <gml:TimePeriod>
+                            <gml:begin>
+                                <gml:TimeInstant>
+                                    <gml:timePosition gml:frame="http://gplates.org/TRS/flat">100</gml:timePosition>
+                                </gml:TimeInstant>
+                            </gml:begin>
+                            <gml:end>
+                                <gml:TimeInstant>
+                                    <gml:timePosition gml:frame="http://gplates.org/TRS/flat">90</gml:timePosition>
+                                </gml:TimeInstant>
+                            </gml:end>
+                        </gml:TimePeriod>
+                    </gpml:member>
+                </gpml:Array>
+            </gpml:times>
+            <gpml:seedPoints>
+                <gpml:ConstantValue>
+                    <gpml:value>
+                        <gml:Point>
+                            <gml:pos>-9.5287000000000006 -13.317500000000003</gml:pos>
+                        </gml:Point>
+                    </gpml:value>
+                    <gpml:valueType xmlns:gml="http://www.opengis.net/gml">gml:Point</gpml:valueType>
+                </gpml:ConstantValue>
+            </gpml:seedPoints>
+        </gpml:Flowline>
+    </gml:featureMember>
+    <gml:featureMember>
+        <gpml:Flowline>
+            <gpml:identity>GPlates-b0ef4655-b632-4b13-b676-e4b8aa713da9</gpml:identity>
+            <gpml:revision>GPlates-77887e0d-9a3d-4031-a545-319fb02e7c3f</gpml:revision>
+            <gpml:reconstructionPlateId>
+                <gpml:ConstantValue>
+                    <gpml:value>0</gpml:value>
+                    <gpml:valueType xmlns:gpml="http://www.gplates.org/gplates">gpml:plateId</gpml:valueType>
+                </gpml:ConstantValue>
+            </gpml:reconstructionPlateId>
+            <gpml:rightPlate>702</gpml:rightPlate>
+            <gpml:leftPlate>201</gpml:leftPlate>
+            <gpml:reconstructionMethod>HalfStageRotation</gpml:reconstructionMethod>
+            <gml:validTime>
+                <gml:TimePeriod>
+                    <gml:begin>
+                        <gml:TimeInstant>
+                            <gml:timePosition gml:frame="http://gplates.org/TRS/flat">http://gplates.org/times/distantPast</gml:timePosition>
+                        </gml:TimeInstant>
+                    </gml:begin>
+                    <gml:end>
+                        <gml:TimeInstant>
+                            <gml:timePosition gml:frame="http://gplates.org/TRS/flat">http://gplates.org/times/distantFuture</gml:timePosition>
+                        </gml:TimeInstant>
+                    </gml:end>
+                </gml:TimePeriod>
+            </gml:validTime>
+            <gml:name>Flow Line Seed Point</gml:name>
+            <gpml:times>
+                <gpml:Array>
+                    <gpml:valueType xmlns:gml="http://www.opengis.net/gml">gml:TimePeriod</gpml:valueType>
+                    <gpml:member>
+                        <gml:TimePeriod>
+                            <gml:begin>
+                                <gml:TimeInstant>
+                                    <gml:timePosition gml:frame="http://gplates.org/TRS/flat">10</gml:timePosition>
+                                </gml:TimeInstant>
+                            </gml:begin>
+                            <gml:end>
+                                <gml:TimeInstant>
+                                    <gml:timePosition gml:frame="http://gplates.org/TRS/flat">0</gml:timePosition>
+                                </gml:TimeInstant>
+                            </gml:end>
+                        </gml:TimePeriod>
+                    </gpml:member>
+                    <gpml:member>
+                        <gml:TimePeriod>
+                            <gml:begin>
+                                <gml:TimeInstant>
+                                    <gml:timePosition gml:frame="http://gplates.org/TRS/flat">20</gml:timePosition>
+                                </gml:TimeInstant>
+                            </gml:begin>
+                            <gml:end>
+                                <gml:TimeInstant>
+                                    <gml:timePosition gml:frame="http://gplates.org/TRS/flat">10</gml:timePosition>
+                                </gml:TimeInstant>
+                            </gml:end>
+                        </gml:TimePeriod>
+                    </gpml:member>
+                    <gpml:member>
+                        <gml:TimePeriod>
+                            <gml:begin>
+                                <gml:TimeInstant>
+                                    <gml:timePosition gml:frame="http://gplates.org/TRS/flat">30</gml:timePosition>
+                                </gml:TimeInstant>
+                            </gml:begin>
+                            <gml:end>
+                                <gml:TimeInstant>
+                                    <gml:timePosition gml:frame="http://gplates.org/TRS/flat">20</gml:timePosition>
+                                </gml:TimeInstant>
+                            </gml:end>
+                        </gml:TimePeriod>
+                    </gpml:member>
+                    <gpml:member>
+                        <gml:TimePeriod>
+                            <gml:begin>
+                                <gml:TimeInstant>
+                                    <gml:timePosition gml:frame="http://gplates.org/TRS/flat">40</gml:timePosition>
+                                </gml:TimeInstant>
+                            </gml:begin>
+                            <gml:end>
+                                <gml:TimeInstant>
+                                    <gml:timePosition gml:frame="http://gplates.org/TRS/flat">30</gml:timePosition>
+                                </gml:TimeInstant>
+                            </gml:end>
+                        </gml:TimePeriod>
+                    </gpml:member>
+                    <gpml:member>
+                        <gml:TimePeriod>
+                            <gml:begin>
+                                <gml:TimeInstant>
+                                    <gml:timePosition gml:frame="http://gplates.org/TRS/flat">50</gml:timePosition>
+                                </gml:TimeInstant>
+                            </gml:begin>
+                            <gml:end>
+                                <gml:TimeInstant>
+                                    <gml:timePosition gml:frame="http://gplates.org/TRS/flat">40</gml:timePosition>
+                                </gml:TimeInstant>
+                            </gml:end>
+                        </gml:TimePeriod>
+                    </gpml:member>
+                    <gpml:member>
+                        <gml:TimePeriod>
+                            <gml:begin>
+                                <gml:TimeInstant>
+                                    <gml:timePosition gml:frame="http://gplates.org/TRS/flat">60</gml:timePosition>
+                                </gml:TimeInstant>
+                            </gml:begin>
+                            <gml:end>
+                                <gml:TimeInstant>
+                                    <gml:timePosition gml:frame="http://gplates.org/TRS/flat">50</gml:timePosition>
+                                </gml:TimeInstant>
+                            </gml:end>
+                        </gml:TimePeriod>
+                    </gpml:member>
+                    <gpml:member>
+                        <gml:TimePeriod>
+                            <gml:begin>
+                                <gml:TimeInstant>
+                                    <gml:timePosition gml:frame="http://gplates.org/TRS/flat">70</gml:timePosition>
+                                </gml:TimeInstant>
+                            </gml:begin>
+                            <gml:end>
+                                <gml:TimeInstant>
+                                    <gml:timePosition gml:frame="http://gplates.org/TRS/flat">60</gml:timePosition>
+                                </gml:TimeInstant>
+                            </gml:end>
+                        </gml:TimePeriod>
+                    </gpml:member>
+                    <gpml:member>
+                        <gml:TimePeriod>
+                            <gml:begin>
+                                <gml:TimeInstant>
+                                    <gml:timePosition gml:frame="http://gplates.org/TRS/flat">80</gml:timePosition>
+                                </gml:TimeInstant>
+                            </gml:begin>
+                            <gml:end>
+                                <gml:TimeInstant>
+                                    <gml:timePosition gml:frame="http://gplates.org/TRS/flat">70</gml:timePosition>
+                                </gml:TimeInstant>
+                            </gml:end>
+                        </gml:TimePeriod>
+                    </gpml:member>
+                    <gpml:member>
+                        <gml:TimePeriod>
+                            <gml:begin>
+                                <gml:TimeInstant>
+                                    <gml:timePosition gml:frame="http://gplates.org/TRS/flat">90</gml:timePosition>
+                                </gml:TimeInstant>
+                            </gml:begin>
+                            <gml:end>
+                                <gml:TimeInstant>
+                                    <gml:timePosition gml:frame="http://gplates.org/TRS/flat">80</gml:timePosition>
+                                </gml:TimeInstant>
+                            </gml:end>
+                        </gml:TimePeriod>
+                    </gpml:member>
+                    <gpml:member>
+                        <gml:TimePeriod>
+                            <gml:begin>
+                                <gml:TimeInstant>
+                                    <gml:timePosition gml:frame="http://gplates.org/TRS/flat">100</gml:timePosition>
+                                </gml:TimeInstant>
+                            </gml:begin>
+                            <gml:end>
+                                <gml:TimeInstant>
+                                    <gml:timePosition gml:frame="http://gplates.org/TRS/flat">90</gml:timePosition>
+                                </gml:TimeInstant>
+                            </gml:end>
+                        </gml:TimePeriod>
+                    </gpml:member>
+                </gpml:Array>
+            </gpml:times>
+            <gpml:seedPoints>
+                <gpml:ConstantValue>
+                    <gpml:value>
+                        <gml:Point>
+                            <gml:pos>-12.0002 -13.308299999999997</gml:pos>
+                        </gml:Point>
+                    </gpml:value>
+                    <gpml:valueType xmlns:gml="http://www.opengis.net/gml">gml:Point</gpml:valueType>
+                </gpml:ConstantValue>
+            </gpml:seedPoints>
+        </gpml:Flowline>
+    </gml:featureMember>
+    <gml:featureMember>
+        <gpml:Flowline>
+            <gpml:identity>GPlates-a04e0912-67bd-4853-be27-6d529c49be20</gpml:identity>
+            <gpml:revision>GPlates-ff3bd9a5-5f78-431d-9b8b-425b9adb74aa</gpml:revision>
+            <gpml:reconstructionPlateId>
+                <gpml:ConstantValue>
+                    <gpml:value>0</gpml:value>
+                    <gpml:valueType xmlns:gpml="http://www.gplates.org/gplates">gpml:plateId</gpml:valueType>
+                </gpml:ConstantValue>
+            </gpml:reconstructionPlateId>
+            <gpml:rightPlate>702</gpml:rightPlate>
+            <gpml:leftPlate>201</gpml:leftPlate>
+            <gpml:reconstructionMethod>HalfStageRotation</gpml:reconstructionMethod>
+            <gml:validTime>
+                <gml:TimePeriod>
+                    <gml:begin>
+                        <gml:TimeInstant>
+                            <gml:timePosition gml:frame="http://gplates.org/TRS/flat">http://gplates.org/times/distantPast</gml:timePosition>
+                        </gml:TimeInstant>
+                    </gml:begin>
+                    <gml:end>
+                        <gml:TimeInstant>
+                            <gml:timePosition gml:frame="http://gplates.org/TRS/flat">http://gplates.org/times/distantFuture</gml:timePosition>
+                        </gml:TimeInstant>
+                    </gml:end>
+                </gml:TimePeriod>
+            </gml:validTime>
+            <gml:name>Flow Line Seed Point</gml:name>
+            <gpml:times>
+                <gpml:Array>
+                    <gpml:valueType xmlns:gml="http://www.opengis.net/gml">gml:TimePeriod</gpml:valueType>
+                    <gpml:member>
+                        <gml:TimePeriod>
+                            <gml:begin>
+                                <gml:TimeInstant>
+                                    <gml:timePosition gml:frame="http://gplates.org/TRS/flat">10</gml:timePosition>
+                                </gml:TimeInstant>
+                            </gml:begin>
+                            <gml:end>
+                                <gml:TimeInstant>
+                                    <gml:timePosition gml:frame="http://gplates.org/TRS/flat">0</gml:timePosition>
+                                </gml:TimeInstant>
+                            </gml:end>
+                        </gml:TimePeriod>
+                    </gpml:member>
+                    <gpml:member>
+                        <gml:TimePeriod>
+                            <gml:begin>
+                                <gml:TimeInstant>
+                                    <gml:timePosition gml:frame="http://gplates.org/TRS/flat">20</gml:timePosition>
+                                </gml:TimeInstant>
+                            </gml:begin>
+                            <gml:end>
+                                <gml:TimeInstant>
+                                    <gml:timePosition gml:frame="http://gplates.org/TRS/flat">10</gml:timePosition>
+                                </gml:TimeInstant>
+                            </gml:end>
+                        </gml:TimePeriod>
+                    </gpml:member>
+                    <gpml:member>
+                        <gml:TimePeriod>
+                            <gml:begin>
+                                <gml:TimeInstant>
+                                    <gml:timePosition gml:frame="http://gplates.org/TRS/flat">30</gml:timePosition>
+                                </gml:TimeInstant>
+                            </gml:begin>
+                            <gml:end>
+                                <gml:TimeInstant>
+                                    <gml:timePosition gml:frame="http://gplates.org/TRS/flat">20</gml:timePosition>
+                                </gml:TimeInstant>
+                            </gml:end>
+                        </gml:TimePeriod>
+                    </gpml:member>
+                    <gpml:member>
+                        <gml:TimePeriod>
+                            <gml:begin>
+                                <gml:TimeInstant>
+                                    <gml:timePosition gml:frame="http://gplates.org/TRS/flat">40</gml:timePosition>
+                                </gml:TimeInstant>
+                            </gml:begin>
+                            <gml:end>
+                                <gml:TimeInstant>
+                                    <gml:timePosition gml:frame="http://gplates.org/TRS/flat">30</gml:timePosition>
+                                </gml:TimeInstant>
+                            </gml:end>
+                        </gml:TimePeriod>
+                    </gpml:member>
+                    <gpml:member>
+                        <gml:TimePeriod>
+                            <gml:begin>
+                                <gml:TimeInstant>
+                                    <gml:timePosition gml:frame="http://gplates.org/TRS/flat">50</gml:timePosition>
+                                </gml:TimeInstant>
+                            </gml:begin>
+                            <gml:end>
+                                <gml:TimeInstant>
+                                    <gml:timePosition gml:frame="http://gplates.org/TRS/flat">40</gml:timePosition>
+                                </gml:TimeInstant>
+                            </gml:end>
+                        </gml:TimePeriod>
+                    </gpml:member>
+                    <gpml:member>
+                        <gml:TimePeriod>
+                            <gml:begin>
+                                <gml:TimeInstant>
+                                    <gml:timePosition gml:frame="http://gplates.org/TRS/flat">60</gml:timePosition>
+                                </gml:TimeInstant>
+                            </gml:begin>
+                            <gml:end>
+                                <gml:TimeInstant>
+                                    <gml:timePosition gml:frame="http://gplates.org/TRS/flat">50</gml:timePosition>
+                                </gml:TimeInstant>
+                            </gml:end>
+                        </gml:TimePeriod>
+                    </gpml:member>
+                    <gpml:member>
+                        <gml:TimePeriod>
+                            <gml:begin>
+                                <gml:TimeInstant>
+                                    <gml:timePosition gml:frame="http://gplates.org/TRS/flat">70</gml:timePosition>
+                                </gml:TimeInstant>
+                            </gml:begin>
+                            <gml:end>
+                                <gml:TimeInstant>
+                                    <gml:timePosition gml:frame="http://gplates.org/TRS/flat">60</gml:timePosition>
+                                </gml:TimeInstant>
+                            </gml:end>
+                        </gml:TimePeriod>
+                    </gpml:member>
+                    <gpml:member>
+                        <gml:TimePeriod>
+                            <gml:begin>
+                                <gml:TimeInstant>
+                                    <gml:timePosition gml:frame="http://gplates.org/TRS/flat">80</gml:timePosition>
+                                </gml:TimeInstant>
+                            </gml:begin>
+                            <gml:end>
+                                <gml:TimeInstant>
+                                    <gml:timePosition gml:frame="http://gplates.org/TRS/flat">70</gml:timePosition>
+                                </gml:TimeInstant>
+                            </gml:end>
+                        </gml:TimePeriod>
+                    </gpml:member>
+                    <gpml:member>
+                        <gml:TimePeriod>
+                            <gml:begin>
+                                <gml:TimeInstant>
+                                    <gml:timePosition gml:frame="http://gplates.org/TRS/flat">90</gml:timePosition>
+                                </gml:TimeInstant>
+                            </gml:begin>
+                            <gml:end>
+                                <gml:TimeInstant>
+                                    <gml:timePosition gml:frame="http://gplates.org/TRS/flat">80</gml:timePosition>
+                                </gml:TimeInstant>
+                            </gml:end>
+                        </gml:TimePeriod>
+                    </gpml:member>
+                    <gpml:member>
+                        <gml:TimePeriod>
+                            <gml:begin>
+                                <gml:TimeInstant>
+                                    <gml:timePosition gml:frame="http://gplates.org/TRS/flat">100</gml:timePosition>
+                                </gml:TimeInstant>
+                            </gml:begin>
+                            <gml:end>
+                                <gml:TimeInstant>
+                                    <gml:timePosition gml:frame="http://gplates.org/TRS/flat">90</gml:timePosition>
+                                </gml:TimeInstant>
+                            </gml:end>
+                        </gml:TimePeriod>
+                    </gpml:member>
+                </gpml:Array>
+            </gpml:times>
+            <gpml:seedPoints>
+                <gpml:ConstantValue>
+                    <gpml:value>
+                        <gml:Point>
+                            <gml:pos>-14.072100000000002 -15.553700000000003</gml:pos>
+                        </gml:Point>
+                    </gpml:value>
+                    <gpml:valueType xmlns:gml="http://www.opengis.net/gml">gml:Point</gpml:valueType>
+                </gpml:ConstantValue>
+            </gpml:seedPoints>
+        </gpml:Flowline>
+    </gml:featureMember>
+    <gml:featureMember>
+        <gpml:MotionPath>
+            <gpml:identity>GPlates-705b1005-b242-4b10-af25-7cd40343aa4e</gpml:identity>
+            <gpml:revision>GPlates-fae94a4e-4ed6-40be-b06d-528d34124498</gpml:revision>
+            <gpml:reconstructionPlateId>
+                <gpml:ConstantValue>
+                    <gpml:value>201</gpml:value>
+                    <gpml:valueType xmlns:gpml="http://www.gplates.org/gplates">gpml:plateId</gpml:valueType>
+                </gpml:ConstantValue>
+            </gpml:reconstructionPlateId>
+            <gml:validTime>
+                <gml:TimePeriod>
+                    <gml:begin>
+                        <gml:TimeInstant>
+                            <gml:timePosition gml:frame="http://gplates.org/TRS/flat">http://gplates.org/times/distantPast</gml:timePosition>
+                        </gml:TimeInstant>
+                    </gml:begin>
+                    <gml:end>
+                        <gml:TimeInstant>
+                            <gml:timePosition gml:frame="http://gplates.org/TRS/flat">http://gplates.org/times/distantFuture</gml:timePosition>
+                        </gml:TimeInstant>
+                    </gml:end>
+                </gml:TimePeriod>
+            </gml:validTime>
+            <gml:name>test motion track</gml:name>
+            <gpml:relativePlate>0</gpml:relativePlate>
+            <gpml:times>
+                <gpml:Array>
+                    <gpml:valueType xmlns:gml="http://www.opengis.net/gml">gml:TimePeriod</gpml:valueType>
+                    <gpml:member>
+                        <gml:TimePeriod>
+                            <gml:begin>
+                                <gml:TimeInstant>
+                                    <gml:timePosition gml:frame="http://gplates.org/TRS/flat">10</gml:timePosition>
+                                </gml:TimeInstant>
+                            </gml:begin>
+                            <gml:end>
+                                <gml:TimeInstant>
+                                    <gml:timePosition gml:frame="http://gplates.org/TRS/flat">0</gml:timePosition>
+                                </gml:TimeInstant>
+                            </gml:end>
+                        </gml:TimePeriod>
+                    </gpml:member>
+                    <gpml:member>
+                        <gml:TimePeriod>
+                            <gml:begin>
+                                <gml:TimeInstant>
+                                    <gml:timePosition gml:frame="http://gplates.org/TRS/flat">20</gml:timePosition>
+                                </gml:TimeInstant>
+                            </gml:begin>
+                            <gml:end>
+                                <gml:TimeInstant>
+                                    <gml:timePosition gml:frame="http://gplates.org/TRS/flat">10</gml:timePosition>
+                                </gml:TimeInstant>
+                            </gml:end>
+                        </gml:TimePeriod>
+                    </gpml:member>
+                    <gpml:member>
+                        <gml:TimePeriod>
+                            <gml:begin>
+                                <gml:TimeInstant>
+                                    <gml:timePosition gml:frame="http://gplates.org/TRS/flat">30</gml:timePosition>
+                                </gml:TimeInstant>
+                            </gml:begin>
+                            <gml:end>
+                                <gml:TimeInstant>
+                                    <gml:timePosition gml:frame="http://gplates.org/TRS/flat">20</gml:timePosition>
+                                </gml:TimeInstant>
+                            </gml:end>
+                        </gml:TimePeriod>
+                    </gpml:member>
+                    <gpml:member>
+                        <gml:TimePeriod>
+                            <gml:begin>
+                                <gml:TimeInstant>
+                                    <gml:timePosition gml:frame="http://gplates.org/TRS/flat">40</gml:timePosition>
+                                </gml:TimeInstant>
+                            </gml:begin>
+                            <gml:end>
+                                <gml:TimeInstant>
+                                    <gml:timePosition gml:frame="http://gplates.org/TRS/flat">30</gml:timePosition>
+                                </gml:TimeInstant>
+                            </gml:end>
+                        </gml:TimePeriod>
+                    </gpml:member>
+                    <gpml:member>
+                        <gml:TimePeriod>
+                            <gml:begin>
+                                <gml:TimeInstant>
+                                    <gml:timePosition gml:frame="http://gplates.org/TRS/flat">50</gml:timePosition>
+                                </gml:TimeInstant>
+                            </gml:begin>
+                            <gml:end>
+                                <gml:TimeInstant>
+                                    <gml:timePosition gml:frame="http://gplates.org/TRS/flat">40</gml:timePosition>
+                                </gml:TimeInstant>
+                            </gml:end>
+                        </gml:TimePeriod>
+                    </gpml:member>
+                    <gpml:member>
+                        <gml:TimePeriod>
+                            <gml:begin>
+                                <gml:TimeInstant>
+                                    <gml:timePosition gml:frame="http://gplates.org/TRS/flat">60</gml:timePosition>
+                                </gml:TimeInstant>
+                            </gml:begin>
+                            <gml:end>
+                                <gml:TimeInstant>
+                                    <gml:timePosition gml:frame="http://gplates.org/TRS/flat">50</gml:timePosition>
+                                </gml:TimeInstant>
+                            </gml:end>
+                        </gml:TimePeriod>
+                    </gpml:member>
+                    <gpml:member>
+                        <gml:TimePeriod>
+                            <gml:begin>
+                                <gml:TimeInstant>
+                                    <gml:timePosition gml:frame="http://gplates.org/TRS/flat">70</gml:timePosition>
+                                </gml:TimeInstant>
+                            </gml:begin>
+                            <gml:end>
+                                <gml:TimeInstant>
+                                    <gml:timePosition gml:frame="http://gplates.org/TRS/flat">60</gml:timePosition>
+                                </gml:TimeInstant>
+                            </gml:end>
+                        </gml:TimePeriod>
+                    </gpml:member>
+                    <gpml:member>
+                        <gml:TimePeriod>
+                            <gml:begin>
+                                <gml:TimeInstant>
+                                    <gml:timePosition gml:frame="http://gplates.org/TRS/flat">80</gml:timePosition>
+                                </gml:TimeInstant>
+                            </gml:begin>
+                            <gml:end>
+                                <gml:TimeInstant>
+                                    <gml:timePosition gml:frame="http://gplates.org/TRS/flat">70</gml:timePosition>
+                                </gml:TimeInstant>
+                            </gml:end>
+                        </gml:TimePeriod>
+                    </gpml:member>
+                    <gpml:member>
+                        <gml:TimePeriod>
+                            <gml:begin>
+                                <gml:TimeInstant>
+                                    <gml:timePosition gml:frame="http://gplates.org/TRS/flat">90</gml:timePosition>
+                                </gml:TimeInstant>
+                            </gml:begin>
+                            <gml:end>
+                                <gml:TimeInstant>
+                                    <gml:timePosition gml:frame="http://gplates.org/TRS/flat">80</gml:timePosition>
+                                </gml:TimeInstant>
+                            </gml:end>
+                        </gml:TimePeriod>
+                    </gpml:member>
+                    <gpml:member>
+                        <gml:TimePeriod>
+                            <gml:begin>
+                                <gml:TimeInstant>
+                                    <gml:timePosition gml:frame="http://gplates.org/TRS/flat">100</gml:timePosition>
+                                </gml:TimeInstant>
+                            </gml:begin>
+                            <gml:end>
+                                <gml:TimeInstant>
+                                    <gml:timePosition gml:frame="http://gplates.org/TRS/flat">90</gml:timePosition>
+                                </gml:TimeInstant>
+                            </gml:end>
+                        </gml:TimePeriod>
+                    </gpml:member>
+                </gpml:Array>
+            </gpml:times>
+            <gpml:seedPoints>
+                <gpml:ConstantValue>
+                    <gpml:value>
+                        <gml:Point>
+                            <gml:pos>-20.112700000000004 -54.614899999999992</gml:pos>
+                        </gml:Point>
+                    </gpml:value>
+                    <gpml:valueType xmlns:gml="http://www.opengis.net/gml">gml:Point</gpml:valueType>
+                </gpml:ConstantValue>
+            </gpml:seedPoints>
+        </gpml:MotionPath>
+    </gml:featureMember>
+    <gml:featureMember>
+        <gpml:MotionPath>
+            <gpml:identity>GPlates-4df13e0c-2093-4ca6-8ff7-3bb4607d5a54</gpml:identity>
+            <gpml:revision>GPlates-2a15bfb5-391e-4684-918b-980cbf51e384</gpml:revision>
+            <gpml:reconstructionPlateId>
+                <gpml:ConstantValue>
+                    <gpml:value>701</gpml:value>
+                    <gpml:valueType xmlns:gpml="http://www.gplates.org/gplates">gpml:plateId</gpml:valueType>
+                </gpml:ConstantValue>
+            </gpml:reconstructionPlateId>
+            <gml:validTime>
+                <gml:TimePeriod>
+                    <gml:begin>
+                        <gml:TimeInstant>
+                            <gml:timePosition gml:frame="http://gplates.org/TRS/flat">http://gplates.org/times/distantPast</gml:timePosition>
+                        </gml:TimeInstant>
+                    </gml:begin>
+                    <gml:end>
+                        <gml:TimeInstant>
+                            <gml:timePosition gml:frame="http://gplates.org/TRS/flat">http://gplates.org/times/distantFuture</gml:timePosition>
+                        </gml:TimeInstant>
+                    </gml:end>
+                </gml:TimePeriod>
+            </gml:validTime>
+            <gml:name>Motion Path Seed Point 1</gml:name>
+            <gpml:relativePlate>0</gpml:relativePlate>
+            <gpml:times>
+                <gpml:Array>
+                    <gpml:valueType xmlns:gml="http://www.opengis.net/gml">gml:TimePeriod</gpml:valueType>
+                    <gpml:member>
+                        <gml:TimePeriod>
+                            <gml:begin>
+                                <gml:TimeInstant>
+                                    <gml:timePosition gml:frame="http://gplates.org/TRS/flat">10</gml:timePosition>
+                                </gml:TimeInstant>
+                            </gml:begin>
+                            <gml:end>
+                                <gml:TimeInstant>
+                                    <gml:timePosition gml:frame="http://gplates.org/TRS/flat">0</gml:timePosition>
+                                </gml:TimeInstant>
+                            </gml:end>
+                        </gml:TimePeriod>
+                    </gpml:member>
+                    <gpml:member>
+                        <gml:TimePeriod>
+                            <gml:begin>
+                                <gml:TimeInstant>
+                                    <gml:timePosition gml:frame="http://gplates.org/TRS/flat">20</gml:timePosition>
+                                </gml:TimeInstant>
+                            </gml:begin>
+                            <gml:end>
+                                <gml:TimeInstant>
+                                    <gml:timePosition gml:frame="http://gplates.org/TRS/flat">10</gml:timePosition>
+                                </gml:TimeInstant>
+                            </gml:end>
+                        </gml:TimePeriod>
+                    </gpml:member>
+                    <gpml:member>
+                        <gml:TimePeriod>
+                            <gml:begin>
+                                <gml:TimeInstant>
+                                    <gml:timePosition gml:frame="http://gplates.org/TRS/flat">30</gml:timePosition>
+                                </gml:TimeInstant>
+                            </gml:begin>
+                            <gml:end>
+                                <gml:TimeInstant>
+                                    <gml:timePosition gml:frame="http://gplates.org/TRS/flat">20</gml:timePosition>
+                                </gml:TimeInstant>
+                            </gml:end>
+                        </gml:TimePeriod>
+                    </gpml:member>
+                    <gpml:member>
+                        <gml:TimePeriod>
+                            <gml:begin>
+                                <gml:TimeInstant>
+                                    <gml:timePosition gml:frame="http://gplates.org/TRS/flat">40</gml:timePosition>
+                                </gml:TimeInstant>
+                            </gml:begin>
+                            <gml:end>
+                                <gml:TimeInstant>
+                                    <gml:timePosition gml:frame="http://gplates.org/TRS/flat">30</gml:timePosition>
+                                </gml:TimeInstant>
+                            </gml:end>
+                        </gml:TimePeriod>
+                    </gpml:member>
+                    <gpml:member>
+                        <gml:TimePeriod>
+                            <gml:begin>
+                                <gml:TimeInstant>
+                                    <gml:timePosition gml:frame="http://gplates.org/TRS/flat">50</gml:timePosition>
+                                </gml:TimeInstant>
+                            </gml:begin>
+                            <gml:end>
+                                <gml:TimeInstant>
+                                    <gml:timePosition gml:frame="http://gplates.org/TRS/flat">40</gml:timePosition>
+                                </gml:TimeInstant>
+                            </gml:end>
+                        </gml:TimePeriod>
+                    </gpml:member>
+                    <gpml:member>
+                        <gml:TimePeriod>
+                            <gml:begin>
+                                <gml:TimeInstant>
+                                    <gml:timePosition gml:frame="http://gplates.org/TRS/flat">60</gml:timePosition>
+                                </gml:TimeInstant>
+                            </gml:begin>
+                            <gml:end>
+                                <gml:TimeInstant>
+                                    <gml:timePosition gml:frame="http://gplates.org/TRS/flat">50</gml:timePosition>
+                                </gml:TimeInstant>
+                            </gml:end>
+                        </gml:TimePeriod>
+                    </gpml:member>
+                    <gpml:member>
+                        <gml:TimePeriod>
+                            <gml:begin>
+                                <gml:TimeInstant>
+                                    <gml:timePosition gml:frame="http://gplates.org/TRS/flat">70</gml:timePosition>
+                                </gml:TimeInstant>
+                            </gml:begin>
+                            <gml:end>
+                                <gml:TimeInstant>
+                                    <gml:timePosition gml:frame="http://gplates.org/TRS/flat">60</gml:timePosition>
+                                </gml:TimeInstant>
+                            </gml:end>
+                        </gml:TimePeriod>
+                    </gpml:member>
+                    <gpml:member>
+                        <gml:TimePeriod>
+                            <gml:begin>
+                                <gml:TimeInstant>
+                                    <gml:timePosition gml:frame="http://gplates.org/TRS/flat">80</gml:timePosition>
+                                </gml:TimeInstant>
+                            </gml:begin>
+                            <gml:end>
+                                <gml:TimeInstant>
+                                    <gml:timePosition gml:frame="http://gplates.org/TRS/flat">70</gml:timePosition>
+                                </gml:TimeInstant>
+                            </gml:end>
+                        </gml:TimePeriod>
+                    </gpml:member>
+                    <gpml:member>
+                        <gml:TimePeriod>
+                            <gml:begin>
+                                <gml:TimeInstant>
+                                    <gml:timePosition gml:frame="http://gplates.org/TRS/flat">90</gml:timePosition>
+                                </gml:TimeInstant>
+                            </gml:begin>
+                            <gml:end>
+                                <gml:TimeInstant>
+                                    <gml:timePosition gml:frame="http://gplates.org/TRS/flat">80</gml:timePosition>
+                                </gml:TimeInstant>
+                            </gml:end>
+                        </gml:TimePeriod>
+                    </gpml:member>
+                    <gpml:member>
+                        <gml:TimePeriod>
+                            <gml:begin>
+                                <gml:TimeInstant>
+                                    <gml:timePosition gml:frame="http://gplates.org/TRS/flat">100</gml:timePosition>
+                                </gml:TimeInstant>
+                            </gml:begin>
+                            <gml:end>
+                                <gml:TimeInstant>
+                                    <gml:timePosition gml:frame="http://gplates.org/TRS/flat">90</gml:timePosition>
+                                </gml:TimeInstant>
+                            </gml:end>
+                        </gml:TimePeriod>
+                    </gpml:member>
+                </gpml:Array>
+            </gpml:times>
+            <gpml:seedPoints>
+                <gpml:ConstantValue>
+                    <gpml:value>
+                        <gml:Point>
+                            <gml:pos>13.3147 -11.740500000000001</gml:pos>
+                        </gml:Point>
+                    </gpml:value>
+                    <gpml:valueType xmlns:gml="http://www.opengis.net/gml">gml:Point</gpml:valueType>
+                </gpml:ConstantValue>
+            </gpml:seedPoints>
+        </gpml:MotionPath>
+    </gml:featureMember>
+    <gml:featureMember>
+        <gpml:MotionPath>
+            <gpml:identity>GPlates-156faccb-b2ed-4b6c-911a-538a2fbd058e</gpml:identity>
+            <gpml:revision>GPlates-21ad7f88-aaac-4a5d-8951-efe846da4bb2</gpml:revision>
+            <gpml:reconstructionPlateId>
+                <gpml:ConstantValue>
+                    <gpml:value>701</gpml:value>
+                    <gpml:valueType xmlns:gpml="http://www.gplates.org/gplates">gpml:plateId</gpml:valueType>
+                </gpml:ConstantValue>
+            </gpml:reconstructionPlateId>
+            <gml:validTime>
+                <gml:TimePeriod>
+                    <gml:begin>
+                        <gml:TimeInstant>
+                            <gml:timePosition gml:frame="http://gplates.org/TRS/flat">http://gplates.org/times/distantPast</gml:timePosition>
+                        </gml:TimeInstant>
+                    </gml:begin>
+                    <gml:end>
+                        <gml:TimeInstant>
+                            <gml:timePosition gml:frame="http://gplates.org/TRS/flat">http://gplates.org/times/distantFuture</gml:timePosition>
+                        </gml:TimeInstant>
+                    </gml:end>
+                </gml:TimePeriod>
+            </gml:validTime>
+            <gml:name>Motion Path Seed Point 1</gml:name>
+            <gpml:relativePlate>0</gpml:relativePlate>
+            <gpml:times>
+                <gpml:Array>
+                    <gpml:valueType xmlns:gml="http://www.opengis.net/gml">gml:TimePeriod</gpml:valueType>
+                    <gpml:member>
+                        <gml:TimePeriod>
+                            <gml:begin>
+                                <gml:TimeInstant>
+                                    <gml:timePosition gml:frame="http://gplates.org/TRS/flat">0</gml:timePosition>
+                                </gml:TimeInstant>
+                            </gml:begin>
+                            <gml:end>
+                                <gml:TimeInstant>
+                                    <gml:timePosition gml:frame="http://gplates.org/TRS/flat">0</gml:timePosition>
+                                </gml:TimeInstant>
+                            </gml:end>
+                        </gml:TimePeriod>
+                    </gpml:member>
+                    <gpml:member>
+                        <gml:TimePeriod>
+                            <gml:begin>
+                                <gml:TimeInstant>
+                                    <gml:timePosition gml:frame="http://gplates.org/TRS/flat">5</gml:timePosition>
+                                </gml:TimeInstant>
+                            </gml:begin>
+                            <gml:end>
+                                <gml:TimeInstant>
+                                    <gml:timePosition gml:frame="http://gplates.org/TRS/flat">0</gml:timePosition>
+                                </gml:TimeInstant>
+                            </gml:end>
+                        </gml:TimePeriod>
+                    </gpml:member>
+                    <gpml:member>
+                        <gml:TimePeriod>
+                            <gml:begin>
+                                <gml:TimeInstant>
+                                    <gml:timePosition gml:frame="http://gplates.org/TRS/flat">10</gml:timePosition>
+                                </gml:TimeInstant>
+                            </gml:begin>
+                            <gml:end>
+                                <gml:TimeInstant>
+                                    <gml:timePosition gml:frame="http://gplates.org/TRS/flat">5</gml:timePosition>
+                                </gml:TimeInstant>
+                            </gml:end>
+                        </gml:TimePeriod>
+                    </gpml:member>
+                    <gpml:member>
+                        <gml:TimePeriod>
+                            <gml:begin>
+                                <gml:TimeInstant>
+                                    <gml:timePosition gml:frame="http://gplates.org/TRS/flat">15</gml:timePosition>
+                                </gml:TimeInstant>
+                            </gml:begin>
+                            <gml:end>
+                                <gml:TimeInstant>
+                                    <gml:timePosition gml:frame="http://gplates.org/TRS/flat">10</gml:timePosition>
+                                </gml:TimeInstant>
+                            </gml:end>
+                        </gml:TimePeriod>
+                    </gpml:member>
+                    <gpml:member>
+                        <gml:TimePeriod>
+                            <gml:begin>
+                                <gml:TimeInstant>
+                                    <gml:timePosition gml:frame="http://gplates.org/TRS/flat">20</gml:timePosition>
+                                </gml:TimeInstant>
+                            </gml:begin>
+                            <gml:end>
+                                <gml:TimeInstant>
+                                    <gml:timePosition gml:frame="http://gplates.org/TRS/flat">15</gml:timePosition>
+                                </gml:TimeInstant>
+                            </gml:end>
+                        </gml:TimePeriod>
+                    </gpml:member>
+                    <gpml:member>
+                        <gml:TimePeriod>
+                            <gml:begin>
+                                <gml:TimeInstant>
+                                    <gml:timePosition gml:frame="http://gplates.org/TRS/flat">25</gml:timePosition>
+                                </gml:TimeInstant>
+                            </gml:begin>
+                            <gml:end>
+                                <gml:TimeInstant>
+                                    <gml:timePosition gml:frame="http://gplates.org/TRS/flat">20</gml:timePosition>
+                                </gml:TimeInstant>
+                            </gml:end>
+                        </gml:TimePeriod>
+                    </gpml:member>
+                    <gpml:member>
+                        <gml:TimePeriod>
+                            <gml:begin>
+                                <gml:TimeInstant>
+                                    <gml:timePosition gml:frame="http://gplates.org/TRS/flat">30</gml:timePosition>
+                                </gml:TimeInstant>
+                            </gml:begin>
+                            <gml:end>
+                                <gml:TimeInstant>
+                                    <gml:timePosition gml:frame="http://gplates.org/TRS/flat">25</gml:timePosition>
+                                </gml:TimeInstant>
+                            </gml:end>
+                        </gml:TimePeriod>
+                    </gpml:member>
+                    <gpml:member>
+                        <gml:TimePeriod>
+                            <gml:begin>
+                                <gml:TimeInstant>
+                                    <gml:timePosition gml:frame="http://gplates.org/TRS/flat">35</gml:timePosition>
+                                </gml:TimeInstant>
+                            </gml:begin>
+                            <gml:end>
+                                <gml:TimeInstant>
+                                    <gml:timePosition gml:frame="http://gplates.org/TRS/flat">30</gml:timePosition>
+                                </gml:TimeInstant>
+                            </gml:end>
+                        </gml:TimePeriod>
+                    </gpml:member>
+                    <gpml:member>
+                        <gml:TimePeriod>
+                            <gml:begin>
+                                <gml:TimeInstant>
+                                    <gml:timePosition gml:frame="http://gplates.org/TRS/flat">40</gml:timePosition>
+                                </gml:TimeInstant>
+                            </gml:begin>
+                            <gml:end>
+                                <gml:TimeInstant>
+                                    <gml:timePosition gml:frame="http://gplates.org/TRS/flat">35</gml:timePosition>
+                                </gml:TimeInstant>
+                            </gml:end>
+                        </gml:TimePeriod>
+                    </gpml:member>
+                    <gpml:member>
+                        <gml:TimePeriod>
+                            <gml:begin>
+                                <gml:TimeInstant>
+                                    <gml:timePosition gml:frame="http://gplates.org/TRS/flat">45</gml:timePosition>
+                                </gml:TimeInstant>
+                            </gml:begin>
+                            <gml:end>
+                                <gml:TimeInstant>
+                                    <gml:timePosition gml:frame="http://gplates.org/TRS/flat">40</gml:timePosition>
+                                </gml:TimeInstant>
+                            </gml:end>
+                        </gml:TimePeriod>
+                    </gpml:member>
+                    <gpml:member>
+                        <gml:TimePeriod>
+                            <gml:begin>
+                                <gml:TimeInstant>
+                                    <gml:timePosition gml:frame="http://gplates.org/TRS/flat">50</gml:timePosition>
+                                </gml:TimeInstant>
+                            </gml:begin>
+                            <gml:end>
+                                <gml:TimeInstant>
+                                    <gml:timePosition gml:frame="http://gplates.org/TRS/flat">45</gml:timePosition>
+                                </gml:TimeInstant>
+                            </gml:end>
+                        </gml:TimePeriod>
+                    </gpml:member>
+                    <gpml:member>
+                        <gml:TimePeriod>
+                            <gml:begin>
+                                <gml:TimeInstant>
+                                    <gml:timePosition gml:frame="http://gplates.org/TRS/flat">55</gml:timePosition>
+                                </gml:TimeInstant>
+                            </gml:begin>
+                            <gml:end>
+                                <gml:TimeInstant>
+                                    <gml:timePosition gml:frame="http://gplates.org/TRS/flat">50</gml:timePosition>
+                                </gml:TimeInstant>
+                            </gml:end>
+                        </gml:TimePeriod>
+                    </gpml:member>
+                    <gpml:member>
+                        <gml:TimePeriod>
+                            <gml:begin>
+                                <gml:TimeInstant>
+                                    <gml:timePosition gml:frame="http://gplates.org/TRS/flat">60</gml:timePosition>
+                                </gml:TimeInstant>
+                            </gml:begin>
+                            <gml:end>
+                                <gml:TimeInstant>
+                                    <gml:timePosition gml:frame="http://gplates.org/TRS/flat">55</gml:timePosition>
+                                </gml:TimeInstant>
+                            </gml:end>
+                        </gml:TimePeriod>
+                    </gpml:member>
+                    <gpml:member>
+                        <gml:TimePeriod>
+                            <gml:begin>
+                                <gml:TimeInstant>
+                                    <gml:timePosition gml:frame="http://gplates.org/TRS/flat">65</gml:timePosition>
+                                </gml:TimeInstant>
+                            </gml:begin>
+                            <gml:end>
+                                <gml:TimeInstant>
+                                    <gml:timePosition gml:frame="http://gplates.org/TRS/flat">60</gml:timePosition>
+                                </gml:TimeInstant>
+                            </gml:end>
+                        </gml:TimePeriod>
+                    </gpml:member>
+                    <gpml:member>
+                        <gml:TimePeriod>
+                            <gml:begin>
+                                <gml:TimeInstant>
+                                    <gml:timePosition gml:frame="http://gplates.org/TRS/flat">70</gml:timePosition>
+                                </gml:TimeInstant>
+                            </gml:begin>
+                            <gml:end>
+                                <gml:TimeInstant>
+                                    <gml:timePosition gml:frame="http://gplates.org/TRS/flat">65</gml:timePosition>
+                                </gml:TimeInstant>
+                            </gml:end>
+                        </gml:TimePeriod>
+                    </gpml:member>
+                    <gpml:member>
+                        <gml:TimePeriod>
+                            <gml:begin>
+                                <gml:TimeInstant>
+                                    <gml:timePosition gml:frame="http://gplates.org/TRS/flat">75</gml:timePosition>
+                                </gml:TimeInstant>
+                            </gml:begin>
+                            <gml:end>
+                                <gml:TimeInstant>
+                                    <gml:timePosition gml:frame="http://gplates.org/TRS/flat">70</gml:timePosition>
+                                </gml:TimeInstant>
+                            </gml:end>
+                        </gml:TimePeriod>
+                    </gpml:member>
+                    <gpml:member>
+                        <gml:TimePeriod>
+                            <gml:begin>
+                                <gml:TimeInstant>
+                                    <gml:timePosition gml:frame="http://gplates.org/TRS/flat">80</gml:timePosition>
+                                </gml:TimeInstant>
+                            </gml:begin>
+                            <gml:end>
+                                <gml:TimeInstant>
+                                    <gml:timePosition gml:frame="http://gplates.org/TRS/flat">75</gml:timePosition>
+                                </gml:TimeInstant>
+                            </gml:end>
+                        </gml:TimePeriod>
+                    </gpml:member>
+                    <gpml:member>
+                        <gml:TimePeriod>
+                            <gml:begin>
+                                <gml:TimeInstant>
+                                    <gml:timePosition gml:frame="http://gplates.org/TRS/flat">85</gml:timePosition>
+                                </gml:TimeInstant>
+                            </gml:begin>
+                            <gml:end>
+                                <gml:TimeInstant>
+                                    <gml:timePosition gml:frame="http://gplates.org/TRS/flat">80</gml:timePosition>
+                                </gml:TimeInstant>
+                            </gml:end>
+                        </gml:TimePeriod>
+                    </gpml:member>
+                    <gpml:member>
+                        <gml:TimePeriod>
+                            <gml:begin>
+                                <gml:TimeInstant>
+                                    <gml:timePosition gml:frame="http://gplates.org/TRS/flat">90</gml:timePosition>
+                                </gml:TimeInstant>
+                            </gml:begin>
+                            <gml:end>
+                                <gml:TimeInstant>
+                                    <gml:timePosition gml:frame="http://gplates.org/TRS/flat">85</gml:timePosition>
+                                </gml:TimeInstant>
+                            </gml:end>
+                        </gml:TimePeriod>
+                    </gpml:member>
+                    <gpml:member>
+                        <gml:TimePeriod>
+                            <gml:begin>
+                                <gml:TimeInstant>
+                                    <gml:timePosition gml:frame="http://gplates.org/TRS/flat">95</gml:timePosition>
+                                </gml:TimeInstant>
+                            </gml:begin>
+                            <gml:end>
+                                <gml:TimeInstant>
+                                    <gml:timePosition gml:frame="http://gplates.org/TRS/flat">90</gml:timePosition>
+                                </gml:TimeInstant>
+                            </gml:end>
+                        </gml:TimePeriod>
+                    </gpml:member>
+                    <gpml:member>
+                        <gml:TimePeriod>
+                            <gml:begin>
+                                <gml:TimeInstant>
+                                    <gml:timePosition gml:frame="http://gplates.org/TRS/flat">100</gml:timePosition>
+                                </gml:TimeInstant>
+                            </gml:begin>
+                            <gml:end>
+                                <gml:TimeInstant>
+                                    <gml:timePosition gml:frame="http://gplates.org/TRS/flat">95</gml:timePosition>
+                                </gml:TimeInstant>
+                            </gml:end>
+                        </gml:TimePeriod>
+                    </gpml:member>
+                </gpml:Array>
+            </gpml:times>
+            <gpml:seedPoints>
+                <gpml:ConstantValue>
+                    <gpml:value>
+                        <gml:Point>
+                            <gml:pos>23.306021296124261 -12.584386749172189</gml:pos>
+                        </gml:Point>
+                    </gpml:value>
+                    <gpml:valueType xmlns:gml="http://www.opengis.net/gml">gml:Point</gpml:valueType>
+                </gpml:ConstantValue>
+            </gpml:seedPoints>
+        </gpml:MotionPath>
+    </gml:featureMember>
+</gpml:FeatureCollection>

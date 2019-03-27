@@ -1,0 +1,118 @@
+#!/bin/bash
+#
+# compute dynamic topography over air
+#
+model=${1-med_weak_mix_ns}
+times=${2-"0"}			
+
+grefmodel=smeanh		# global reference coordinate structure if coordinates are not saved. careful!!!
+inc=0.25
+
+# dynamic topo wrt air/water
+#
+# wrt air
+#    scale = eta_0*kappa*/R^2*rho*g = 1e21*(1e-6)/(6371km*6371km*3350*10) = 0.00073542769862529
+#
+scale=0.00073542769862529
+# rhom = 3350, rhow = 1020
+#gnuplot> print 1e21*1e-6/(6371e3)**2/2500./10.
+#0.000985473116157889
+#
+#
+# seawater
+#
+#scale=0.00105737458815224
+
+# (3350-1020)/3350  = 0.69552238806
+
+tmpn=/tmp/$HOST.$$.pm
+trap "rm -rf $tmpn.* ; exit" 0 1 2 15
+
+
+
+rm scratch/$model/scoord.dat 2> /dev/null
+
+
+
+if [ ! -s scratch/$model/coord.0.gz ];then
+    echo 
+    echo $0: WARNING: scratch/$model/coord.0.gz not found , using $grefmodel instead
+    echo 
+    cmodel=$grefmodel
+else
+    cmodel=$model
+fi
+
+
+for time in $times;do
+
+    rm scratch/$model/$time/dyn.dat 2> /dev/null    
+    i=0
+    while [ -s scratch/$cmodel/coord.$i.gz ];do
+	zcat scratch/$cmodel/coord.$i.gz | \
+	    gawk '{if($3>0.99999)print($2*57.2957795130823208,90-$1*57.2957795130823208)}' > $tmpn.1
+	ntop=`lc $tmpn.1`
+
+	if [ $ntop -gt 0 ];then
+	    echo model $model time $time node $i has surface info
+	    cat $tmpn.1 >> scratch/$model/scoord.dat
+	    rm $tmpn.1
+	    zcat scratch/$model/$time/surf.$i.$time.gz | \
+		gawk -v scale=$scale '{if(NR>1)print($1*scale/1e3)}' > $tmpn.2
+	    nsurf=`lc $tmpn.2`
+	    echo $0: ntop $ntop nsurf $nsurf
+	    if [ $ntop -ne $nsurf ];then
+		echo $0: error, mismatch
+		exit
+	    fi
+	    cat $tmpn.2 >> scratch/$model/$time/dyn.dat # convert to km
+	    rm $tmpn.2
+	fi
+	
+	((i=i+1))
+    done
+
+    n1=`lc scratch/$model/scoord.dat`
+    n2=`lc scratch/$model/$time/dyn.dat`
+
+    echo $0: model $model time $time n1 $n1 n2 $n2
+    if [ $n1 -ne $n2 ];then
+	echo $0: line error
+	exit
+    fi
+    minmax scratch/$model/scoord.dat
+
+    paste scratch/$model/scoord.dat scratch/$model/$time/dyn.dat  | \
+	surface -Rg -I$inc -fg -Gscratch/$model/$time/dtopo.grd
+    
+    debug=0
+    if [ $debug -eq 1 ];then
+	reg=-R0/40/30/50
+	proj=-JH20/10
+	paste scratch/$model/scoord.dat scratch/$model/$time/dyn.dat  > tmp.dat
+	makecpt -T-3/3/.1 -Chaxby > tmp.cpt
+	grdimage scratch/$model/$time/dtopo.grd -Ctmp.cpt $reg $proj -K -P -Ba10f1 > scratch/$model/$time/tmp.ps
+	paste scratch/$model/scoord.dat scratch/$model/$time/dyn.dat  | \
+	    psxy $reg $proj -O -Sc.025 -G0 >> scratch/$model/$time/tmp.ps
+	echo $0: written to scratch/$model/$time/tmp.ps
+    fi
+    
+
+
+    rm scratch/$model/scoord.dat scratch/$model/$time/dyn.dat
+    echo $0: output in scratch/$model/$time/dtopo.grd
+# expand
+    shana 257 scratch/$model/$time/dtopo > scratch/$model/$time/dtopo.257.ab
+    cat scratch/$model/$time/dtopo.257.ab | abconvert 0 0 1 0 -12 | shsyn $inc 0 scratch/$model/$time/dtopo.f12 # high pass > 12
+
+    gzip -f scratch/$model/$time/dtopo.257.ab
+    
+    
+    grd2map  scratch/$model/$time/dtopo.grd
+    gzip -f scratch/$model/$time/dtopo.ps
+ 
+    grd2map  scratch/$model/$time/dtopo.f12.grd
+    gzip -f scratch/$model/$time/dtopo.f12.ps
+    
+
+done

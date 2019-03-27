@@ -1,0 +1,38 @@
+<GLM filetype="Build project" version="2.3.10">
+	<BuildProject2 id="1">
+		<field_label>EarthByte_Agegrid_Final_Mask: </field_label>
+		<field_id>agegrid_final_mask</field_id>
+		<category>/EarthByte/Age grids without continents</category>
+		<predef_layer>true</predef_layer>
+		<single_layer>false</single_layer>
+		<use_age_filter>true</use_age_filter>
+		<rotation_model>Default</rotation_model>
+		<palette>Blue to Red</palette>
+		<palette_min>0</palette_min>
+		<palette_max>140</palette_max>
+	</BuildProject2>
+		<BuildFile2 parent="1">
+			<filename source="user">H:\GeoData\Statoil\20130624_earthbyte_agegrids_2013\Mask\agegrid_final_mask_0.grd</filename>
+			<field_label>000</field_label>
+			<field_aoa>0.5</field_aoa>
+			<field_aod>-0.5</field_aod>
+		</BuildFile2>
+		<BuildFile2 parent="1">
+			<filename source="user">H:\GeoData\Statoil\20130624_earthbyte_agegrids_2013\Mask\agegrid_final_mask_1.grd</filename>
+			<field_label>001</field_label>
+			<field_aoa>1.5</field_aoa>
+			<field_aod>0.5</field_aod>
+		</BuildFile2>
+		<BuildFile2 parent="1">
+			<filename source="user">H:\GeoData\Statoil\20130624_earthbyte_agegrids_2013\Mask\agegrid_final_mask_2.grd</filename>
+			<field_label>002</field_label>
+			<field_aoa>2.5</field_aoa>
+			<field_aod>1.5</field_aod>
+		</BuildFile2>
+		<BuildFile2 parent="1">
+			<filename source="user">H:\GeoData\Statoil\20130624_earthbyte_agegrids_2013\Mask\agegrid_final_mask_3.grd</filename>
+			<field_label>003</field_label>
+			<field_aoa>3.5</field_aoa>
+			<field_aod>2.5</field_aod>
+		</BuildFile2>
+</GLM>

@@ -1,0 +1,18 @@
+<?xml version="1.0"?>
+<gpml:unclassifiedGeometryCoverage xmlns:gml="http://www.opengis.net/gml" xmlns:gpml="http://www.gplates.org/gplates" xmlns:xsi="http://www.w3.org/XMLSchema-instance" gpml:version="1.6.0329" xsi:schemaLocation="http://www.gplates.org/gplates ../xsd/gpml.xsd http://www.opengis.net/gml ../../../gml/current/base">
+	<gpml:ConstantValue>
+		<gpml:value>
+			<gml:DataBlock>
+				<gml:rangeParameters>
+			 		<gml:CompositeValue>
+						<gml:valueComponent>
+							<gpml:CrustalThickness gpml:uom="urn:x-si:v1999:uom:kilometre">template</gpml:CrustalThickness>
+						</gml:valueComponent>
+					</gml:CompositeValue>
+				</gml:rangeParameters>
+				<gml:tupleList>0 10 </gml:tupleList>
+			</gml:DataBlock>
+		</gpml:value>
+		<gpml:valueType xmlns:gml="http://www.opengis.net/gml">gml:DataBlock</gpml:valueType>
+	</gpml:ConstantValue>
+</gpml:unclassifiedGeometryCoverage>

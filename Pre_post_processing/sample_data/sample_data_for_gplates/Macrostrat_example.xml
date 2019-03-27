@@ -1,0 +1,1270 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<wfs:FeatureCollection xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+ xsi:schemaLocation="http://www.opengis.net/wfs http://schemas.opengis.net/wfs/1.1.0/wfs.xsd urn:cgi:xmlns:CGI:GeoSciML:2.0 http://www.geosciml.org/geosciml/2.0/xsd/geosciml.xsd"
+ xmlns:gml="http://www.opengis.net/gml" 
+ xmlns:wfs="http://www.opengis.net/wfs" 
+ xmlns:gsml="urn:cgi:xmlns:CGI:GeoSciML:2.0" 
+ xmlns:sa="http://www.opengis.net/sampling/1.0" 
+ xmlns:om="http://www.opengis.net/om/1.0" 
+ xmlns:cgu="urn:cgi:xmlns:CGI:DbUtils:1.0" 
+ xmlns:xlink="http://www.w3.org/1999/xlink" 
+ xmlns:gpml="http://www.gplates.org/gplates" 
+ gml:id="test6_from_macrostrat">
+<gpml:test>_REQUEST: polygon=-104.3 37.88, -104.2 35.77, -99.38 35.6, -99.23 37.82, -104.3 37.88; ages = 200 0; </gpml:test>
+<gpml:test>query geom: result: -99.251 35.936</gpml:test>
+<gml:featureMember>
+<gpml:RockUnit_siliciclastic>
+<gml:name>Ogallala Fm</gml:name>
+<gsml:shape><gml:Polygon><gml:posList>-97.724261 35.908134 -97.847716 36.266311 -99.686946 37.114015 -100.342191 35.448511 -100.214224 34.976633 -98.94391 34.669465 -97.785143 35.525729 -97.724261 35.908134</gml:posList></gml:Polygon></gsml:shape>
+<gml:validTime>
+<gml:TimePeriod>
+<gml:begin>
+<gml:TimeInstant>
+<gml:timePosition gml:frame="http://gplates.org/TRS/flat">5.3320</gml:timePosition>
+</gml:TimeInstant>
+</gml:begin>
+<gml:end>
+<gml:TimeInstant>
+<gml:timePosition gml:frame="http://gplates.org/TRS/flat">2.5880</gml:timePosition>
+</gml:TimeInstant>
+</gml:end>
+</gml:TimePeriod>
+</gml:validTime>
+<gpml:rock_max_thick>180.0</gpml:rock_max_thick>
+<gpml:rock_min_thick>0.0</gpml:rock_min_thick>
+<gpml:rock_type>siliciclastic</gpml:rock_type>
+</gpml:RockUnit_siliciclastic>
+</gml:featureMember>
+<gpml:test>query geom: result: -100.886 36.380</gpml:test>
+<gml:featureMember>
+<gpml:RockUnit_siliciclastic>
+<gml:name>Ogallala Fm</gml:name>
+<gsml:shape><gml:Polygon><gml:posList>-99.686946 37.114015 -99.773321 37.256604 -102.208289 36.728922 -102.244217 36.479471 -100.342191 35.448511 -99.686946 37.114015</gml:posList></gml:Polygon></gsml:shape>
+<gml:validTime>
+<gml:TimePeriod>
+<gml:begin>
+<gml:TimeInstant>
+<gml:timePosition gml:frame="http://gplates.org/TRS/flat">5.3320</gml:timePosition>
+</gml:TimeInstant>
+</gml:begin>
+<gml:end>
+<gml:TimeInstant>
+<gml:timePosition gml:frame="http://gplates.org/TRS/flat">2.5880</gml:timePosition>
+</gml:TimeInstant>
+</gml:end>
+</gml:TimePeriod>
+</gml:validTime>
+<gpml:rock_max_thick>180.0</gpml:rock_max_thick>
+<gpml:rock_min_thick>0.0</gpml:rock_min_thick>
+<gpml:rock_type>siliciclastic</gpml:rock_type>
+</gpml:RockUnit_siliciclastic>
+</gml:featureMember>
+<gpml:test>query geom: result: -101.283 37.583</gpml:test>
+<gml:featureMember>
+<gpml:RockUnit_siliciclastic>
+<gml:name>Meade Gp</gml:name>
+<gsml:shape><gml:Polygon><gml:posList>-99.999537 37.896631 -100.762435 38.511029 -101.408666 38.536704 -102.510536 37.225899 -102.208289 36.728922 -99.773321 37.256604 -99.771576 37.282723 -99.999537 37.896631</gml:posList></gml:Polygon></gsml:shape>
+<gml:validTime>
+<gml:TimePeriod>
+<gml:begin>
+<gml:TimeInstant>
+<gml:timePosition gml:frame="http://gplates.org/TRS/flat">2.5880</gml:timePosition>
+</gml:TimeInstant>
+</gml:begin>
+<gml:end>
+<gml:TimeInstant>
+<gml:timePosition gml:frame="http://gplates.org/TRS/flat">0.0117</gml:timePosition>
+</gml:TimeInstant>
+</gml:end>
+</gml:TimePeriod>
+</gml:validTime>
+<gpml:rock_max_thick>50.0</gpml:rock_max_thick>
+<gpml:rock_min_thick>15.0</gpml:rock_min_thick>
+<gpml:rock_type>siliciclastic</gpml:rock_type>
+</gpml:RockUnit_siliciclastic>
+</gml:featureMember>
+<gml:featureMember>
+<gpml:RockUnit_siliciclastic>
+<gml:name>Ogallala Fm</gml:name>
+<gsml:shape><gml:Polygon><gml:posList>-99.999537 37.896631 -100.762435 38.511029 -101.408666 38.536704 -102.510536 37.225899 -102.208289 36.728922 -99.773321 37.256604 -99.771576 37.282723 -99.999537 37.896631</gml:posList></gml:Polygon></gsml:shape>
+<gml:validTime>
+<gml:TimePeriod>
+<gml:begin>
+<gml:TimeInstant>
+<gml:timePosition gml:frame="http://gplates.org/TRS/flat">5.3320</gml:timePosition>
+</gml:TimeInstant>
+</gml:begin>
+<gml:end>
+<gml:TimeInstant>
+<gml:timePosition gml:frame="http://gplates.org/TRS/flat">3.6000</gml:timePosition>
+</gml:TimeInstant>
+</gml:end>
+</gml:TimePeriod>
+</gml:validTime>
+<gpml:rock_max_thick>180.0</gpml:rock_max_thick>
+<gpml:rock_min_thick>0.0</gpml:rock_min_thick>
+<gpml:rock_type>siliciclastic</gpml:rock_type>
+</gpml:RockUnit_siliciclastic>
+</gml:featureMember>
+<gml:featureMember>
+<gpml:RockUnit_siliciclastic>
+<gml:name>Dakota Fm</gml:name>
+<gsml:shape><gml:Polygon><gml:posList>-99.999537 37.896631 -100.762435 38.511029 -101.408666 38.536704 -102.510536 37.225899 -102.208289 36.728922 -99.773321 37.256604 -99.771576 37.282723 -99.999537 37.896631</gml:posList></gml:Polygon></gsml:shape>
+<gml:validTime>
+<gml:TimePeriod>
+<gml:begin>
+<gml:TimeInstant>
+<gml:timePosition gml:frame="http://gplates.org/TRS/flat">99.6000</gml:timePosition>
+</gml:TimeInstant>
+</gml:begin>
+<gml:end>
+<gml:TimeInstant>
+<gml:timePosition gml:frame="http://gplates.org/TRS/flat">93.5000</gml:timePosition>
+</gml:TimeInstant>
+</gml:end>
+</gml:TimePeriod>
+</gml:validTime>
+<gpml:rock_max_thick>90.0</gpml:rock_max_thick>
+<gpml:rock_min_thick>60.0</gpml:rock_min_thick>
+<gpml:rock_type>siliciclastic</gpml:rock_type>
+</gpml:RockUnit_siliciclastic>
+</gml:featureMember>
+<gml:featureMember>
+<gpml:RockUnit_siliciclastic>
+<gml:name>Kiowa Shale</gml:name>
+<gsml:shape><gml:Polygon><gml:posList>-99.999537 37.896631 -100.762435 38.511029 -101.408666 38.536704 -102.510536 37.225899 -102.208289 36.728922 -99.773321 37.256604 -99.771576 37.282723 -99.999537 37.896631</gml:posList></gml:Polygon></gsml:shape>
+<gml:validTime>
+<gml:TimePeriod>
+<gml:begin>
+<gml:TimeInstant>
+<gml:timePosition gml:frame="http://gplates.org/TRS/flat">112.0000</gml:timePosition>
+</gml:TimeInstant>
+</gml:begin>
+<gml:end>
+<gml:TimeInstant>
+<gml:timePosition gml:frame="http://gplates.org/TRS/flat">93.5000</gml:timePosition>
+</gml:TimeInstant>
+</gml:end>
+</gml:TimePeriod>
+</gml:validTime>
+<gpml:rock_max_thick>45.0</gpml:rock_max_thick>
+<gpml:rock_min_thick>18.0</gpml:rock_min_thick>
+<gpml:rock_type>siliciclastic</gpml:rock_type>
+</gpml:RockUnit_siliciclastic>
+</gml:featureMember>
+<gml:featureMember>
+<gpml:RockUnit_siliciclastic>
+<gml:name>Cheyenne Sandstone</gml:name>
+<gsml:shape><gml:Polygon><gml:posList>-99.999537 37.896631 -100.762435 38.511029 -101.408666 38.536704 -102.510536 37.225899 -102.208289 36.728922 -99.773321 37.256604 -99.771576 37.282723 -99.999537 37.896631</gml:posList></gml:Polygon></gsml:shape>
+<gml:validTime>
+<gml:TimePeriod>
+<gml:begin>
+<gml:TimeInstant>
+<gml:timePosition gml:frame="http://gplates.org/TRS/flat">125.0000</gml:timePosition>
+</gml:TimeInstant>
+</gml:begin>
+<gml:end>
+<gml:TimeInstant>
+<gml:timePosition gml:frame="http://gplates.org/TRS/flat">99.6000</gml:timePosition>
+</gml:TimeInstant>
+</gml:end>
+</gml:TimePeriod>
+</gml:validTime>
+<gpml:rock_max_thick>90.0</gpml:rock_max_thick>
+<gpml:rock_min_thick>0.0</gpml:rock_min_thick>
+<gpml:rock_type>siliciclastic</gpml:rock_type>
+</gpml:RockUnit_siliciclastic>
+</gml:featureMember>
+<gml:featureMember>
+<gpml:RockUnit_siliciclastic>
+<gml:name>Morrison Fm</gml:name>
+<gsml:shape><gml:Polygon><gml:posList>-99.999537 37.896631 -100.762435 38.511029 -101.408666 38.536704 -102.510536 37.225899 -102.208289 36.728922 -99.773321 37.256604 -99.771576 37.282723 -99.999537 37.896631</gml:posList></gml:Polygon></gsml:shape>
+<gml:validTime>
+<gml:TimePeriod>
+<gml:begin>
+<gml:TimeInstant>
+<gml:timePosition gml:frame="http://gplates.org/TRS/flat">164.7000</gml:timePosition>
+</gml:TimeInstant>
+</gml:begin>
+<gml:end>
+<gml:TimeInstant>
+<gml:timePosition gml:frame="http://gplates.org/TRS/flat">145.5000</gml:timePosition>
+</gml:TimeInstant>
+</gml:end>
+</gml:TimePeriod>
+</gml:validTime>
+<gpml:rock_max_thick>90.0</gpml:rock_max_thick>
+<gpml:rock_min_thick>0.0</gpml:rock_min_thick>
+<gpml:rock_type>siliciclastic</gpml:rock_type>
+</gpml:RockUnit_siliciclastic>
+</gml:featureMember>
+<gml:featureMember>
+<gpml:RockUnit_siliciclastic>
+<gml:name>Sheep Pen Sandstone</gml:name>
+<gsml:shape><gml:Polygon><gml:posList>-99.999537 37.896631 -100.762435 38.511029 -101.408666 38.536704 -102.510536 37.225899 -102.208289 36.728922 -99.773321 37.256604 -99.771576 37.282723 -99.999537 37.896631</gml:posList></gml:Polygon></gsml:shape>
+<gml:validTime>
+<gml:TimePeriod>
+<gml:begin>
+<gml:TimeInstant>
+<gml:timePosition gml:frame="http://gplates.org/TRS/flat">216.5000</gml:timePosition>
+</gml:TimeInstant>
+</gml:begin>
+<gml:end>
+<gml:TimeInstant>
+<gml:timePosition gml:frame="http://gplates.org/TRS/flat">199.6000</gml:timePosition>
+</gml:TimeInstant>
+</gml:end>
+</gml:TimePeriod>
+</gml:validTime>
+<gpml:rock_max_thick>32.0</gpml:rock_max_thick>
+<gpml:rock_min_thick>0.0</gpml:rock_min_thick>
+<gpml:rock_type>siliciclastic</gpml:rock_type>
+</gpml:RockUnit_siliciclastic>
+</gml:featureMember>
+<gpml:test>query geom: result: -103.595 36.646</gpml:test>
+<gml:featureMember>
+<gpml:RockUnit_siliciclastic>
+<gml:name>Unnamed</gml:name>
+<gsml:shape><gml:Polygon><gml:posList>-102.244217 36.479471 -102.208289 36.728922 -102.510536 37.225899 -103.031961 37.443757 -105.005511 36.293002 -104.299349 35.262932 -103.370679 35.168248 -103.2771 35.221356 -102.244217 36.479471</gml:posList></gml:Polygon></gsml:shape>
+<gml:validTime>
+<gml:TimePeriod>
+<gml:begin>
+<gml:TimeInstant>
+<gml:timePosition gml:frame="http://gplates.org/TRS/flat">2.5880</gml:timePosition>
+</gml:TimeInstant>
+</gml:begin>
+<gml:end>
+<gml:TimeInstant>
+<gml:timePosition gml:frame="http://gplates.org/TRS/flat">0.0000</gml:timePosition>
+</gml:TimeInstant>
+</gml:end>
+</gml:TimePeriod>
+</gml:validTime>
+<gpml:rock_max_thick>30.0</gpml:rock_max_thick>
+<gpml:rock_min_thick>0.0</gpml:rock_min_thick>
+<gpml:rock_type>siliciclastic</gpml:rock_type>
+</gpml:RockUnit_siliciclastic>
+</gml:featureMember>
+<gml:featureMember>
+<gpml:RockUnit_volcanic>
+<gml:name>Capulin Basalts Beds</gml:name>
+<gsml:shape><gml:Polygon><gml:posList>-102.244217 36.479471 -102.208289 36.728922 -102.510536 37.225899 -103.031961 37.443757 -105.005511 36.293002 -104.299349 35.262932 -103.370679 35.168248 -103.2771 35.221356 -102.244217 36.479471</gml:posList></gml:Polygon></gsml:shape>
+<gml:validTime>
+<gml:TimePeriod>
+<gml:begin>
+<gml:TimeInstant>
+<gml:timePosition gml:frame="http://gplates.org/TRS/flat">2.5880</gml:timePosition>
+</gml:TimeInstant>
+</gml:begin>
+<gml:end>
+<gml:TimeInstant>
+<gml:timePosition gml:frame="http://gplates.org/TRS/flat">0.0117</gml:timePosition>
+</gml:TimeInstant>
+</gml:end>
+</gml:TimePeriod>
+</gml:validTime>
+<gpml:rock_max_thick>0.0</gpml:rock_max_thick>
+<gpml:rock_min_thick>0.0</gpml:rock_min_thick>
+<gpml:rock_type>volcanic</gpml:rock_type>
+</gpml:RockUnit_volcanic>
+</gml:featureMember>
+<gml:featureMember>
+<gpml:RockUnit_volcanic>
+<gml:name>Clayton Basalt</gml:name>
+<gsml:shape><gml:Polygon><gml:posList>-102.244217 36.479471 -102.208289 36.728922 -102.510536 37.225899 -103.031961 37.443757 -105.005511 36.293002 -104.299349 35.262932 -103.370679 35.168248 -103.2771 35.221356 -102.244217 36.479471</gml:posList></gml:Polygon></gsml:shape>
+<gml:validTime>
+<gml:TimePeriod>
+<gml:begin>
+<gml:TimeInstant>
+<gml:timePosition gml:frame="http://gplates.org/TRS/flat">3.6000</gml:timePosition>
+</gml:TimeInstant>
+</gml:begin>
+<gml:end>
+<gml:TimeInstant>
+<gml:timePosition gml:frame="http://gplates.org/TRS/flat">2.5880</gml:timePosition>
+</gml:TimeInstant>
+</gml:end>
+</gml:TimePeriod>
+</gml:validTime>
+<gpml:rock_max_thick>0.0</gpml:rock_max_thick>
+<gpml:rock_min_thick>0.0</gpml:rock_min_thick>
+<gpml:rock_type>volcanic</gpml:rock_type>
+</gpml:RockUnit_volcanic>
+</gml:featureMember>
+<gml:featureMember>
+<gpml:RockUnit_volcanic>
+<gml:name>Raton Basalt</gml:name>
+<gsml:shape><gml:Polygon><gml:posList>-102.244217 36.479471 -102.208289 36.728922 -102.510536 37.225899 -103.031961 37.443757 -105.005511 36.293002 -104.299349 35.262932 -103.370679 35.168248 -103.2771 35.221356 -102.244217 36.479471</gml:posList></gml:Polygon></gsml:shape>
+<gml:validTime>
+<gml:TimePeriod>
+<gml:begin>
+<gml:TimeInstant>
+<gml:timePosition gml:frame="http://gplates.org/TRS/flat">5.3320</gml:timePosition>
+</gml:TimeInstant>
+</gml:begin>
+<gml:end>
+<gml:TimeInstant>
+<gml:timePosition gml:frame="http://gplates.org/TRS/flat">3.6000</gml:timePosition>
+</gml:TimeInstant>
+</gml:end>
+</gml:TimePeriod>
+</gml:validTime>
+<gpml:rock_max_thick>150.0</gpml:rock_max_thick>
+<gpml:rock_min_thick>0.0</gpml:rock_min_thick>
+<gpml:rock_type>volcanic</gpml:rock_type>
+</gpml:RockUnit_volcanic>
+</gml:featureMember>
+<gml:featureMember>
+<gpml:RockUnit_siliciclastic>
+<gml:name>Ogallala Fm</gml:name>
+<gsml:shape><gml:Polygon><gml:posList>-102.244217 36.479471 -102.208289 36.728922 -102.510536 37.225899 -103.031961 37.443757 -105.005511 36.293002 -104.299349 35.262932 -103.370679 35.168248 -103.2771 35.221356 -102.244217 36.479471</gml:posList></gml:Polygon></gsml:shape>
+<gml:validTime>
+<gml:TimePeriod>
+<gml:begin>
+<gml:TimeInstant>
+<gml:timePosition gml:frame="http://gplates.org/TRS/flat">11.6080</gml:timePosition>
+</gml:TimeInstant>
+</gml:begin>
+<gml:end>
+<gml:TimeInstant>
+<gml:timePosition gml:frame="http://gplates.org/TRS/flat">2.5880</gml:timePosition>
+</gml:TimeInstant>
+</gml:end>
+</gml:TimePeriod>
+</gml:validTime>
+<gpml:rock_max_thick>120.0</gpml:rock_max_thick>
+<gpml:rock_min_thick>0.0</gpml:rock_min_thick>
+<gpml:rock_type>siliciclastic</gpml:rock_type>
+</gpml:RockUnit_siliciclastic>
+</gml:featureMember>
+<gml:featureMember>
+<gpml:RockUnit_siliciclastic>
+<gml:name>Smoky Hill Marl Mbr of Niobrara Fm</gml:name>
+<gsml:shape><gml:Polygon><gml:posList>-102.244217 36.479471 -102.208289 36.728922 -102.510536 37.225899 -103.031961 37.443757 -105.005511 36.293002 -104.299349 35.262932 -103.370679 35.168248 -103.2771 35.221356 -102.244217 36.479471</gml:posList></gml:Polygon></gsml:shape>
+<gml:validTime>
+<gml:TimePeriod>
+<gml:begin>
+<gml:TimeInstant>
+<gml:timePosition gml:frame="http://gplates.org/TRS/flat">89.3000</gml:timePosition>
+</gml:TimeInstant>
+</gml:begin>
+<gml:end>
+<gml:TimeInstant>
+<gml:timePosition gml:frame="http://gplates.org/TRS/flat">83.5000</gml:timePosition>
+</gml:TimeInstant>
+</gml:end>
+</gml:TimePeriod>
+</gml:validTime>
+<gpml:rock_max_thick>300.0</gpml:rock_max_thick>
+<gpml:rock_min_thick>0.0</gpml:rock_min_thick>
+<gpml:rock_type>siliciclastic</gpml:rock_type>
+</gpml:RockUnit_siliciclastic>
+</gml:featureMember>
+<gml:featureMember>
+<gpml:RockUnit_carbonate>
+<gml:name>Fort Hays Limestone Mbr of Niobrara Fm</gml:name>
+<gsml:shape><gml:Polygon><gml:posList>-102.244217 36.479471 -102.208289 36.728922 -102.510536 37.225899 -103.031961 37.443757 -105.005511 36.293002 -104.299349 35.262932 -103.370679 35.168248 -103.2771 35.221356 -102.244217 36.479471</gml:posList></gml:Polygon></gsml:shape>
+<gml:validTime>
+<gml:TimePeriod>
+<gml:begin>
+<gml:TimeInstant>
+<gml:timePosition gml:frame="http://gplates.org/TRS/flat">93.5000</gml:timePosition>
+</gml:TimeInstant>
+</gml:begin>
+<gml:end>
+<gml:TimeInstant>
+<gml:timePosition gml:frame="http://gplates.org/TRS/flat">85.8000</gml:timePosition>
+</gml:TimeInstant>
+</gml:end>
+</gml:TimePeriod>
+</gml:validTime>
+<gpml:rock_max_thick>15.0</gpml:rock_max_thick>
+<gpml:rock_min_thick>0.0</gpml:rock_min_thick>
+<gpml:rock_type>carbonate</gpml:rock_type>
+</gpml:RockUnit_carbonate>
+</gml:featureMember>
+<gml:featureMember>
+<gpml:RockUnit_siliciclastic>
+<gml:name>Carlile Fm</gml:name>
+<gsml:shape><gml:Polygon><gml:posList>-102.244217 36.479471 -102.208289 36.728922 -102.510536 37.225899 -103.031961 37.443757 -105.005511 36.293002 -104.299349 35.262932 -103.370679 35.168248 -103.2771 35.221356 -102.244217 36.479471</gml:posList></gml:Polygon></gsml:shape>
+<gml:validTime>
+<gml:TimePeriod>
+<gml:begin>
+<gml:TimeInstant>
+<gml:timePosition gml:frame="http://gplates.org/TRS/flat">93.5000</gml:timePosition>
+</gml:TimeInstant>
+</gml:begin>
+<gml:end>
+<gml:TimeInstant>
+<gml:timePosition gml:frame="http://gplates.org/TRS/flat">89.3000</gml:timePosition>
+</gml:TimeInstant>
+</gml:end>
+</gml:TimePeriod>
+</gml:validTime>
+<gpml:rock_max_thick>60.0</gpml:rock_max_thick>
+<gpml:rock_min_thick>0.0</gpml:rock_min_thick>
+<gpml:rock_type>siliciclastic</gpml:rock_type>
+</gpml:RockUnit_siliciclastic>
+</gml:featureMember>
+<gml:featureMember>
+<gpml:RockUnit_carbonate>
+<gml:name>Greenhorn Limestone of Benton Gp</gml:name>
+<gsml:shape><gml:Polygon><gml:posList>-102.244217 36.479471 -102.208289 36.728922 -102.510536 37.225899 -103.031961 37.443757 -105.005511 36.293002 -104.299349 35.262932 -103.370679 35.168248 -103.2771 35.221356 -102.244217 36.479471</gml:posList></gml:Polygon></gsml:shape>
+<gml:validTime>
+<gml:TimePeriod>
+<gml:begin>
+<gml:TimeInstant>
+<gml:timePosition gml:frame="http://gplates.org/TRS/flat">99.6000</gml:timePosition>
+</gml:TimeInstant>
+</gml:begin>
+<gml:end>
+<gml:TimeInstant>
+<gml:timePosition gml:frame="http://gplates.org/TRS/flat">93.5000</gml:timePosition>
+</gml:TimeInstant>
+</gml:end>
+</gml:TimePeriod>
+</gml:validTime>
+<gpml:rock_max_thick>10.0</gpml:rock_max_thick>
+<gpml:rock_min_thick>0.0</gpml:rock_min_thick>
+<gpml:rock_type>carbonate</gpml:rock_type>
+</gpml:RockUnit_carbonate>
+</gml:featureMember>
+<gml:featureMember>
+<gpml:RockUnit_siliciclastic>
+<gml:name>Graneros Shale of Benton Gp</gml:name>
+<gsml:shape><gml:Polygon><gml:posList>-102.244217 36.479471 -102.208289 36.728922 -102.510536 37.225899 -103.031961 37.443757 -105.005511 36.293002 -104.299349 35.262932 -103.370679 35.168248 -103.2771 35.221356 -102.244217 36.479471</gml:posList></gml:Polygon></gsml:shape>
+<gml:validTime>
+<gml:TimePeriod>
+<gml:begin>
+<gml:TimeInstant>
+<gml:timePosition gml:frame="http://gplates.org/TRS/flat">99.6000</gml:timePosition>
+</gml:TimeInstant>
+</gml:begin>
+<gml:end>
+<gml:TimeInstant>
+<gml:timePosition gml:frame="http://gplates.org/TRS/flat">93.5000</gml:timePosition>
+</gml:TimeInstant>
+</gml:end>
+</gml:TimePeriod>
+</gml:validTime>
+<gpml:rock_max_thick>40.0</gpml:rock_max_thick>
+<gpml:rock_min_thick>0.0</gpml:rock_min_thick>
+<gpml:rock_type>siliciclastic</gpml:rock_type>
+</gpml:RockUnit_siliciclastic>
+</gml:featureMember>
+<gml:featureMember>
+<gpml:RockUnit_siliciclastic>
+<gml:name>Dakota Fm</gml:name>
+<gsml:shape><gml:Polygon><gml:posList>-102.244217 36.479471 -102.208289 36.728922 -102.510536 37.225899 -103.031961 37.443757 -105.005511 36.293002 -104.299349 35.262932 -103.370679 35.168248 -103.2771 35.221356 -102.244217 36.479471</gml:posList></gml:Polygon></gsml:shape>
+<gml:validTime>
+<gml:TimePeriod>
+<gml:begin>
+<gml:TimeInstant>
+<gml:timePosition gml:frame="http://gplates.org/TRS/flat">125.0000</gml:timePosition>
+</gml:TimeInstant>
+</gml:begin>
+<gml:end>
+<gml:TimeInstant>
+<gml:timePosition gml:frame="http://gplates.org/TRS/flat">93.5000</gml:timePosition>
+</gml:TimeInstant>
+</gml:end>
+</gml:TimePeriod>
+</gml:validTime>
+<gpml:rock_max_thick>60.0</gpml:rock_max_thick>
+<gpml:rock_min_thick>25.0</gpml:rock_min_thick>
+<gpml:rock_type>siliciclastic</gpml:rock_type>
+</gpml:RockUnit_siliciclastic>
+</gml:featureMember>
+<gml:featureMember>
+<gpml:RockUnit_siliciclastic>
+<gml:name>Purgatoire Fm of Dakota Gp</gml:name>
+<gsml:shape><gml:Polygon><gml:posList>-102.244217 36.479471 -102.208289 36.728922 -102.510536 37.225899 -103.031961 37.443757 -105.005511 36.293002 -104.299349 35.262932 -103.370679 35.168248 -103.2771 35.221356 -102.244217 36.479471</gml:posList></gml:Polygon></gsml:shape>
+<gml:validTime>
+<gml:TimePeriod>
+<gml:begin>
+<gml:TimeInstant>
+<gml:timePosition gml:frame="http://gplates.org/TRS/flat">145.5000</gml:timePosition>
+</gml:TimeInstant>
+</gml:begin>
+<gml:end>
+<gml:TimeInstant>
+<gml:timePosition gml:frame="http://gplates.org/TRS/flat">125.0000</gml:timePosition>
+</gml:TimeInstant>
+</gml:end>
+</gml:TimePeriod>
+</gml:validTime>
+<gpml:rock_max_thick>30.0</gpml:rock_max_thick>
+<gpml:rock_min_thick>2.0</gpml:rock_min_thick>
+<gpml:rock_type>siliciclastic</gpml:rock_type>
+</gpml:RockUnit_siliciclastic>
+</gml:featureMember>
+<gml:featureMember>
+<gpml:RockUnit_siliciclastic>
+<gml:name>Morrison Fm</gml:name>
+<gsml:shape><gml:Polygon><gml:posList>-102.244217 36.479471 -102.208289 36.728922 -102.510536 37.225899 -103.031961 37.443757 -105.005511 36.293002 -104.299349 35.262932 -103.370679 35.168248 -103.2771 35.221356 -102.244217 36.479471</gml:posList></gml:Polygon></gsml:shape>
+<gml:validTime>
+<gml:TimePeriod>
+<gml:begin>
+<gml:TimeInstant>
+<gml:timePosition gml:frame="http://gplates.org/TRS/flat">150.8000</gml:timePosition>
+</gml:TimeInstant>
+</gml:begin>
+<gml:end>
+<gml:TimeInstant>
+<gml:timePosition gml:frame="http://gplates.org/TRS/flat">145.5000</gml:timePosition>
+</gml:TimeInstant>
+</gml:end>
+</gml:TimePeriod>
+</gml:validTime>
+<gpml:rock_max_thick>168.0</gpml:rock_max_thick>
+<gpml:rock_min_thick>52.0</gpml:rock_min_thick>
+<gpml:rock_type>siliciclastic</gpml:rock_type>
+</gpml:RockUnit_siliciclastic>
+</gml:featureMember>
+<gml:featureMember>
+<gpml:RockUnit_siliciclastic>
+<gml:name>Exeter Sandstone</gml:name>
+<gsml:shape><gml:Polygon><gml:posList>-102.244217 36.479471 -102.208289 36.728922 -102.510536 37.225899 -103.031961 37.443757 -105.005511 36.293002 -104.299349 35.262932 -103.370679 35.168248 -103.2771 35.221356 -102.244217 36.479471</gml:posList></gml:Polygon></gsml:shape>
+<gml:validTime>
+<gml:TimePeriod>
+<gml:begin>
+<gml:TimeInstant>
+<gml:timePosition gml:frame="http://gplates.org/TRS/flat">161.2000</gml:timePosition>
+</gml:TimeInstant>
+</gml:begin>
+<gml:end>
+<gml:TimeInstant>
+<gml:timePosition gml:frame="http://gplates.org/TRS/flat">150.8000</gml:timePosition>
+</gml:TimeInstant>
+</gml:end>
+</gml:TimePeriod>
+</gml:validTime>
+<gpml:rock_max_thick>25.0</gpml:rock_max_thick>
+<gpml:rock_min_thick>0.0</gpml:rock_min_thick>
+<gpml:rock_type>siliciclastic</gpml:rock_type>
+</gpml:RockUnit_siliciclastic>
+</gml:featureMember>
+<gml:featureMember>
+<gpml:RockUnit_siliciclastic>
+<gml:name>Sheep Pen Sandstone of Dockum Gp</gml:name>
+<gsml:shape><gml:Polygon><gml:posList>-102.244217 36.479471 -102.208289 36.728922 -102.510536 37.225899 -103.031961 37.443757 -105.005511 36.293002 -104.299349 35.262932 -103.370679 35.168248 -103.2771 35.221356 -102.244217 36.479471</gml:posList></gml:Polygon></gsml:shape>
+<gml:validTime>
+<gml:TimePeriod>
+<gml:begin>
+<gml:TimeInstant>
+<gml:timePosition gml:frame="http://gplates.org/TRS/flat">203.6000</gml:timePosition>
+</gml:TimeInstant>
+</gml:begin>
+<gml:end>
+<gml:TimeInstant>
+<gml:timePosition gml:frame="http://gplates.org/TRS/flat">199.6000</gml:timePosition>
+</gml:TimeInstant>
+</gml:end>
+</gml:TimePeriod>
+</gml:validTime>
+<gpml:rock_max_thick>33.0</gpml:rock_max_thick>
+<gpml:rock_min_thick>0.0</gpml:rock_min_thick>
+<gpml:rock_type>siliciclastic</gpml:rock_type>
+</gpml:RockUnit_siliciclastic>
+</gml:featureMember>
+<gml:featureMember>
+<gpml:RockUnit_siliciclastic>
+<gml:name>Sloan Canyon Fm of Dockum Gp</gml:name>
+<gsml:shape><gml:Polygon><gml:posList>-102.244217 36.479471 -102.208289 36.728922 -102.510536 37.225899 -103.031961 37.443757 -105.005511 36.293002 -104.299349 35.262932 -103.370679 35.168248 -103.2771 35.221356 -102.244217 36.479471</gml:posList></gml:Polygon></gsml:shape>
+<gml:validTime>
+<gml:TimePeriod>
+<gml:begin>
+<gml:TimeInstant>
+<gml:timePosition gml:frame="http://gplates.org/TRS/flat">216.5000</gml:timePosition>
+</gml:TimeInstant>
+</gml:begin>
+<gml:end>
+<gml:TimeInstant>
+<gml:timePosition gml:frame="http://gplates.org/TRS/flat">199.6000</gml:timePosition>
+</gml:TimeInstant>
+</gml:end>
+</gml:TimePeriod>
+</gml:validTime>
+<gpml:rock_max_thick>45.0</gpml:rock_max_thick>
+<gpml:rock_min_thick>0.0</gpml:rock_min_thick>
+<gpml:rock_type>siliciclastic</gpml:rock_type>
+</gpml:RockUnit_siliciclastic>
+</gml:featureMember>
+<gpml:test>query geom: result: -104.148 37.283</gpml:test>
+<gml:featureMember>
+<gpml:RockUnit_volcanic>
+<gml:name>Andesitic and Basaltic Dikes, Plugs</gml:name>
+<gsml:shape><gml:Polygon><gml:posList>-103.031961 37.443757 -104.047662 38.480936 -105.426824 37.627072 -105.552174 36.683857 -105.005511 36.293002 -103.031961 37.443757</gml:posList></gml:Polygon></gsml:shape>
+<gml:validTime>
+<gml:TimePeriod>
+<gml:begin>
+<gml:TimeInstant>
+<gml:timePosition gml:frame="http://gplates.org/TRS/flat">5.3320</gml:timePosition>
+</gml:TimeInstant>
+</gml:begin>
+<gml:end>
+<gml:TimeInstant>
+<gml:timePosition gml:frame="http://gplates.org/TRS/flat">0.0000</gml:timePosition>
+</gml:TimeInstant>
+</gml:end>
+</gml:TimePeriod>
+</gml:validTime>
+<gpml:rock_max_thick>0.0</gpml:rock_max_thick>
+<gpml:rock_min_thick>0.0</gpml:rock_min_thick>
+<gpml:rock_type>volcanic</gpml:rock_type>
+</gpml:RockUnit_volcanic>
+</gml:featureMember>
+<gml:featureMember>
+<gpml:RockUnit_volcanic>
+<gml:name>Devils Hole Fm</gml:name>
+<gsml:shape><gml:Polygon><gml:posList>-103.031961 37.443757 -104.047662 38.480936 -105.426824 37.627072 -105.552174 36.683857 -105.005511 36.293002 -103.031961 37.443757</gml:posList></gml:Polygon></gsml:shape>
+<gml:validTime>
+<gml:TimePeriod>
+<gml:begin>
+<gml:TimeInstant>
+<gml:timePosition gml:frame="http://gplates.org/TRS/flat">23.0300</gml:timePosition>
+</gml:TimeInstant>
+</gml:begin>
+<gml:end>
+<gml:TimeInstant>
+<gml:timePosition gml:frame="http://gplates.org/TRS/flat">5.3320</gml:timePosition>
+</gml:TimeInstant>
+</gml:end>
+</gml:TimePeriod>
+</gml:validTime>
+<gpml:rock_max_thick>400.0</gpml:rock_max_thick>
+<gpml:rock_min_thick>10.0</gpml:rock_min_thick>
+<gpml:rock_type>volcanic</gpml:rock_type>
+</gpml:RockUnit_volcanic>
+</gml:featureMember>
+<gml:featureMember>
+<gpml:RockUnit_siliciclastic>
+<gml:name>Devils Hole Fm</gml:name>
+<gsml:shape><gml:Polygon><gml:posList>-103.031961 37.443757 -104.047662 38.480936 -105.426824 37.627072 -105.552174 36.683857 -105.005511 36.293002 -103.031961 37.443757</gml:posList></gml:Polygon></gsml:shape>
+<gml:validTime>
+<gml:TimePeriod>
+<gml:begin>
+<gml:TimeInstant>
+<gml:timePosition gml:frame="http://gplates.org/TRS/flat">23.0300</gml:timePosition>
+</gml:TimeInstant>
+</gml:begin>
+<gml:end>
+<gml:TimeInstant>
+<gml:timePosition gml:frame="http://gplates.org/TRS/flat">5.3320</gml:timePosition>
+</gml:TimeInstant>
+</gml:end>
+</gml:TimePeriod>
+</gml:validTime>
+<gpml:rock_max_thick>400.0</gpml:rock_max_thick>
+<gpml:rock_min_thick>10.0</gpml:rock_min_thick>
+<gpml:rock_type>volcanic</gpml:rock_type>
+<gpml:rock_type>siliciclastic</gpml:rock_type>
+</gpml:RockUnit_siliciclastic>
+</gml:featureMember>
+<gml:featureMember>
+<gpml:RockUnit_siliciclastic>
+<gml:name>Farisita Fm</gml:name>
+<gsml:shape><gml:Polygon><gml:posList>-103.031961 37.443757 -104.047662 38.480936 -105.426824 37.627072 -105.552174 36.683857 -105.005511 36.293002 -103.031961 37.443757</gml:posList></gml:Polygon></gsml:shape>
+<gml:validTime>
+<gml:TimePeriod>
+<gml:begin>
+<gml:TimeInstant>
+<gml:timePosition gml:frame="http://gplates.org/TRS/flat">33.9000</gml:timePosition>
+</gml:TimeInstant>
+</gml:begin>
+<gml:end>
+<gml:TimeInstant>
+<gml:timePosition gml:frame="http://gplates.org/TRS/flat">23.0300</gml:timePosition>
+</gml:TimeInstant>
+</gml:end>
+</gml:TimePeriod>
+</gml:validTime>
+<gpml:rock_max_thick>365.0</gpml:rock_max_thick>
+<gpml:rock_min_thick>0.0</gpml:rock_min_thick>
+<gpml:rock_type>siliciclastic</gpml:rock_type>
+</gpml:RockUnit_siliciclastic>
+</gml:featureMember>
+<gml:featureMember>
+<gpml:RockUnit_siliciclastic>
+<gml:name>Huerfano Fm</gml:name>
+<gsml:shape><gml:Polygon><gml:posList>-103.031961 37.443757 -104.047662 38.480936 -105.426824 37.627072 -105.552174 36.683857 -105.005511 36.293002 -103.031961 37.443757</gml:posList></gml:Polygon></gsml:shape>
+<gml:validTime>
+<gml:TimePeriod>
+<gml:begin>
+<gml:TimeInstant>
+<gml:timePosition gml:frame="http://gplates.org/TRS/flat">48.6000</gml:timePosition>
+</gml:TimeInstant>
+</gml:begin>
+<gml:end>
+<gml:TimeInstant>
+<gml:timePosition gml:frame="http://gplates.org/TRS/flat">33.9000</gml:timePosition>
+</gml:TimeInstant>
+</gml:end>
+</gml:TimePeriod>
+</gml:validTime>
+<gpml:rock_max_thick>610.0</gpml:rock_max_thick>
+<gpml:rock_min_thick>0.0</gpml:rock_min_thick>
+<gpml:rock_type>siliciclastic</gpml:rock_type>
+</gpml:RockUnit_siliciclastic>
+</gml:featureMember>
+<gml:featureMember>
+<gpml:RockUnit_siliciclastic>
+<gml:name>Cuchara Fm</gml:name>
+<gsml:shape><gml:Polygon><gml:posList>-103.031961 37.443757 -104.047662 38.480936 -105.426824 37.627072 -105.552174 36.683857 -105.005511 36.293002 -103.031961 37.443757</gml:posList></gml:Polygon></gsml:shape>
+<gml:validTime>
+<gml:TimePeriod>
+<gml:begin>
+<gml:TimeInstant>
+<gml:timePosition gml:frame="http://gplates.org/TRS/flat">58.7000</gml:timePosition>
+</gml:TimeInstant>
+</gml:begin>
+<gml:end>
+<gml:TimeInstant>
+<gml:timePosition gml:frame="http://gplates.org/TRS/flat">48.6000</gml:timePosition>
+</gml:TimeInstant>
+</gml:end>
+</gml:TimePeriod>
+</gml:validTime>
+<gpml:rock_max_thick>1500.0</gpml:rock_max_thick>
+<gpml:rock_min_thick>0.0</gpml:rock_min_thick>
+<gpml:rock_type>siliciclastic</gpml:rock_type>
+</gpml:RockUnit_siliciclastic>
+</gml:featureMember>
+<gml:featureMember>
+<gpml:RockUnit_siliciclastic>
+<gml:name>Poison Canyon Fm</gml:name>
+<gsml:shape><gml:Polygon><gml:posList>-103.031961 37.443757 -104.047662 38.480936 -105.426824 37.627072 -105.552174 36.683857 -105.005511 36.293002 -103.031961 37.443757</gml:posList></gml:Polygon></gsml:shape>
+<gml:validTime>
+<gml:TimePeriod>
+<gml:begin>
+<gml:TimeInstant>
+<gml:timePosition gml:frame="http://gplates.org/TRS/flat">65.5000</gml:timePosition>
+</gml:TimeInstant>
+</gml:begin>
+<gml:end>
+<gml:TimeInstant>
+<gml:timePosition gml:frame="http://gplates.org/TRS/flat">55.8000</gml:timePosition>
+</gml:TimeInstant>
+</gml:end>
+</gml:TimePeriod>
+</gml:validTime>
+<gpml:rock_max_thick>760.0</gpml:rock_max_thick>
+<gpml:rock_min_thick>0.0</gpml:rock_min_thick>
+<gpml:rock_type>siliciclastic</gpml:rock_type>
+</gpml:RockUnit_siliciclastic>
+</gml:featureMember>
+<gml:featureMember>
+<gpml:RockUnit_siliciclastic>
+<gml:name>Raton Fm</gml:name>
+<gsml:shape><gml:Polygon><gml:posList>-103.031961 37.443757 -104.047662 38.480936 -105.426824 37.627072 -105.552174 36.683857 -105.005511 36.293002 -103.031961 37.443757</gml:posList></gml:Polygon></gsml:shape>
+<gml:validTime>
+<gml:TimePeriod>
+<gml:begin>
+<gml:TimeInstant>
+<gml:timePosition gml:frame="http://gplates.org/TRS/flat">70.6000</gml:timePosition>
+</gml:TimeInstant>
+</gml:begin>
+<gml:end>
+<gml:TimeInstant>
+<gml:timePosition gml:frame="http://gplates.org/TRS/flat">61.7000</gml:timePosition>
+</gml:TimeInstant>
+</gml:end>
+</gml:TimePeriod>
+</gml:validTime>
+<gpml:rock_max_thick>520.0</gpml:rock_max_thick>
+<gpml:rock_min_thick>0.0</gpml:rock_min_thick>
+<gpml:rock_type>siliciclastic</gpml:rock_type>
+</gpml:RockUnit_siliciclastic>
+</gml:featureMember>
+<gml:featureMember>
+<gpml:RockUnit_organic>
+<gml:name>Raton Fm</gml:name>
+<gsml:shape><gml:Polygon><gml:posList>-103.031961 37.443757 -104.047662 38.480936 -105.426824 37.627072 -105.552174 36.683857 -105.005511 36.293002 -103.031961 37.443757</gml:posList></gml:Polygon></gsml:shape>
+<gml:validTime>
+<gml:TimePeriod>
+<gml:begin>
+<gml:TimeInstant>
+<gml:timePosition gml:frame="http://gplates.org/TRS/flat">70.6000</gml:timePosition>
+</gml:TimeInstant>
+</gml:begin>
+<gml:end>
+<gml:TimeInstant>
+<gml:timePosition gml:frame="http://gplates.org/TRS/flat">61.7000</gml:timePosition>
+</gml:TimeInstant>
+</gml:end>
+</gml:TimePeriod>
+</gml:validTime>
+<gpml:rock_max_thick>520.0</gpml:rock_max_thick>
+<gpml:rock_min_thick>0.0</gpml:rock_min_thick>
+<gpml:rock_type>siliciclastic</gpml:rock_type>
+<gpml:rock_type>organic</gpml:rock_type>
+</gpml:RockUnit_organic>
+</gml:featureMember>
+<gml:featureMember>
+<gpml:RockUnit_siliciclastic>
+<gml:name>Vermejo Fm</gml:name>
+<gsml:shape><gml:Polygon><gml:posList>-103.031961 37.443757 -104.047662 38.480936 -105.426824 37.627072 -105.552174 36.683857 -105.005511 36.293002 -103.031961 37.443757</gml:posList></gml:Polygon></gsml:shape>
+<gml:validTime>
+<gml:TimePeriod>
+<gml:begin>
+<gml:TimeInstant>
+<gml:timePosition gml:frame="http://gplates.org/TRS/flat">83.5000</gml:timePosition>
+</gml:TimeInstant>
+</gml:begin>
+<gml:end>
+<gml:TimeInstant>
+<gml:timePosition gml:frame="http://gplates.org/TRS/flat">70.6000</gml:timePosition>
+</gml:TimeInstant>
+</gml:end>
+</gml:TimePeriod>
+</gml:validTime>
+<gpml:rock_max_thick>170.0</gpml:rock_max_thick>
+<gpml:rock_min_thick>0.0</gpml:rock_min_thick>
+<gpml:rock_type>siliciclastic</gpml:rock_type>
+</gpml:RockUnit_siliciclastic>
+</gml:featureMember>
+<gml:featureMember>
+<gpml:RockUnit_siliciclastic>
+<gml:name>Trinidad Sandstone</gml:name>
+<gsml:shape><gml:Polygon><gml:posList>-103.031961 37.443757 -104.047662 38.480936 -105.426824 37.627072 -105.552174 36.683857 -105.005511 36.293002 -103.031961 37.443757</gml:posList></gml:Polygon></gsml:shape>
+<gml:validTime>
+<gml:TimePeriod>
+<gml:begin>
+<gml:TimeInstant>
+<gml:timePosition gml:frame="http://gplates.org/TRS/flat">85.8000</gml:timePosition>
+</gml:TimeInstant>
+</gml:begin>
+<gml:end>
+<gml:TimeInstant>
+<gml:timePosition gml:frame="http://gplates.org/TRS/flat">70.6000</gml:timePosition>
+</gml:TimeInstant>
+</gml:end>
+</gml:TimePeriod>
+</gml:validTime>
+<gpml:rock_max_thick>90.0</gpml:rock_max_thick>
+<gpml:rock_min_thick>0.0</gpml:rock_min_thick>
+<gpml:rock_type>siliciclastic</gpml:rock_type>
+</gpml:RockUnit_siliciclastic>
+</gml:featureMember>
+<gml:featureMember>
+<gpml:RockUnit_siliciclastic>
+<gml:name>Pierre Shale</gml:name>
+<gsml:shape><gml:Polygon><gml:posList>-103.031961 37.443757 -104.047662 38.480936 -105.426824 37.627072 -105.552174 36.683857 -105.005511 36.293002 -103.031961 37.443757</gml:posList></gml:Polygon></gsml:shape>
+<gml:validTime>
+<gml:TimePeriod>
+<gml:begin>
+<gml:TimeInstant>
+<gml:timePosition gml:frame="http://gplates.org/TRS/flat">85.8000</gml:timePosition>
+</gml:TimeInstant>
+</gml:begin>
+<gml:end>
+<gml:TimeInstant>
+<gml:timePosition gml:frame="http://gplates.org/TRS/flat">70.6000</gml:timePosition>
+</gml:TimeInstant>
+</gml:end>
+</gml:TimePeriod>
+</gml:validTime>
+<gpml:rock_max_thick>700.0</gpml:rock_max_thick>
+<gpml:rock_min_thick>490.0</gpml:rock_min_thick>
+<gpml:rock_type>siliciclastic</gpml:rock_type>
+</gpml:RockUnit_siliciclastic>
+</gml:featureMember>
+<gml:featureMember>
+<gpml:RockUnit_siliciclastic>
+<gml:name>Smoky Hill Marl Mbr of Niobrara Fm</gml:name>
+<gsml:shape><gml:Polygon><gml:posList>-103.031961 37.443757 -104.047662 38.480936 -105.426824 37.627072 -105.552174 36.683857 -105.005511 36.293002 -103.031961 37.443757</gml:posList></gml:Polygon></gsml:shape>
+<gml:validTime>
+<gml:TimePeriod>
+<gml:begin>
+<gml:TimeInstant>
+<gml:timePosition gml:frame="http://gplates.org/TRS/flat">89.3000</gml:timePosition>
+</gml:TimeInstant>
+</gml:begin>
+<gml:end>
+<gml:TimeInstant>
+<gml:timePosition gml:frame="http://gplates.org/TRS/flat">83.5000</gml:timePosition>
+</gml:TimeInstant>
+</gml:end>
+</gml:TimePeriod>
+</gml:validTime>
+<gpml:rock_max_thick>187.0</gpml:rock_max_thick>
+<gpml:rock_min_thick>173.0</gpml:rock_min_thick>
+<gpml:rock_type>siliciclastic</gpml:rock_type>
+</gpml:RockUnit_siliciclastic>
+</gml:featureMember>
+<gml:featureMember>
+<gpml:RockUnit_carbonate>
+<gml:name>Fort Hays Limestone Mbr of Niobrara Fm</gml:name>
+<gsml:shape><gml:Polygon><gml:posList>-103.031961 37.443757 -104.047662 38.480936 -105.426824 37.627072 -105.552174 36.683857 -105.005511 36.293002 -103.031961 37.443757</gml:posList></gml:Polygon></gsml:shape>
+<gml:validTime>
+<gml:TimePeriod>
+<gml:begin>
+<gml:TimeInstant>
+<gml:timePosition gml:frame="http://gplates.org/TRS/flat">93.5000</gml:timePosition>
+</gml:TimeInstant>
+</gml:begin>
+<gml:end>
+<gml:TimeInstant>
+<gml:timePosition gml:frame="http://gplates.org/TRS/flat">85.8000</gml:timePosition>
+</gml:TimeInstant>
+</gml:end>
+</gml:TimePeriod>
+</gml:validTime>
+<gpml:rock_max_thick>17.0</gpml:rock_max_thick>
+<gpml:rock_min_thick>3.0</gpml:rock_min_thick>
+<gpml:rock_type>carbonate</gpml:rock_type>
+</gpml:RockUnit_carbonate>
+</gml:featureMember>
+<gml:featureMember>
+<gpml:RockUnit_siliciclastic>
+<gml:name>Codell Sandstone Mbr of Carlile Shale</gml:name>
+<gsml:shape><gml:Polygon><gml:posList>-103.031961 37.443757 -104.047662 38.480936 -105.426824 37.627072 -105.552174 36.683857 -105.005511 36.293002 -103.031961 37.443757</gml:posList></gml:Polygon></gsml:shape>
+<gml:validTime>
+<gml:TimePeriod>
+<gml:begin>
+<gml:TimeInstant>
+<gml:timePosition gml:frame="http://gplates.org/TRS/flat">93.5000</gml:timePosition>
+</gml:TimeInstant>
+</gml:begin>
+<gml:end>
+<gml:TimeInstant>
+<gml:timePosition gml:frame="http://gplates.org/TRS/flat">89.3000</gml:timePosition>
+</gml:TimeInstant>
+</gml:end>
+</gml:TimePeriod>
+</gml:validTime>
+<gpml:rock_max_thick>8.0</gpml:rock_max_thick>
+<gpml:rock_min_thick>5.0</gpml:rock_min_thick>
+<gpml:rock_type>siliciclastic</gpml:rock_type>
+</gpml:RockUnit_siliciclastic>
+</gml:featureMember>
+<gml:featureMember>
+<gpml:RockUnit_siliciclastic>
+<gml:name>Carlile Fm</gml:name>
+<gsml:shape><gml:Polygon><gml:posList>-103.031961 37.443757 -104.047662 38.480936 -105.426824 37.627072 -105.552174 36.683857 -105.005511 36.293002 -103.031961 37.443757</gml:posList></gml:Polygon></gsml:shape>
+<gml:validTime>
+<gml:TimePeriod>
+<gml:begin>
+<gml:TimeInstant>
+<gml:timePosition gml:frame="http://gplates.org/TRS/flat">93.5000</gml:timePosition>
+</gml:TimeInstant>
+</gml:begin>
+<gml:end>
+<gml:TimeInstant>
+<gml:timePosition gml:frame="http://gplates.org/TRS/flat">89.3000</gml:timePosition>
+</gml:TimeInstant>
+</gml:end>
+</gml:TimePeriod>
+</gml:validTime>
+<gpml:rock_max_thick>100.0</gpml:rock_max_thick>
+<gpml:rock_min_thick>50.0</gpml:rock_min_thick>
+<gpml:rock_type>siliciclastic</gpml:rock_type>
+</gpml:RockUnit_siliciclastic>
+</gml:featureMember>
+<gml:featureMember>
+<gpml:RockUnit_carbonate>
+<gml:name>Greenhorn Limestone</gml:name>
+<gsml:shape><gml:Polygon><gml:posList>-103.031961 37.443757 -104.047662 38.480936 -105.426824 37.627072 -105.552174 36.683857 -105.005511 36.293002 -103.031961 37.443757</gml:posList></gml:Polygon></gsml:shape>
+<gml:validTime>
+<gml:TimePeriod>
+<gml:begin>
+<gml:TimeInstant>
+<gml:timePosition gml:frame="http://gplates.org/TRS/flat">99.6000</gml:timePosition>
+</gml:TimeInstant>
+</gml:begin>
+<gml:end>
+<gml:TimeInstant>
+<gml:timePosition gml:frame="http://gplates.org/TRS/flat">93.5000</gml:timePosition>
+</gml:TimeInstant>
+</gml:end>
+</gml:TimePeriod>
+</gml:validTime>
+<gpml:rock_max_thick>25.0</gpml:rock_max_thick>
+<gpml:rock_min_thick>6.0</gpml:rock_min_thick>
+<gpml:rock_type>carbonate</gpml:rock_type>
+</gpml:RockUnit_carbonate>
+</gml:featureMember>
+<gml:featureMember>
+<gpml:RockUnit_siliciclastic>
+<gml:name>Graneros Shale</gml:name>
+<gsml:shape><gml:Polygon><gml:posList>-103.031961 37.443757 -104.047662 38.480936 -105.426824 37.627072 -105.552174 36.683857 -105.005511 36.293002 -103.031961 37.443757</gml:posList></gml:Polygon></gsml:shape>
+<gml:validTime>
+<gml:TimePeriod>
+<gml:begin>
+<gml:TimeInstant>
+<gml:timePosition gml:frame="http://gplates.org/TRS/flat">99.6000</gml:timePosition>
+</gml:TimeInstant>
+</gml:begin>
+<gml:end>
+<gml:TimeInstant>
+<gml:timePosition gml:frame="http://gplates.org/TRS/flat">93.5000</gml:timePosition>
+</gml:TimeInstant>
+</gml:end>
+</gml:TimePeriod>
+</gml:validTime>
+<gpml:rock_max_thick>115.0</gpml:rock_max_thick>
+<gpml:rock_min_thick>55.0</gpml:rock_min_thick>
+<gpml:rock_type>siliciclastic</gpml:rock_type>
+</gpml:RockUnit_siliciclastic>
+</gml:featureMember>
+<gml:featureMember>
+<gpml:RockUnit_siliciclastic>
+<gml:name>Dakota Fm</gml:name>
+<gsml:shape><gml:Polygon><gml:posList>-103.031961 37.443757 -104.047662 38.480936 -105.426824 37.627072 -105.552174 36.683857 -105.005511 36.293002 -103.031961 37.443757</gml:posList></gml:Polygon></gsml:shape>
+<gml:validTime>
+<gml:TimePeriod>
+<gml:begin>
+<gml:TimeInstant>
+<gml:timePosition gml:frame="http://gplates.org/TRS/flat">125.0000</gml:timePosition>
+</gml:TimeInstant>
+</gml:begin>
+<gml:end>
+<gml:TimeInstant>
+<gml:timePosition gml:frame="http://gplates.org/TRS/flat">93.5000</gml:timePosition>
+</gml:TimeInstant>
+</gml:end>
+</gml:TimePeriod>
+</gml:validTime>
+<gpml:rock_max_thick>45.0</gpml:rock_max_thick>
+<gpml:rock_min_thick>9.0</gpml:rock_min_thick>
+<gpml:rock_type>siliciclastic</gpml:rock_type>
+</gpml:RockUnit_siliciclastic>
+</gml:featureMember>
+<gml:featureMember>
+<gpml:RockUnit_organic>
+<gml:name>Kiowa Shale Mbr of Purgatoire Fm</gml:name>
+<gsml:shape><gml:Polygon><gml:posList>-103.031961 37.443757 -104.047662 38.480936 -105.426824 37.627072 -105.552174 36.683857 -105.005511 36.293002 -103.031961 37.443757</gml:posList></gml:Polygon></gsml:shape>
+<gml:validTime>
+<gml:TimePeriod>
+<gml:begin>
+<gml:TimeInstant>
+<gml:timePosition gml:frame="http://gplates.org/TRS/flat">140.2000</gml:timePosition>
+</gml:TimeInstant>
+</gml:begin>
+<gml:end>
+<gml:TimeInstant>
+<gml:timePosition gml:frame="http://gplates.org/TRS/flat">125.0000</gml:timePosition>
+</gml:TimeInstant>
+</gml:end>
+</gml:TimePeriod>
+</gml:validTime>
+<gpml:rock_max_thick>15.0</gpml:rock_max_thick>
+<gpml:rock_min_thick>5.0</gpml:rock_min_thick>
+<gpml:rock_type>organic</gpml:rock_type>
+</gpml:RockUnit_organic>
+</gml:featureMember>
+<gml:featureMember>
+<gpml:RockUnit_siliciclastic>
+<gml:name>Kiowa Shale Mbr of Purgatoire Fm</gml:name>
+<gsml:shape><gml:Polygon><gml:posList>-103.031961 37.443757 -104.047662 38.480936 -105.426824 37.627072 -105.552174 36.683857 -105.005511 36.293002 -103.031961 37.443757</gml:posList></gml:Polygon></gsml:shape>
+<gml:validTime>
+<gml:TimePeriod>
+<gml:begin>
+<gml:TimeInstant>
+<gml:timePosition gml:frame="http://gplates.org/TRS/flat">140.2000</gml:timePosition>
+</gml:TimeInstant>
+</gml:begin>
+<gml:end>
+<gml:TimeInstant>
+<gml:timePosition gml:frame="http://gplates.org/TRS/flat">125.0000</gml:timePosition>
+</gml:TimeInstant>
+</gml:end>
+</gml:TimePeriod>
+</gml:validTime>
+<gpml:rock_max_thick>15.0</gpml:rock_max_thick>
+<gpml:rock_min_thick>5.0</gpml:rock_min_thick>
+<gpml:rock_type>organic</gpml:rock_type>
+<gpml:rock_type>siliciclastic</gpml:rock_type>
+</gpml:RockUnit_siliciclastic>
+</gml:featureMember>
+<gml:featureMember>
+<gpml:RockUnit_siliciclastic>
+<gml:name>Cheyenne Sandstone Mbr of Purgatoire</gml:name>
+<gsml:shape><gml:Polygon><gml:posList>-103.031961 37.443757 -104.047662 38.480936 -105.426824 37.627072 -105.552174 36.683857 -105.005511 36.293002 -103.031961 37.443757</gml:posList></gml:Polygon></gsml:shape>
+<gml:validTime>
+<gml:TimePeriod>
+<gml:begin>
+<gml:TimeInstant>
+<gml:timePosition gml:frame="http://gplates.org/TRS/flat">145.5000</gml:timePosition>
+</gml:TimeInstant>
+</gml:begin>
+<gml:end>
+<gml:TimeInstant>
+<gml:timePosition gml:frame="http://gplates.org/TRS/flat">136.4000</gml:timePosition>
+</gml:TimeInstant>
+</gml:end>
+</gml:TimePeriod>
+</gml:validTime>
+<gpml:rock_max_thick>45.0</gpml:rock_max_thick>
+<gpml:rock_min_thick>15.0</gpml:rock_min_thick>
+<gpml:rock_type>siliciclastic</gpml:rock_type>
+</gpml:RockUnit_siliciclastic>
+</gml:featureMember>
+<gml:featureMember>
+<gpml:RockUnit_siliciclastic>
+<gml:name>Morrison Fm</gml:name>
+<gsml:shape><gml:Polygon><gml:posList>-103.031961 37.443757 -104.047662 38.480936 -105.426824 37.627072 -105.552174 36.683857 -105.005511 36.293002 -103.031961 37.443757</gml:posList></gml:Polygon></gsml:shape>
+<gml:validTime>
+<gml:TimePeriod>
+<gml:begin>
+<gml:TimeInstant>
+<gml:timePosition gml:frame="http://gplates.org/TRS/flat">155.7000</gml:timePosition>
+</gml:TimeInstant>
+</gml:begin>
+<gml:end>
+<gml:TimeInstant>
+<gml:timePosition gml:frame="http://gplates.org/TRS/flat">145.5000</gml:timePosition>
+</gml:TimeInstant>
+</gml:end>
+</gml:TimePeriod>
+</gml:validTime>
+<gpml:rock_max_thick>120.0</gpml:rock_max_thick>
+<gpml:rock_min_thick>45.0</gpml:rock_min_thick>
+<gpml:rock_type>siliciclastic</gpml:rock_type>
+</gpml:RockUnit_siliciclastic>
+</gml:featureMember>
+<gml:featureMember>
+<gpml:RockUnit_siliciclastic>
+<gml:name>Ralston Creek Fm</gml:name>
+<gsml:shape><gml:Polygon><gml:posList>-103.031961 37.443757 -104.047662 38.480936 -105.426824 37.627072 -105.552174 36.683857 -105.005511 36.293002 -103.031961 37.443757</gml:posList></gml:Polygon></gsml:shape>
+<gml:validTime>
+<gml:TimePeriod>
+<gml:begin>
+<gml:TimeInstant>
+<gml:timePosition gml:frame="http://gplates.org/TRS/flat">161.2000</gml:timePosition>
+</gml:TimeInstant>
+</gml:begin>
+<gml:end>
+<gml:TimeInstant>
+<gml:timePosition gml:frame="http://gplates.org/TRS/flat">150.8000</gml:timePosition>
+</gml:TimeInstant>
+</gml:end>
+</gml:TimePeriod>
+</gml:validTime>
+<gpml:rock_max_thick>30.0</gpml:rock_max_thick>
+<gpml:rock_min_thick>15.0</gpml:rock_min_thick>
+<gpml:rock_type>siliciclastic</gpml:rock_type>
+</gpml:RockUnit_siliciclastic>
+</gml:featureMember>
+<gml:featureMember>
+<gpml:RockUnit_carbonate>
+<gml:name>Ralston Creek Fm</gml:name>
+<gsml:shape><gml:Polygon><gml:posList>-103.031961 37.443757 -104.047662 38.480936 -105.426824 37.627072 -105.552174 36.683857 -105.005511 36.293002 -103.031961 37.443757</gml:posList></gml:Polygon></gsml:shape>
+<gml:validTime>
+<gml:TimePeriod>
+<gml:begin>
+<gml:TimeInstant>
+<gml:timePosition gml:frame="http://gplates.org/TRS/flat">161.2000</gml:timePosition>
+</gml:TimeInstant>
+</gml:begin>
+<gml:end>
+<gml:TimeInstant>
+<gml:timePosition gml:frame="http://gplates.org/TRS/flat">150.8000</gml:timePosition>
+</gml:TimeInstant>
+</gml:end>
+</gml:TimePeriod>
+</gml:validTime>
+<gpml:rock_max_thick>30.0</gpml:rock_max_thick>
+<gpml:rock_min_thick>15.0</gpml:rock_min_thick>
+<gpml:rock_type>siliciclastic</gpml:rock_type>
+<gpml:rock_type>carbonate</gpml:rock_type>
+</gpml:RockUnit_carbonate>
+</gml:featureMember>
+<gml:featureMember>
+<gpml:RockUnit_evaporite>
+<gml:name>Ralston Creek Fm</gml:name>
+<gsml:shape><gml:Polygon><gml:posList>-103.031961 37.443757 -104.047662 38.480936 -105.426824 37.627072 -105.552174 36.683857 -105.005511 36.293002 -103.031961 37.443757</gml:posList></gml:Polygon></gsml:shape>
+<gml:validTime>
+<gml:TimePeriod>
+<gml:begin>
+<gml:TimeInstant>
+<gml:timePosition gml:frame="http://gplates.org/TRS/flat">161.2000</gml:timePosition>
+</gml:TimeInstant>
+</gml:begin>
+<gml:end>
+<gml:TimeInstant>
+<gml:timePosition gml:frame="http://gplates.org/TRS/flat">150.8000</gml:timePosition>
+</gml:TimeInstant>
+</gml:end>
+</gml:TimePeriod>
+</gml:validTime>
+<gpml:rock_max_thick>30.0</gpml:rock_max_thick>
+<gpml:rock_min_thick>15.0</gpml:rock_min_thick>
+<gpml:rock_type>siliciclastic</gpml:rock_type>
+<gpml:rock_type>carbonate</gpml:rock_type>
+<gpml:rock_type>evaporite</gpml:rock_type>
+</gpml:RockUnit_evaporite>
+</gml:featureMember>
+<gml:featureMember>
+<gpml:RockUnit_siliciclastic>
+<gml:name>Entrada Fm</gml:name>
+<gsml:shape><gml:Polygon><gml:posList>-103.031961 37.443757 -104.047662 38.480936 -105.426824 37.627072 -105.552174 36.683857 -105.005511 36.293002 -103.031961 37.443757</gml:posList></gml:Polygon></gsml:shape>
+<gml:validTime>
+<gml:TimePeriod>
+<gml:begin>
+<gml:TimeInstant>
+<gml:timePosition gml:frame="http://gplates.org/TRS/flat">161.2000</gml:timePosition>
+</gml:TimeInstant>
+</gml:begin>
+<gml:end>
+<gml:TimeInstant>
+<gml:timePosition gml:frame="http://gplates.org/TRS/flat">155.7000</gml:timePosition>
+</gml:TimeInstant>
+</gml:end>
+</gml:TimePeriod>
+</gml:validTime>
+<gpml:rock_max_thick>35.0</gpml:rock_max_thick>
+<gpml:rock_min_thick>6.0</gpml:rock_min_thick>
+<gpml:rock_type>siliciclastic</gpml:rock_type>
+</gpml:RockUnit_siliciclastic>
+</gml:featureMember>
+<gml:featureMember>
+<gpml:RockUnit_carbonate>
+<gml:name>Johnson Gap Fm</gml:name>
+<gsml:shape><gml:Polygon><gml:posList>-103.031961 37.443757 -104.047662 38.480936 -105.426824 37.627072 -105.552174 36.683857 -105.005511 36.293002 -103.031961 37.443757</gml:posList></gml:Polygon></gsml:shape>
+<gml:validTime>
+<gml:TimePeriod>
+<gml:begin>
+<gml:TimeInstant>
+<gml:timePosition gml:frame="http://gplates.org/TRS/flat">203.6000</gml:timePosition>
+</gml:TimeInstant>
+</gml:begin>
+<gml:end>
+<gml:TimeInstant>
+<gml:timePosition gml:frame="http://gplates.org/TRS/flat">199.6000</gml:timePosition>
+</gml:TimeInstant>
+</gml:end>
+</gml:TimePeriod>
+</gml:validTime>
+<gpml:rock_max_thick>35.0</gpml:rock_max_thick>
+<gpml:rock_min_thick>25.0</gpml:rock_min_thick>
+<gpml:rock_type>carbonate</gpml:rock_type>
+</gpml:RockUnit_carbonate>
+</gml:featureMember>
+<gml:featureMember>
+<gpml:RockUnit_siliciclastic>
+<gml:name>Johnson Gap Fm</gml:name>
+<gsml:shape><gml:Polygon><gml:posList>-103.031961 37.443757 -104.047662 38.480936 -105.426824 37.627072 -105.552174 36.683857 -105.005511 36.293002 -103.031961 37.443757</gml:posList></gml:Polygon></gsml:shape>
+<gml:validTime>
+<gml:TimePeriod>
+<gml:begin>
+<gml:TimeInstant>
+<gml:timePosition gml:frame="http://gplates.org/TRS/flat">203.6000</gml:timePosition>
+</gml:TimeInstant>
+</gml:begin>
+<gml:end>
+<gml:TimeInstant>
+<gml:timePosition gml:frame="http://gplates.org/TRS/flat">199.6000</gml:timePosition>
+</gml:TimeInstant>
+</gml:end>
+</gml:TimePeriod>
+</gml:validTime>
+<gpml:rock_max_thick>35.0</gpml:rock_max_thick>
+<gpml:rock_min_thick>25.0</gpml:rock_min_thick>
+<gpml:rock_type>carbonate</gpml:rock_type>
+<gpml:rock_type>siliciclastic</gpml:rock_type>
+</gpml:RockUnit_siliciclastic>
+</gml:featureMember>
+</wfs:FeatureCollection>
+
+

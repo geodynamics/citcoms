@@ -1,0 +1,484 @@
+>sR # name: ANS # subductionZoneAge: Unknown # subductionZoneConvergence: Unknown # subductionZoneDeepDip: Unknown # subductionZoneDepth: Unknown # subductionZoneSystem: Unknown # subductionZoneSystemOrder: Unknown # rheaFault: Unknown # polygon: ANS # use_reverse: yes # identity: GPlates-952c6bbf-3a79-45c4-8ac3-719d3c5b4e39
+62.512507 -4.601834
+62.671237 -4.938976
+62.868179 -5.749472
+63.288637 -6.699176
+63.484002 -7.748503
+63.809972 -8.97798
+64.325182 -9.95673
+64.673658 -10.84025
+64.865968 -11.850177
+65.271418 -12.76592
+66.044553 -13.826949
+67.305023 -14.757269
+67.877743 -15.726005
+68.531735 -17.047984
+69.050773 -18.153476
+69.884395 -18.951818
+70.64242 -19.788312
+71.939833 -20.806999
+72.468513 -22.182956
+72.671435 -22.972787
+72.888451 -23.99558
+72.982372 -25.045013
+73.108057 -25.155294
+>sR # name: ANS formation # subductionZoneAge: Unknown # subductionZoneConvergence: Unknown # subductionZoneDeepDip: Unknown # subductionZoneDepth: Unknown # subductionZoneSystem: Unknown # subductionZoneSystemOrder: Unknown # rheaFault: Unknown # polygon: ANS # use_reverse: no # identity: GPlates-151b6201-211f-4b3e-8581-9087610ebd8f
+68.457119 -1.471097
+70.16607 0.421619
+73.963595 2.652844
+79.139662 6.821512
+80.819454 6.730082
+81.617514 6.613949
+83.067722 6.19852
+84.097598 5.759703
+84.875806 5.383781
+85.55012 4.896853
+86.045077 4.376927
+86.477296 3.692869
+87.034843 3.153701
+88.019098 2.783262
+89.07782 2.333632
+89.749301 1.996467
+90.310162 1.425244
+91.013288 0.573181
+91.690277 -0.468541
+92.31779 -1.398686
+92.729017 -2.206916
+92.793507 -3.447071
+93.74171 -8.81569
+93.819694 -9.53651
+>sR # name: ANS # subductionZoneAge: Unknown # subductionZoneConvergence: Unknown # subductionZoneDeepDip: Unknown # subductionZoneDepth: Unknown # subductionZoneSystem: Unknown # subductionZoneSystemOrder: Unknown # rheaFault: Unknown # polygon: Azania # use_reverse: yes # identity: GPlates-952c6bbf-3a79-45c4-8ac3-719d3c5b4e39
+73.108057 -25.155294
+73.832307 -25.784833
+74.220767 -26.518062
+74.249862 -26.527781
+>sR # name: ANS formation # subductionZoneAge: Unknown # subductionZoneConvergence: Unknown # subductionZoneDeepDip: Unknown # subductionZoneDepth: Unknown # subductionZoneSystem: Unknown # subductionZoneSystemOrder: Unknown # rheaFault: Unknown # polygon: Azania # use_reverse: no # identity: GPlates-151b6201-211f-4b3e-8581-9087610ebd8f
+93.819694 -9.53651
+94.124474 -12.322478
+94.550133 -13.856106
+>sR # name: Mozambique Belt # subductionZoneAge: Unknown # subductionZoneConvergence: Unknown # subductionZoneDeepDip: Unknown # subductionZoneDepth: Unknown # subductionZoneSystem: Unknown # subductionZoneSystemOrder: Unknown # rheaFault: Unknown # polygon: Azania # use_reverse: yes # identity: GPlates-335c0987-33d3-4016-9c5d-bdae430f5039
+74.249862 -26.527781
+75.955142 -25.83432
+77.172691 -24.931867
+78.348941 -24.219943
+80.062908 -22.812506
+81.076419 -22.40091
+82.129226 -23.171752
+82.856621 -24.490519
+82.954877 -26.106104
+83.948409 -27.941578
+85.439935 -30.010403
+86.021832 -30.55362
+86.805002 -31.245937
+87.648044 -31.969931
+88.603996 -32.761712
+89.598686 -33.263881
+91.202288 -34.394126
+92.338466 -35.745422
+93.82388 -37.137633
+94.421327 -37.995902
+94.669946 -38.353428
+>sR # name: ANS formation # subductionZoneAge: Unknown # subductionZoneConvergence: Unknown # subductionZoneDeepDip: Unknown # subductionZoneDepth: Unknown # subductionZoneSystem: Unknown # subductionZoneSystemOrder: Unknown # rheaFault: Unknown # polygon: Australia-India # use_reverse: yes # identity: GPlates-151b6201-211f-4b3e-8581-9087610ebd8f
+72.829362 1.987741
+73.963595 2.652844
+79.139662 6.821512
+80.819454 6.730082
+81.617514 6.613949
+83.067722 6.19852
+84.097598 5.759703
+84.875806 5.383781
+85.55012 4.896853
+86.045077 4.376927
+86.477296 3.692869
+87.034843 3.153701
+88.019098 2.783262
+89.07782 2.333632
+89.749301 1.996467
+90.310162 1.425244
+91.013288 0.573181
+91.690277 -0.468541
+92.31779 -1.398686
+92.729017 -2.206916
+92.793507 -3.447071
+93.74171 -8.81569
+94.124474 -12.322478
+94.550133 -13.856106
+>sL # name: Oceanic arc # subductionZoneAge: Unknown # subductionZoneConvergence: Unknown # subductionZoneDeepDip: Unknown # subductionZoneDepth: Unknown # subductionZoneSystem: Unknown # subductionZoneSystemOrder: Unknown # rheaFault: Unknown # polygon: Australia-India # use_reverse: yes # identity: GPlates-78843307-78b9-4275-b0db-6d6450235f98
+145.482125 42.234372
+139.543713 41.775474
+132.838538 41.817152
+128.719469 39.981138
+125.023955 37.893533
+121.088758 34.857796
+119.223326 32.869016
+118.628642 32.444525
+>sR # name: Oceanic arc # subductionZoneAge: Unknown # subductionZoneConvergence: Unknown # subductionZoneDeepDip: Unknown # subductionZoneDepth: Unknown # subductionZoneSystem: Unknown # subductionZoneSystemOrder: Unknown # rheaFault: Unknown # polygon: Tarim # use_reverse: no # identity: GPlates-cb84c737-4c75-4b73-8ed7-f197b01d4e9f
+97.345533 57.086222
+105.690352 54.206092
+112.76768 48.590493
+116.145648 46.107895
+>sL # name: Oceanic arc # subductionZoneAge: Unknown # subductionZoneConvergence: Unknown # subductionZoneDeepDip: Unknown # subductionZoneDepth: Unknown # subductionZoneSystem: Unknown # subductionZoneSystemOrder: Unknown # rheaFault: Unknown # polygon: Tarim # use_reverse: no # identity: GPlates-78843307-78b9-4275-b0db-6d6450235f98
+126.411572 38.705566
+125.023955 37.893533
+121.088758 34.857796
+119.223326 32.869016
+118.628642 32.444525
+>sR # name: ANS # subductionZoneAge: Unknown # subductionZoneConvergence: Unknown # subductionZoneDeepDip: Unknown # subductionZoneDepth: Unknown # subductionZoneSystem: Unknown # subductionZoneSystemOrder: Unknown # rheaFault: Unknown # polygon: Congo-SF # use_reverse: no # identity: GPlates-952c6bbf-3a79-45c4-8ac3-719d3c5b4e39
+73.585313 -25.571279
+73.832307 -25.784833
+74.220767 -26.518062
+74.249862 -26.527781
+>sR # name: Mozambique Belt # subductionZoneAge: Unknown # subductionZoneConvergence: Unknown # subductionZoneDeepDip: Unknown # subductionZoneDepth: Unknown # subductionZoneSystem: Unknown # subductionZoneSystemOrder: Unknown # rheaFault: Unknown # polygon: Congo-SF # use_reverse: no # identity: GPlates-335c0987-33d3-4016-9c5d-bdae430f5039
+74.249862 -26.527781
+75.955142 -25.83432
+77.172691 -24.931867
+78.348941 -24.219943
+80.062908 -22.812506
+81.076419 -22.40091
+82.129226 -23.171752
+82.856621 -24.490519
+82.954877 -26.106104
+83.948409 -27.941578
+85.439935 -30.010403
+86.021832 -30.55362
+86.805002 -31.245937
+87.648044 -31.969931
+88.603996 -32.761712
+89.598686 -33.263881
+91.202288 -34.394126
+92.338466 -35.745422
+93.82388 -37.137633
+94.421327 -37.995902
+94.669946 -38.353428
+>sL # name: Brasilia Belt # subductionZoneAge: Unknown # subductionZoneConvergence: Unknown # subductionZoneDeepDip: Unknown # subductionZoneDepth: Unknown # subductionZoneSystem: Unknown # subductionZoneSystemOrder: Unknown # rheaFault: Unknown # polygon: Congo-SF # use_reverse: no # identity: GPlates-27474886-13ad-4e1e-96c8-29b753c96454
+16.377915 -66.479702
+18.182004 -64.232011
+20.158787 -62.286585
+24.609224 -58.687656
+27.531912 -56.541625
+27.492738 -55.366058
+25.39144 -52.801851
+>sL # name: Goias Arc and Brasilia Belt # subductionZoneAge: Unknown # subductionZoneConvergence: Unknown # subductionZoneDeepDip: Unknown # subductionZoneDepth: Unknown # subductionZoneSystem: Unknown # subductionZoneSystemOrder: Unknown # rheaFault: Unknown # polygon: Congo-SF # use_reverse: no # identity: GPlates-b50b9745-e5cf-4513-a0d5-7fa71e4b55bc
+31.305853 -54.068878
+30.992421 -53.469711
+30.943082 -52.352614
+31.747372 -50.469344
+29.237961 -46.126992
+28.409571 -41.602109
+28.921637 -39.264159
+29.562862 -36.671454
+29.575818 -35.982626
+>sL # name: Dahomenides # subductionZoneAge: Unknown # subductionZoneConvergence: Unknown # subductionZoneDeepDip: Unknown # subductionZoneDepth: Unknown # subductionZoneSystem: Unknown # subductionZoneSystemOrder: Unknown # rheaFault: Unknown # polygon: Sahara Metacraton # use_reverse: yes # identity: GPlates-a491135b-04a7-41ae-bfbc-39924b3a12b4
+29.366815 -25.445023
+30.060248 -29.71809
+31.530492 -35.744437
+31.625858 -36.64192
+>sR # name: East Saharan Craton - Aouzeguer Terrane SZ # subductionZoneAge: Unknown # subductionZoneConvergence: Unknown # subductionZoneDeepDip: Unknown # subductionZoneDepth: Unknown # subductionZoneSystem: Unknown # subductionZoneSystemOrder: Unknown # rheaFault: Unknown # polygon: Sahara Metacraton # use_reverse: yes # identity: GPlates-8438e637-ef11-4a1e-af45-c19e82434cc1
+38.275583 -3.132438
+37.754474 -5.464176
+37.431775 -9.097417
+37.86749 -10.670145
+38.511666 -11.399881
+38.937153 -12.440141
+39.308234 -14.089646
+39.639711 -15.840228
+39.903976 -17.446127
+39.927622 -18.081951
+40.068512 -19.181769
+39.998731 -20.757886
+40.240418 -22.128992
+>sR # name: northern SM SZ? # subductionZoneAge: Unknown # subductionZoneConvergence: Unknown # subductionZoneDeepDip: Unknown # subductionZoneDepth: Unknown # subductionZoneSystem: Unknown # subductionZoneSystemOrder: Unknown # rheaFault: Unknown # polygon: Sahara Metacraton # use_reverse: no # identity: GPlates-57c2c0f1-6309-4014-b018-10159d455b55
+38.394102 -4.663996
+39.191508 -4.563208
+40.333934 -4.353097
+41.588929 -4.479083
+42.62991 -3.813628
+44.241091 -3.824067
+46.906231 -4.393488
+50.147414 -5.235739
+53.725656 -5.187643
+56.149529 -4.597453
+57.644559 -4.731791
+59.861834 -4.708113
+61.502019 -4.621172
+62.020063 -4.365077
+62.240912 -4.024159
+>sR # name: ANS # subductionZoneAge: Unknown # subductionZoneConvergence: Unknown # subductionZoneDeepDip: Unknown # subductionZoneDepth: Unknown # subductionZoneSystem: Unknown # subductionZoneSystemOrder: Unknown # rheaFault: Unknown # polygon: Sahara Metacraton # use_reverse: no # identity: GPlates-952c6bbf-3a79-45c4-8ac3-719d3c5b4e39
+62.240912 -4.024159
+62.671237 -4.938976
+62.868179 -5.749472
+63.288637 -6.699176
+63.484002 -7.748503
+63.809972 -8.97798
+64.325182 -9.95673
+64.673658 -10.84025
+64.865968 -11.850177
+65.271418 -12.76592
+66.044553 -13.826949
+67.305023 -14.757269
+67.877743 -15.726005
+68.531735 -17.047984
+69.050773 -18.153476
+69.884395 -18.951818
+70.64242 -19.788312
+71.939833 -20.806999
+72.468513 -22.182956
+72.671435 -22.972787
+72.888451 -23.99558
+72.982372 -25.045013
+73.585313 -25.571279
+>sL # name: Dahomenides # subductionZoneAge: Unknown # subductionZoneConvergence: Unknown # subductionZoneDeepDip: Unknown # subductionZoneDepth: Unknown # subductionZoneSystem: Unknown # subductionZoneSystemOrder: Unknown # rheaFault: Unknown # polygon: Hoggar Assembly # use_reverse: yes # identity: GPlates-a491135b-04a7-41ae-bfbc-39924b3a12b4
+28.565957 -19.891992
+29.014895 -23.149264
+29.366815 -25.445023
+>sL # name: Hoggar assembly # subductionZoneAge: Unknown # subductionZoneConvergence: Unknown # subductionZoneDeepDip: Unknown # subductionZoneDepth: Unknown # subductionZoneSystem: Unknown # subductionZoneSystemOrder: Unknown # rheaFault: Unknown # polygon: Hoggar Assembly # use_reverse: yes # identity: GPlates-8691ce9b-fbbb-435d-a1be-07a5936fa420
+27.143922 -17.350843
+27.340041 -17.733996
+28.565957 -19.891992
+>sL # name: Serouenent Terrane accretion # subductionZoneAge: Unknown # subductionZoneConvergence: Unknown # subductionZoneDeepDip: Unknown # subductionZoneDepth: Unknown # subductionZoneSystem: Unknown # subductionZoneSystemOrder: Unknown # rheaFault: Unknown # polygon: Hoggar Assembly # use_reverse: yes # identity: GPlates-b68d4663-7a1b-46a2-a7c1-73c209ab28f3
+31.245719 -6.405728
+32.558077 -8.508721
+33.407869 -9.83306
+33.55995 -10.068779
+33.96877 -11.260741
+34.198024 -12.075531
+34.326604 -13.739883
+>sR # name: East Saharan Craton - Aouzeguer Terrane SZ # subductionZoneAge: Unknown # subductionZoneConvergence: Unknown # subductionZoneDeepDip: Unknown # subductionZoneDepth: Unknown # subductionZoneSystem: Unknown # subductionZoneSystemOrder: Unknown # rheaFault: Unknown # polygon: Hoggar Assembly # use_reverse: no # identity: GPlates-8438e637-ef11-4a1e-af45-c19e82434cc1
+37.657061 -6.566977
+37.431775 -9.097417
+37.86749 -10.670145
+38.511666 -11.399881
+38.937153 -12.440141
+39.308234 -14.089646
+39.639711 -15.840228
+39.903976 -17.446127
+39.927622 -18.081951
+40.068512 -19.181769
+39.998731 -20.757886
+40.240418 -22.128992
+>sL # name: Hoggar assembly # subductionZoneAge: Unknown # subductionZoneConvergence: Unknown # subductionZoneDeepDip: Unknown # subductionZoneDepth: Unknown # subductionZoneSystem: Unknown # subductionZoneSystemOrder: Unknown # rheaFault: Unknown # polygon: Central Hoggar Assembly # use_reverse: yes # identity: GPlates-8691ce9b-fbbb-435d-a1be-07a5936fa420
+22.101043 1.714153
+22.227043 0.788744
+22.561553 -0.786928
+22.554943 -2.639937
+22.704805 -4.247851
+23.225569 -6.293707
+23.501829 -8.087144
+23.89203 -9.534558
+24.531503 -11.576609
+25.678104 -14.432049
+27.143922 -17.350843
+>sL # name: Serouenent Terrane accretion # subductionZoneAge: Unknown # subductionZoneConvergence: Unknown # subductionZoneDeepDip: Unknown # subductionZoneDepth: Unknown # subductionZoneSystem: Unknown # subductionZoneSystemOrder: Unknown # rheaFault: Unknown # polygon: Central Hoggar Assembly # use_reverse: no # identity: GPlates-b68d4663-7a1b-46a2-a7c1-73c209ab28f3
+29.489277 -0.542211
+29.563819 -1.570011
+30.018342 -3.031358
+30.521712 -5.116231
+31.245312 -6.405073
+32.558077 -8.508721
+33.407869 -9.83306
+33.55995 -10.068779
+33.96877 -11.260741
+34.198024 -12.075531
+34.326604 -13.739883
+>sL # name: foras Granulite Unit SZ # subductionZoneAge: Unknown # subductionZoneConvergence: Unknown # subductionZoneDeepDip: Unknown # subductionZoneDepth: Unknown # subductionZoneSystem: Unknown # subductionZoneSystemOrder: Unknown # rheaFault: Unknown # polygon: Iforus granulite unit # use_reverse: yes # identity: GPlates-d3d5b890-71dc-46db-ae21-7c8f2ebedd5a
+21.227212 -2.308862
+21.301238 -3.738943
+22.070161 -5.984525
+22.389905 -9.291273
+22.550317 -9.601994
+>sL # name: Hoggar assembly # subductionZoneAge: Unknown # subductionZoneConvergence: Unknown # subductionZoneDeepDip: Unknown # subductionZoneDepth: Unknown # subductionZoneSystem: Unknown # subductionZoneSystemOrder: Unknown # rheaFault: Unknown # polygon: Iforus granulite unit # use_reverse: no # identity: GPlates-8691ce9b-fbbb-435d-a1be-07a5936fa420
+22.557975 -1.790356
+22.554943 -2.639937
+22.704805 -4.247851
+23.225569 -6.293707
+23.501829 -8.087144
+23.89203 -9.534558
+23.951343 -9.725134
+>sR # name: SZ # subductionZoneAge: Unknown # subductionZoneConvergence: Unknown # subductionZoneDeepDip: Unknown # subductionZoneDepth: Unknown # subductionZoneSystem: Unknown # subductionZoneSystemOrder: Unknown # rheaFault: Unknown # polygon: Siberia # use_reverse: no # identity: GPlates-87c1e2cb-d6ef-4950-a926-ac73d2a02f32
+256.121931 -14.063028
+255.888325 -13.034222
+255.33328899999998 -5.247376
+257.851771 3.13318
+259.24787100000003 6.126768
+263.588472 10.606916
+>sL # name: Taimyr SZ # subductionZoneAge: Unknown # subductionZoneConvergence: Unknown # subductionZoneDeepDip: Unknown # subductionZoneDepth: Unknown # subductionZoneSystem: Unknown # subductionZoneSystemOrder: Unknown # rheaFault: Unknown # polygon: Siberia # use_reverse: no # identity: GPlates-7b771b58-1bf6-4fa8-ba2c-42569651893e
+272.31352400000003 15.323382
+275.677904 15.770701
+277.358113 14.863505
+279.194173 13.264798
+281.485482 12.279254
+282.610314 10.732582
+283.811391 8.818055
+284.00217299999997 8.595364
+>sL # name: Taimyr SZ # subductionZoneAge: Unknown # subductionZoneConvergence: Unknown # subductionZoneDeepDip: Unknown # subductionZoneDepth: Unknown # subductionZoneSystem: Unknown # subductionZoneSystemOrder: Unknown # rheaFault: Unknown # polygon: Taimyr Plate # use_reverse: yes # identity: GPlates-7b771b58-1bf6-4fa8-ba2c-42569651893e
+273.10062600000003 15.432773
+275.677904 15.770701
+277.358113 14.863505
+279.194173 13.264798
+281.485482 12.279254
+282.610314 10.732582
+283.811391 8.818055
+284.00217299999997 8.595364
+>sL # name: Avalonia-Ganderia subduction zone # subductionZoneAge: Unknown # subductionZoneConvergence: Unknown # subductionZoneDeepDip: Unknown # subductionZoneDepth: Unknown # subductionZoneSystem: Unknown # subductionZoneSystemOrder: Unknown # rheaFault: Unknown # polygon: Florida # use_reverse: no # identity: GPlates-2ae70daa-a45d-4721-945c-cd81a6765305
+320.63032599999997 -23.571292
+324.927983 -20.944603
+328.91474 -17.373394
+338.987905 -10.722862
+>sL # name: Bassiride belt # subductionZoneAge: Unknown # subductionZoneConvergence: Unknown # subductionZoneDeepDip: Unknown # subductionZoneDepth: Unknown # subductionZoneSystem: Unknown # subductionZoneSystemOrder: Unknown # rheaFault: Unknown # polygon: Florida # use_reverse: yes # identity: GPlates-48843d4b-f247-4f73-b23c-c5000370adb4
+334.328208 -41.151252
+336.378669 -36.759175
+338.228452 -34.032884
+338.994199 -31.169231
+339.48957 -27.093098
+339.791479 -23.229095
+339.790116 -23.080567
+>sR # name: Offshore Timan ocean arc? # subductionZoneAge: Unknown # subductionZoneConvergence: Unknown # subductionZoneDeepDip: Unknown # subductionZoneDepth: Unknown # subductionZoneSystem: Unknown # subductionZoneSystemOrder: Unknown # rheaFault: Unknown # polygon: Rodinia # use_reverse: no # identity: GPlates-095b287c-07cb-4b67-8f25-f71067ddaca2
+289.975595 -4.873818
+290.84639 -4.005262
+294.498815 -0.402682
+298.314797 2.899042
+302.9212 5.989979
+306.344942 7.28465
+311.18399 6.988976
+311.713281 6.824307
+>sL # name: Avalonia-Ganderia subduction zone # subductionZoneAge: Unknown # subductionZoneConvergence: Unknown # subductionZoneDeepDip: Unknown # subductionZoneDepth: Unknown # subductionZoneSystem: Unknown # subductionZoneSystemOrder: Unknown # rheaFault: Unknown # polygon: Rodinia # use_reverse: yes # identity: GPlates-2ae70daa-a45d-4721-945c-cd81a6765305
+320.63032599999997 -23.571292
+321.424944 -23.101639
+>sL # name: Bassiride belt # subductionZoneAge: Unknown # subductionZoneConvergence: Unknown # subductionZoneDeepDip: Unknown # subductionZoneDepth: Unknown # subductionZoneSystem: Unknown # subductionZoneSystemOrder: Unknown # rheaFault: Unknown # polygon: Rodinia # use_reverse: no # identity: GPlates-48843d4b-f247-4f73-b23c-c5000370adb4
+334.328208 -41.151252
+336.378669 -36.759175
+338.228452 -34.032884
+338.994199 -31.169231
+339.48957 -27.093098
+339.791479 -23.229095
+339.790116 -23.080567
+>sL # name: Avalonia-Ganderia subduction zone # subductionZoneAge: Unknown # subductionZoneConvergence: Unknown # subductionZoneDeepDip: Unknown # subductionZoneDepth: Unknown # subductionZoneSystem: Unknown # subductionZoneSystemOrder: Unknown # rheaFault: Unknown # polygon: Rodinia # use_reverse: no # identity: GPlates-2ae70daa-a45d-4721-945c-cd81a6765305
+338.987905 -10.722862
+340.155554 -9.903808
+343.832708 -6.203125
+347.989008 -3.040798
+352.398721 1.388695
+353.935912 3.306183
+>sL # name: Hoggar assembly # subductionZoneAge: Unknown # subductionZoneConvergence: Unknown # subductionZoneDeepDip: Unknown # subductionZoneDepth: Unknown # subductionZoneSystem: Unknown # subductionZoneSystemOrder: Unknown # rheaFault: Unknown # polygon: Rodinia # use_reverse: no # identity: GPlates-8691ce9b-fbbb-435d-a1be-07a5936fa420
+22.305228 0.420482
+22.561553 -0.786928
+22.557975 -1.790356
+>sL # name: foras Granulite Unit SZ # subductionZoneAge: Unknown # subductionZoneConvergence: Unknown # subductionZoneDeepDip: Unknown # subductionZoneDepth: Unknown # subductionZoneSystem: Unknown # subductionZoneSystemOrder: Unknown # rheaFault: Unknown # polygon: Rodinia # use_reverse: no # identity: GPlates-d3d5b890-71dc-46db-ae21-7c8f2ebedd5a
+21.227212 -2.308862
+21.301238 -3.738943
+22.070161 -5.984525
+22.389905 -9.291273
+22.550317 -9.601994
+>sL # name: Hoggar assembly # subductionZoneAge: Unknown # subductionZoneConvergence: Unknown # subductionZoneDeepDip: Unknown # subductionZoneDepth: Unknown # subductionZoneSystem: Unknown # subductionZoneSystemOrder: Unknown # rheaFault: Unknown # polygon: Rodinia # use_reverse: no # identity: GPlates-8691ce9b-fbbb-435d-a1be-07a5936fa420
+23.951343 -9.725134
+24.531503 -11.576609
+25.678104 -14.432049
+27.340041 -17.733996
+28.565957 -19.891992
+>sL # name: Dahomenides # subductionZoneAge: Unknown # subductionZoneConvergence: Unknown # subductionZoneDeepDip: Unknown # subductionZoneDepth: Unknown # subductionZoneSystem: Unknown # subductionZoneSystemOrder: Unknown # rheaFault: Unknown # polygon: Rodinia # use_reverse: no # identity: GPlates-a491135b-04a7-41ae-bfbc-39924b3a12b4
+28.565957 -19.891992
+29.014895 -23.149264
+30.060248 -29.71809
+31.530492 -35.744437
+31.625858 -36.64192
+>sL # name: Goias Arc and Brasilia Belt # subductionZoneAge: Unknown # subductionZoneConvergence: Unknown # subductionZoneDeepDip: Unknown # subductionZoneDepth: Unknown # subductionZoneSystem: Unknown # subductionZoneSystemOrder: Unknown # rheaFault: Unknown # polygon: Rodinia # use_reverse: yes # identity: GPlates-b50b9745-e5cf-4513-a0d5-7fa71e4b55bc
+28.897352 -39.378791
+28.921637 -39.264159
+29.562862 -36.671454
+29.575818 -35.982626
+>sR # name: ANS formation # subductionZoneAge: Unknown # subductionZoneConvergence: Unknown # subductionZoneDeepDip: Unknown # subductionZoneDepth: Unknown # subductionZoneSystem: Unknown # subductionZoneSystemOrder: Unknown # rheaFault: Unknown # polygon: Mirovoi Ocean Plate # use_reverse: yes # identity: GPlates-151b6201-211f-4b3e-8581-9087610ebd8f
+68.457119 -1.471097
+70.16607 0.421619
+72.829362 1.987741
+>sR # name: ANS # subductionZoneAge: Unknown # subductionZoneConvergence: Unknown # subductionZoneDeepDip: Unknown # subductionZoneDepth: Unknown # subductionZoneSystem: Unknown # subductionZoneSystemOrder: Unknown # rheaFault: Unknown # polygon: Mirovoi Ocean Plate # use_reverse: yes # identity: GPlates-952c6bbf-3a79-45c4-8ac3-719d3c5b4e39
+62.240912 -4.024159
+62.512507 -4.601834
+>sR # name: northern SM SZ? # subductionZoneAge: Unknown # subductionZoneConvergence: Unknown # subductionZoneDeepDip: Unknown # subductionZoneDepth: Unknown # subductionZoneSystem: Unknown # subductionZoneSystemOrder: Unknown # rheaFault: Unknown # polygon: Mirovoi Ocean Plate # use_reverse: yes # identity: GPlates-57c2c0f1-6309-4014-b018-10159d455b55
+38.394102 -4.663996
+39.191508 -4.563208
+40.333934 -4.353097
+41.588929 -4.479083
+42.62991 -3.813628
+44.241091 -3.824067
+46.906231 -4.393488
+50.147414 -5.235739
+53.725656 -5.187643
+56.149529 -4.597453
+57.644559 -4.731791
+59.861834 -4.708113
+61.502019 -4.621172
+62.020063 -4.365077
+62.240912 -4.024159
+>sR # name: East Saharan Craton - Aouzeguer Terrane SZ # subductionZoneAge: Unknown # subductionZoneConvergence: Unknown # subductionZoneDeepDip: Unknown # subductionZoneDepth: Unknown # subductionZoneSystem: Unknown # subductionZoneSystemOrder: Unknown # rheaFault: Unknown # polygon: Mirovoi Ocean Plate # use_reverse: no # identity: GPlates-8438e637-ef11-4a1e-af45-c19e82434cc1
+38.275583 -3.132438
+37.754474 -5.464176
+37.657061 -6.566977
+>sL # name: Serouenent Terrane accretion # subductionZoneAge: Unknown # subductionZoneConvergence: Unknown # subductionZoneDeepDip: Unknown # subductionZoneDepth: Unknown # subductionZoneSystem: Unknown # subductionZoneSystemOrder: Unknown # rheaFault: Unknown # polygon: Mirovoi Ocean Plate # use_reverse: yes # identity: GPlates-b68d4663-7a1b-46a2-a7c1-73c209ab28f3
+29.489277 -0.542211
+29.563819 -1.570011
+30.018342 -3.031358
+30.521712 -5.116231
+31.245312 -6.405073
+31.245719 -6.405728
+>sL # name: Hoggar assembly # subductionZoneAge: Unknown # subductionZoneConvergence: Unknown # subductionZoneDeepDip: Unknown # subductionZoneDepth: Unknown # subductionZoneSystem: Unknown # subductionZoneSystemOrder: Unknown # rheaFault: Unknown # polygon: Mirovoi Ocean Plate # use_reverse: no # identity: GPlates-8691ce9b-fbbb-435d-a1be-07a5936fa420
+22.101043 1.714153
+22.227043 0.788744
+22.305228 0.420482
+>sR # name: SZ # subductionZoneAge: Unknown # subductionZoneConvergence: Unknown # subductionZoneDeepDip: Unknown # subductionZoneDepth: Unknown # subductionZoneSystem: Unknown # subductionZoneSystemOrder: Unknown # rheaFault: Unknown # polygon: Mirovoi Ocean Plate # use_reverse: yes # identity: GPlates-87c1e2cb-d6ef-4950-a926-ac73d2a02f32
+256.121931 -14.063028
+255.888325 -13.034222
+255.33328899999998 -5.247376
+257.851771 3.13318
+258.898106 5.379558
+>sL # name: Oceanic arc # subductionZoneAge: Unknown # subductionZoneConvergence: Unknown # subductionZoneDeepDip: Unknown # subductionZoneDepth: Unknown # subductionZoneSystem: Unknown # subductionZoneSystemOrder: Unknown # rheaFault: Unknown # polygon: Mirovoi Ocean Plate # use_reverse: no # identity: GPlates-78843307-78b9-4275-b0db-6d6450235f98
+145.482125 42.234372
+139.543713 41.775474
+132.838538 41.817152
+128.719469 39.981138
+126.411572 38.705566
+>sR # name: Oceanic arc # subductionZoneAge: Unknown # subductionZoneConvergence: Unknown # subductionZoneDeepDip: Unknown # subductionZoneDepth: Unknown # subductionZoneSystem: Unknown # subductionZoneSystemOrder: Unknown # rheaFault: Unknown # polygon: Mirovoi Ocean Plate # use_reverse: yes # identity: GPlates-cb84c737-4c75-4b73-8ed7-f197b01d4e9f
+97.345533 57.086222
+105.690352 54.206092
+112.76768 48.590493
+116.145648 46.107895
+>sL # name: Taimyr SZ # subductionZoneAge: Unknown # subductionZoneConvergence: Unknown # subductionZoneDeepDip: Unknown # subductionZoneDepth: Unknown # subductionZoneSystem: Unknown # subductionZoneSystemOrder: Unknown # rheaFault: Unknown # polygon: Timan Plate # use_reverse: yes # identity: GPlates-7b771b58-1bf6-4fa8-ba2c-42569651893e
+272.31352400000003 15.323382
+273.10062600000003 15.432773
+>sR # name: SZ # subductionZoneAge: Unknown # subductionZoneConvergence: Unknown # subductionZoneDeepDip: Unknown # subductionZoneDepth: Unknown # subductionZoneSystem: Unknown # subductionZoneSystemOrder: Unknown # rheaFault: Unknown # polygon: Timan Plate # use_reverse: yes # identity: GPlates-87c1e2cb-d6ef-4950-a926-ac73d2a02f32
+258.898106 5.379558
+259.24787100000003 6.126768
+263.588472 10.606916
+>sL # name: Avalonia-Ganderia subduction zone # subductionZoneAge: Unknown # subductionZoneConvergence: Unknown # subductionZoneDeepDip: Unknown # subductionZoneDepth: Unknown # subductionZoneSystem: Unknown # subductionZoneSystemOrder: Unknown # rheaFault: Unknown # polygon: Timan Plate # use_reverse: yes # identity: GPlates-2ae70daa-a45d-4721-945c-cd81a6765305
+321.424944 -23.101639
+324.927983 -20.944603
+328.91474 -17.373394
+340.155554 -9.903808
+343.832708 -6.203125
+347.989008 -3.040798
+352.398721 1.388695
+353.935912 3.306183
+>sR # name: Offshore Timan ocean arc? # subductionZoneAge: Unknown # subductionZoneConvergence: Unknown # subductionZoneDeepDip: Unknown # subductionZoneDepth: Unknown # subductionZoneSystem: Unknown # subductionZoneSystemOrder: Unknown # rheaFault: Unknown # polygon: Timan Plate # use_reverse: yes # identity: GPlates-095b287c-07cb-4b67-8f25-f71067ddaca2
+286.929666 -7.881783
+290.84639 -4.005262
+294.498815 -0.402682
+298.314797 2.899042
+302.9212 5.989979
+306.344942 7.28465
+311.18399 6.988976
+311.713281 6.824307
+>sL # name: Goias Arc and Brasilia Belt # subductionZoneAge: Unknown # subductionZoneConvergence: Unknown # subductionZoneDeepDip: Unknown # subductionZoneDepth: Unknown # subductionZoneSystem: Unknown # subductionZoneSystemOrder: Unknown # rheaFault: Unknown # polygon: Parana # use_reverse: yes # identity: GPlates-b50b9745-e5cf-4513-a0d5-7fa71e4b55bc
+31.305853 -54.068878
+30.992421 -53.469711
+30.943082 -52.352614
+31.747372 -50.469344
+29.237961 -46.126992
+28.409571 -41.602109
+28.897352 -39.378791
+>sL # name: Brasilia Belt # subductionZoneAge: Unknown # subductionZoneConvergence: Unknown # subductionZoneDeepDip: Unknown # subductionZoneDepth: Unknown # subductionZoneSystem: Unknown # subductionZoneSystemOrder: Unknown # rheaFault: Unknown # polygon: Parana # use_reverse: yes # identity: GPlates-27474886-13ad-4e1e-96c8-29b753c96454
+16.377915 -66.479702
+18.182004 -64.232011
+20.158787 -62.286585
+24.609224 -58.687656
+27.531912 -56.541625
+27.492738 -55.366058
+25.39144 -52.801851

@@ -1,0 +1,43 @@
+<?xml version='1.0' encoding='utf-8'?>
+<gpml:FeatureCollection xmlns:gml="http://www.opengis.net/gml" xmlns:gpml="http://www.gplates.org/gplates" xmlns:xsi="http://www.w3.org/XMLSchema-instance" gpml:version="1.6.0324" xsi:schemaLocation="http://www.gplates.org/gplates ../xsd/gpml.xsd http://www.opengis.net/gml ../../../gml/current/base">
+    <gml:featureMember>
+        <gpml:TopologicalNetwork>
+            <gpml:identity>GPlates-0a64601b-3804-4e35-a8a2-2d90cd77239b</gpml:identity>
+            <gpml:revision>GPlates-97ad5567-9485-4954-9462-ddc09a15c58b</gpml:revision>
+            <gml:name>Test Network for Auto interior insert</gml:name>
+            <gml:validTime>
+                <gml:TimePeriod>
+                    <gml:begin>
+                        <gml:TimeInstant>
+                            <gml:timePosition gml:frame="http://gplates.org/TRS/flat">http://gplates.org/times/distantPast</gml:timePosition>
+                        </gml:TimeInstant>
+                    </gml:begin>
+                    <gml:end>
+                        <gml:TimeInstant>
+                            <gml:timePosition gml:frame="http://gplates.org/TRS/flat">http://gplates.org/times/distantFuture</gml:timePosition>
+                        </gml:TimeInstant>
+                    </gml:end>
+                </gml:TimePeriod>
+            </gml:validTime>
+            <gpml:reconstructionPlateId>
+                <gpml:ConstantValue>
+                    <gpml:value>0</gpml:value>
+                    <gpml:valueType>gpml:plateId</gpml:valueType>
+                </gpml:ConstantValue>
+            </gpml:reconstructionPlateId>
+            <gpml:network>
+                <gpml:ConstantValue>
+                    <gpml:value>
+                        <gpml:TopologicalNetwork>
+                            <gpml:boundary>
+                                <gpml:TopologicalSections>
+                                <gpml:section><gpml:TopologicalPoint><gpml:sourceGeometry><gpml:PropertyDelegate><gpml:targetFeature>GPlates-6b032481-3a5a-45a6-881d-4de2ebd43c7e</gpml:targetFeature><gpml:targetProperty xmlns:gpml="http://www.gplates.org/gplates">gpml:position</gpml:targetProperty><gpml:valueType xmlns:gml="http://www.opengis.net/gml">gml:Point</gpml:valueType></gpml:PropertyDelegate></gpml:sourceGeometry></gpml:TopologicalPoint></gpml:section><gpml:section><gpml:TopologicalPoint><gpml:sourceGeometry><gpml:PropertyDelegate><gpml:targetFeature>GPlates-48234fa1-3c34-4a49-9331-f5eefab711fa</gpml:targetFeature><gpml:targetProperty xmlns:gpml="http://www.gplates.org/gplates">gpml:position</gpml:targetProperty><gpml:valueType xmlns:gml="http://www.opengis.net/gml">gml:Point</gpml:valueType></gpml:PropertyDelegate></gpml:sourceGeometry></gpml:TopologicalPoint></gpml:section><gpml:section><gpml:TopologicalPoint><gpml:sourceGeometry><gpml:PropertyDelegate><gpml:targetFeature>GPlates-7a76ee5e-7d1c-468e-89cf-2a26d00032ba</gpml:targetFeature><gpml:targetProperty xmlns:gpml="http://www.gplates.org/gplates">gpml:position</gpml:targetProperty><gpml:valueType xmlns:gml="http://www.opengis.net/gml">gml:Point</gpml:valueType></gpml:PropertyDelegate></gpml:sourceGeometry></gpml:TopologicalPoint></gpml:section><gpml:section><gpml:TopologicalPoint><gpml:sourceGeometry><gpml:PropertyDelegate><gpml:targetFeature>GPlates-2e658ba7-2340-487f-89ab-a5bcd3560738</gpml:targetFeature><gpml:targetProperty xmlns:gpml="http://www.gplates.org/gplates">gpml:position</gpml:targetProperty><gpml:valueType xmlns:gml="http://www.opengis.net/gml">gml:Point</gpml:valueType></gpml:PropertyDelegate></gpml:sourceGeometry></gpml:TopologicalPoint></gpml:section><gpml:section><gpml:TopologicalPoint><gpml:sourceGeometry><gpml:PropertyDelegate><gpml:targetFeature>GPlates-6c9bb9b8-5e73-42d5-bd95-d2b8733bc80b</gpml:targetFeature><gpml:targetProperty xmlns:gpml="http://www.gplates.org/gplates">gpml:position</gpml:targetProperty><gpml:valueType xmlns:gml="http://www.opengis.net/gml">gml:Point</gpml:valueType></gpml:PropertyDelegate></gpml:sourceGeometry></gpml:TopologicalPoint></gpml:section><gpml:section><gpml:TopologicalPoint><gpml:sourceGeometry><gpml:PropertyDelegate><gpml:targetFeature>GPlates-7fa5c4ff-6efd-4ee7-bc9f-fa8121f5202f</gpml:targetFeature><gpml:targetProperty xmlns:gpml="http://www.gplates.org/gplates">gpml:position</gpml:targetProperty><gpml:valueType xmlns:gml="http://www.opengis.net/gml">gml:Point</gpml:valueType></gpml:PropertyDelegate></gpml:sourceGeometry></gpml:TopologicalPoint></gpml:section><gpml:section><gpml:TopologicalPoint><gpml:sourceGeometry><gpml:PropertyDelegate><gpml:targetFeature>GPlates-11aa334c-d50a-4533-b49a-ba05472ae944</gpml:targetFeature><gpml:targetProperty xmlns:gpml="http://www.gplates.org/gplates">gpml:position</gpml:targetProperty><gpml:valueType xmlns:gml="http://www.opengis.net/gml">gml:Point</gpml:valueType></gpml:PropertyDelegate></gpml:sourceGeometry></gpml:TopologicalPoint></gpml:section><gpml:section><gpml:TopologicalPoint><gpml:sourceGeometry><gpml:PropertyDelegate><gpml:targetFeature>GPlates-76863a19-2ebe-4c62-abcf-8ee86855186a</gpml:targetFeature><gpml:targetProperty xmlns:gpml="http://www.gplates.org/gplates">gpml:position</gpml:targetProperty><gpml:valueType xmlns:gml="http://www.opengis.net/gml">gml:Point</gpml:valueType></gpml:PropertyDelegate></gpml:sourceGeometry></gpml:TopologicalPoint></gpml:section><gpml:section><gpml:TopologicalPoint><gpml:sourceGeometry><gpml:PropertyDelegate><gpml:targetFeature>GPlates-a63f871e-4806-4fa1-9ebc-3e856603ab99</gpml:targetFeature><gpml:targetProperty xmlns:gpml="http://www.gplates.org/gplates">gpml:position</gpml:targetProperty><gpml:valueType xmlns:gml="http://www.opengis.net/gml">gml:Point</gpml:valueType></gpml:PropertyDelegate></gpml:sourceGeometry></gpml:TopologicalPoint></gpml:section><gpml:section><gpml:TopologicalPoint><gpml:sourceGeometry><gpml:PropertyDelegate><gpml:targetFeature>GPlates-388b8613-de3a-405f-b9a4-79bbc16f4bc7</gpml:targetFeature><gpml:targetProperty xmlns:gpml="http://www.gplates.org/gplates">gpml:position</gpml:targetProperty><gpml:valueType xmlns:gml="http://www.opengis.net/gml">gml:Point</gpml:valueType></gpml:PropertyDelegate></gpml:sourceGeometry></gpml:TopologicalPoint></gpml:section></gpml:TopologicalSections>
+                            </gpml:boundary>
+                        <gpml:interior><gpml:TopologicalNetworkInterior><gpml:sourceGeometry><gpml:PropertyDelegate><gpml:targetFeature>GPlates-bf7e9cac-c0dc-4174-8b7c-074e5ac43971</gpml:targetFeature><gpml:targetProperty xmlns:gpml="http://www.gplates.org/gplates">gpml:position</gpml:targetProperty><gpml:valueType xmlns:gml="http://www.opengis.net/gml">gml:Point</gpml:valueType></gpml:PropertyDelegate></gpml:sourceGeometry></gpml:TopologicalNetworkInterior></gpml:interior></gpml:TopologicalNetwork>
+                    </gpml:value>
+                    <gpml:valueType>gpml:TopologicalNetwork</gpml:valueType>
+                </gpml:ConstantValue>
+            </gpml:network>
+        </gpml:TopologicalNetwork>
+    </gml:featureMember>
+</gpml:FeatureCollection>

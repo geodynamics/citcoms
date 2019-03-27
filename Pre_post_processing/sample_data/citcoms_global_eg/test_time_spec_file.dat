@@ -1,0 +1,8 @@
+# Lines that start with # are ignored
+0 # comments may appear after the value 
+10
+100 # values without units are model time steps
+1000
+170Ma # use specific units to get closest model times for that value 
+100 Myr # various units may be mixed in one file 
+1600

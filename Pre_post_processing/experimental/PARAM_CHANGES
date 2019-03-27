@@ -1,0 +1,32 @@
+# Common CitcomS parameters for all restart runs go here, at the top:
+# Prefix replacement values with the correct [CitcomS*] section name:
+
+CitcomS.steps = 3
+
+CitcomS.controller.monitoringFrequency = 1
+
+CitcomS.solver.datafile = FIXME
+CitcomS.solver.datafile_old = FIXME
+CitcomS.solver.datadir = FIXME
+CitcomS.solver.datadir_old = FIXME
+
+CitcomS.solver.mesher.coor_file = FIXME
+
+CitcomS.solver.output.output_optional = surf,geoid,botm
+CitcomS.solver.output.use_cbf_topo = 1
+CitcomS.solver.output.output_ll_max = 80
+CitcomS.solver.output.self_gravitation = 1
+
+CitcomS.solver.ic.restart = on
+CitcomS.solver.ic.solution_cycles_init = steps_i 
+CitcomS.solver.ic.zero_elapsed_time = off 
+CitcomS.solver.ic.tic_method = COMMENT
+
+CitcomS.solver.tracer.tracer_file = COMMENT
+
+CitcomS.solver.bc.topvbxval = 0.0
+CitcomS.solver.bc.topvbyval = 0.0
+
+CitcomS.solver.param.file_bcs = 0
+CitcomS.solver.param.vel_bound_file = COMMENT
+CitcomS.solver.param.start_age = COMMENT

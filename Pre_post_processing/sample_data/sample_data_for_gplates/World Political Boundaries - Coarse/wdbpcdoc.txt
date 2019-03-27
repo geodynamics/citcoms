@@ -1,0 +1,118 @@
+UNEP/GRID Documentation Summary for Data Set:                                   
+World Boundary Databank; PC ARC/INFO 'EXPORT' Version                           
+                                                                                
+                                                                                
+The data file "WDBTEMP4.E00" is based on the "PC World Data Base"               
+product from ESRI (April 1990), having been significantly modified              
+and enhanced at GRID-Geneva.  Among changes made are the following:             
+                                                                                
+  -  The "internal" boundaries of former Yugoslavia have been digitized,        
+     and the following states have been added: Bosnia-Hercegovina (BS),         
+     Croatia (CR) and Slovenia (SS);                                            
+                                                                                
+  -  The "internal" boundary for Czechoslovakia has been added,                 
+     but national entities have not yet been named pending further              
+     clarification of the situation there;                                      
+                                                                                
+  -  The fifteen independent republics of the former USSR (now, the             
+     Commonwealth of Independent States or C.I.S.) are upgraded to              
+     national status, and have proper country names applied;                    
+                                                                                
+  -  The boundary between the former East and West Germanies has been           
+     removed to form a single country, the Federal Republic of Germany;         
+                                                                                
+  -  A large number of additional geographic entities have been added           
+     through digitization, and/or have had names applied where none             
+     were available.  Also, name changes have been made for countries           
+     such as 'Burkina' to 'Burkina Faso', 'Burma' to 'Myanmar', etc.            
+                                                                                
+                                                                                
+The data file contains countries as polygons, coastlines, and major lakes       
+and islands.  At this time there are no rivers included; they might be          
+added as a separate layer in the next version of this data set.                 
+                                                                                
+Both a polygon attribute table (PAT) and an arc attribute table (AAT)           
+exist to define the countries in the coverage "WDBTEMP4".  These tables         
+are summarized in the following outlines of their contents.                     
+                                                                                
+POLYGON ATTRIBUTE TABLE (8 Items)                                               
+                                                                                
+Variable       Columns        Defined Item Name   Item Definition               
+________       _______        _________________   _______________               
+                                                                                
+Area            01-04         AREA                4,12,F,3                      
+Perimeter       05-08         PERIMETER           4,12,F,3                      
+Country #       09-12         COVER#              4,5,B,0                       
+Country-ID      13-16         COVER-ID            4,5,B,0                       
+Country Code    17-20         COUNTRY             4,4,C                         
+Land-Water Code    21         FEATURE             1,1,I                         
+Country Name    22-61         NAME                40,40,C                       
+Region             62         REGION              1,1,C			                                                                                
+                                                                                
+ARC ATTRIBUTE TABLE (8 Items)                                                   
+                                                                                
+Variable       Columns        Defined Item Name   Item Definition               
+________       _______        _________________   _______________               
+                                                                                
+               01-04          FNODE#              4,5,B,0                       
+               05-08          TNODE#              4,5,B,0                       
+               09-12          LPOLY#              4,5,B,0                       
+               13-16          RPOLY#              4,5,B,0                       
+Length of arc  17-20          LENGTH              4,12,F,3                      
+Country #      21-24          COVER#              4,5,B,0                       
+Feature ID     25-28          COVER-ID            4,5,B,0                       
+Boundary Type     29          RANK                2,2,I                         
+                                                                                
+                                                                                
+Data Classification of PAT                                                      
+                                                                                
+COUNTRY - This item contains selected World Boundary Databank-II                
+          (WBDb-II) country code designations (see attached list).              
+                                                                                
+FEATURE - This item indicates a land, ocean or inland waterbody                 
+          polygon (0 = Ocean, 1 = Land, 9 = Inland waterbody).                  
+                                                                                
+                                                                                
+REGION  - This item contains codes dividing the world into 7 regions.
+          (A = Asia, E = Europe, F = Africa, N = North America,
+           S = South America, T = Antarctic Area, U = Australian Area)
+
+
+Data Classification of AAT                                                      
+                                                                                
+     RANK  -  This item contains selected WBDb-II rank codes as below:          
+                                                                                
+        0  -  global polygon (-180 W., -90 S., 180 E., 90 N. degrees)           
+        1  -  Coastlines, Islands and Lakes                                     
+        4  -  International boundaries; generally accepted                      
+        5  -  International boundaries; indefinite or in dispute                
+       10  -  New political boundaries added in version 1 (WDBTEMP1)            
+       11  -  New political boundaries added in version 2 (WDBTEMP2)            
+       12  -  New political boundaries added in version 3 (WDBTEMP3)            
+                                                                                
+                                                                                
+The INFO look-up table which contained country names in the original ESRI       
+version has been included within the Data Classification PAT, as separate       
+item 'NAME' up to 40 characters in length, to simplify using these names.       
+The projection for this data set remains the same; that is, ARC/INFO's          
+Geographic, and coordinates are in latitude/longitude decimal degrees.          
+There are a total number of 2801 arcs and 1047 polygons in the data set.        
+                                                                                
+Those users who are supplied with the data on six-inch magnetic tape will       
+find a single ARC/INFO 'EXPORT' file, "WDBTEMP4.E00" to manipulate.  When       
+the data are supplied on 3.5" diskettes, users will find a total of four        
+diskettes and files ("WDBTEMP4.E00, .E01, .E02 and .E03") to manipulate.        
+The data can be 'IMPORTed' using the ARC/INFO command of this name to           
+recreate a directory structure and for further manipulation, overlay etc.       
+                                                                                
+When a tape is delivered, it will first have to be 'TAPEREAD' using the         
+ARC/INFO command of this name before the 'IMPORT' can be carried out.           
+The tape will normally have been explicitly mounted with a density of           
+6250 bpi, with a blocksize of 8000 and a recordsize (record length) of          
+80, which yields a blocking factor of 100.                                      
+                                                                                
+UNEP and GRID wish to express to the users of this product "WDBTEMP4"           
+that we take final responsibility for neither the placement of                  
+boundaries in this data set, nor for the place names used, but that             
+they reflect the best available sources of information available to             
+UNEP/GRID at this time.                                                         

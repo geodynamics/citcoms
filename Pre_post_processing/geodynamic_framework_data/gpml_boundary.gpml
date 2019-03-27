@@ -1,0 +1,37 @@
+<?xml version="1.0"?>
+    <gpml:boundary xmlns:gml="http://www.opengis.net/gml" xmlns:gpml="http://www.gplates.org/gplates" xmlns:xsi="http://www.w3.org/XMLSchema-instance" gpml:version="1.6.0324" xsi:schemaLocation="http://www.gplates.org/gplates ../xsd/gpml.xsd http://www.opengis.net/gml ../../../gml/current/base">
+                <gpml:PiecewiseAggregation>
+                    <gpml:valueType xmlns:gpml="http://www.gplates.org/gplates">gpml:TopologicalPolygon</gpml:valueType>
+                    <gpml:timeWindow>
+                        <gpml:TimeWindow>
+                            <gpml:timeDependentPropertyValue>
+                                <gpml:ConstantValue>
+                                    <gpml:value>
+                                        <gpml:TopologicalPolygon>
+                                            <gpml:exterior>
+                                            </gpml:exterior>
+                                        </gpml:TopologicalPolygon>
+                                    </gpml:value>
+                                    <gpml:valueType xmlns:gpml="http://www.gplates.org/gplates">gpml:TopologicalPolygon</gpml:valueType>
+                                </gpml:ConstantValue>
+                            </gpml:timeDependentPropertyValue>
+                            <gpml:validTime>
+                                <gml:TimePeriod>
+                                    <gml:begin>
+                                        <gml:TimeInstant>
+                                            <gml:timePosition>http://gplates.org/times/distantPast</gml:timePosition>
+                                        </gml:TimeInstant>
+                                    </gml:begin>
+                                    <gml:end>
+                                        <gml:TimeInstant>
+                                            <gml:timePosition>http://gplates.org/times/distantFuture</gml:timePosition>
+                                        </gml:TimeInstant>
+                                    </gml:end>
+                                </gml:TimePeriod>
+                            </gpml:validTime>
+                            <gpml:valueType xmlns:gpml="http://www.gplates.org/gplates">gpml:TopologicalPolygon</gpml:valueType>
+                        </gpml:TimeWindow>
+                    </gpml:timeWindow>
+                </gpml:PiecewiseAggregation>
+            </gpml:boundary>
+

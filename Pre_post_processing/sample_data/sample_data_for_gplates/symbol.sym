@@ -1,0 +1,40 @@
+# Test GPlates symbol definition file 
+# Each line of this file should be of the form:
+# feature-type symbol-type symbol-size fill-state
+#
+# feature-type (text) should be the name of a gpml feature type, 
+# such as Volcano, HotSpot etc.
+#
+# symbol-type (text) must be one of:
+# TRIANGLE
+# SQUARE
+# CROSS
+# CIRCLE
+#
+# symbol-size should be a positive integer. 
+# 
+# fill-state is optional and should be one of:
+# FILLED (default state)
+# UNFILLED
+#
+# Some restrictions on current symbol file usage:
+# * Only one file at a time can be loaded
+# * Symbol rules in the file will apply to all loaded collections.
+# * Only point features will be drawn with symbols.
+# * Symbol mapping is only by feature type.
+# * Symbols are only drawn on the globe projection.
+#
+# NAVDAT Symobols 
+#
+NavdatSampleMafic TRIANGLE 1 UNFILLED
+NavdatSampleIntermediate TRIANGLE 1 UNFILLED
+NavdatSampleFelsicLow TRIANGLE 1 UNFILLED
+NavdatSampleFelsicHigh TRIANGLE 1 UNFILLED
+#
+# Macrostrat symbols
+#
+FossilCollection_large CROSS 10 FILLED
+FossilCollection_medium CROSS 3 FILLED
+FossilCollection_small CROSS 1 FILLED
+#
+#

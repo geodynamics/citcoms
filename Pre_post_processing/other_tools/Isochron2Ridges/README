@@ -1,0 +1,58 @@
+Isochron2Ridges
+---------------
+
+Isochron2Ridges is a program written in the Python programming language to
+convert isochrons to mid-ocean ridges and calculate the total ridge distance
+over all isochrons at each age.
+
+To do this it does the following:
+ - reads a PLATES4 or GMT format file and extracts isochron features,
+ - converts segments of isochrons into mid-ocean ridges and transform faults,
+ - calculates the total ridge distance across all isochrons at each age.
+
+----------------------------
+CHANGELOG
+----------------------------
+
+date: 2009-02-10 20:11:31 +1100;  author: jscannon;  state: Exp;  commitid: sEVjjW2SSupCSRBt;
+
+Added ability to read GMT format file (in addition to PLATES4 format).
+Will automatically detect format of input file and output file will be written in same format.
+When reading GMT format the features are expected to have PLATES4 two-line headers embedded in the GMT header (GMT header simply has '>' at beginning of header lines).
+If GMT input file doesn't have PLATES4 headers embedded then plate_id information cannot be obtained.
+When using Intertec to generate input for Isochron2Ridges use the '-gp' option to embedd PLATES4 headers in GMT output.
+GMT format files can contain data points with more than just latitude and longitude - the extra data members are interpolated when used with the --output_extra_ridge_points command-line option.
+----------------------------
+
+date: 2009-02-05 16:58:40 +1100;  author: jscannon;  state: Exp;  lines: +6 -1;  commitid: DC2GxbfGQrhrYcBt;
+
+Fixed some errors with missing global variable declarations, missing "import math" and validateConjugateGroupRidgeDistances() is not in module IsochronFunctions.
+Not sure how this was not picked up at previous commit - maybe something to do with the cached ".pyc" files.
+----------------------------
+
+date: 2009-01-06 12:38:46 +1100;  author: jscannon;  state: Exp;  lines: +246 -79;  commitid: aVly8xqrS5X3vkxt;
+
+Added command-line option to specify maximum sample spacing in Kms (arc distance between two sample points on surface of earth). For example, for a maximum spacing of 100Km you add --output_extra_ridge_points=100 to the command-line.
+----------------------------
+
+date: 2008-11-11 20:08:38 +1100;  author: jscannon;  state: Exp;  lines: +5 -4;
+
+Replaced simple (lat,lon) strike deviation calculation with more advanced vector calculus - works much better near the poles.
+Added PLATES4 'RI' feature code to those considered as isochrons when reading input PLATES4 file.
+----------------------------
+
+date: 2008-11-11 20:00:57 +1100;  author: jscannon;  state: Exp;  lines: +94 -286;
+
+Moved common functions out into new 'IsochronFunctions.py' module.
+Added '--calculate_fault_distances' command-line flag to calculate transform fault distances instead of mid-ocean ridge distances.
+----------------------------
+
+date: 2008-11-11 19:43:56 +1100;  author: jscannon;  state: Exp;  lines: +65 -8;
+
+Added option to read file containing list of plateId/conjugatePlateId pairs whose ridges and faults should be inverted
+----------------------------
+
+date: 2008-11-11 19:35:41 +1100;  author: jscannon;  state: Exp;
+
+Initial import of Isochron2Ridges Python program to read isochrons from a PLATES4 format file, convert isochrons to mid-ocean ridges and transform faults and output the total ridge distance across all isochrons at each age.
+----------------------------

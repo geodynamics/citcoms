@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<gpml:FeatureCollection xmlns:gpml="http://www.gplates.org/gplates" xmlns:gml="http://www.opengis.net/gml" xmlns:xsi="http://www.w3.org/XMLSchema-instance" gpml:version="1.6.0324" xsi:schemaLocation="http://www.gplates.org/gplates ../xsd/gpml.xsd http://www.opengis.net/gml ../../../gml/current/base">
+    <gml:featureMember>
+        <gpml:TopologicalNetwork>
+            <gpml:identity>GPlates-0a64601b-3804-4e35-a8a2-2d90cd77239b</gpml:identity>
+            <gpml:revision>GPlates-97ad5567-9485-4954-9462-ddc09a15c58b</gpml:revision>
+            <gml:name>Test Network for Auto interior insert</gml:name>
+            <gml:validTime>
+                <gml:TimePeriod>
+                    <gml:begin>
+                        <gml:TimeInstant>
+                            <gml:timePosition gml:frame="http://gplates.org/TRS/flat">http://gplates.org/times/distantPast</gml:timePosition>
+                        </gml:TimeInstant>
+                    </gml:begin>
+                    <gml:end>
+                        <gml:TimeInstant>
+                            <gml:timePosition gml:frame="http://gplates.org/TRS/flat">http://gplates.org/times/distantFuture</gml:timePosition>
+                        </gml:TimeInstant>
+                    </gml:end>
+                </gml:TimePeriod>
+            </gml:validTime>
+            <gpml:reconstructionPlateId>
+                <gpml:ConstantValue>
+                    <gpml:value>0</gpml:value>
+                    <gpml:valueType xmlns:gpml="http://www.gplates.org/gplates">gpml:plateId</gpml:valueType>
+                </gpml:ConstantValue>
+            </gpml:reconstructionPlateId>
+            <gpml:network>
+                <gpml:ConstantValue>
+                    <gpml:value>
+                        <gpml:TopologicalNetwork>
+                            <gpml:boundary>
+                                <gpml:TopologicalSections>
+                                </gpml:TopologicalSections>
+                            </gpml:boundary>
+                        </gpml:TopologicalNetwork>
+                    </gpml:value>
+                    <gpml:valueType xmlns:gpml="http://www.gplates.org/gplates">gpml:TopologicalNetwork</gpml:valueType>
+                </gpml:ConstantValue>
+            </gpml:network>
+        </gpml:TopologicalNetwork>
+    </gml:featureMember>
+</gpml:FeatureCollection>

@@ -1,0 +1,80 @@
+# This is a gerneral use colour palette table.
+# ------------------------------------------------------------------------
+#
+# Column 1: Feature type name without gpml: "FeatureType"
+# Column 2: Color value:
+#             r/g/b values from 0 to 255,
+#             a standard colour name from X11 system: i.e. /usr/X11/share/X11/rgb.txt
+# Column 3: Full gpml feature type: "gpml:FeatureType"
+#
+# ------------------------------------------------------------------------
+#
+# Basic tectonic features
+#
+MidOceanRidge	255/10/10 gpml:MidOceanRidge
+Isochron 200/150/150    gpml:Isochron
+#SubductionZone 100/150/250    gpml:SubductionZone
+SubductionZone green gpml:SubductionZone
+#
+TopologicalClosedPlateBoundary lightgrey gpml:TopologicalClosedPlateBoundary
+Coastline  green                      gpml:Coastline
+ExtendedContinentalCrust  blue         gpml:ExtendedContinentalCrust
+TerraneBoundary  blue         gpml:TerraneBoundary
+InferredPaleoBoundary blue gpml:InferredPaleoBoundary
+#
+#
+# NOTE: in deforming zones ExtendedContinentalCrust polygons have a 
+# PolygonCentroidPoint feature to indicate they are microblocks in a TopologyNetwork
+PolygonCentroidPoint blue gpml:PolygonCentroidPoint 
+#
+# NOTE: in some models displacment points are incorrectly coded up as HotSpot features
+HotSpot 128/128/128 gpml:HotSpot
+DisplacementPoint 128/128/128 gpml:DisplacementPoint
+# 
+# NOTE: by default networks are shaded with deformation values;
+TopologicalNetwork lightblue gpml:TopologicalNetwork
+#
+# ------------------------------------------------------------------------
+# Slab Features
+#
+SlabEdge blue gpml:SlabEdge
+TopologicalSlabBoundary blue gpml:TopologicalSlabBoundary
+# ------------------------------------------------------------------------
+#
+# Macrostrat Features
+#
+RockUnit_carbonate blue gpml:RockUnit_carbonate
+RockUnit_siliciclastic tan gpml:RockUnit_siliciclastic
+RockUnit_evaporite lightred gpml:RockUnit_evaporite
+RockUnit_organic black gpml:RockUnit_organic
+RockUnit_chemical darkblue gpml:RockUnit_chemical
+RockUnit_volcanic lightgreen gpml:RockUnit_volcanic
+RockUnit_plutonic darkgreen gpml:RockUnit_plutonic
+RockUnit_metamorphic brown  gpml:RockUnit_metamorphic
+RockUnit_indeterminate_igneous green       gpml:RockUnit_indeterminate_igneous
+# 
+FossilCollection_small lightbrown  gpml:FossilCollection_small
+FossilCollection_medium brown      gpml:FossilCollection_medium
+FossilCollection_large darkbrown   gpml:FossilCollection_large
+#
+# ------------------------------------------------------------------------
+#
+# NAVDAT Features
+#
+NavdatSampleMafic 255/0/0   gpml:NavdatSampleMafic
+NavdatSampleIntermediate 255/150/0 gpml:NavdatSampleIntermediate
+NavdatSampleFelsicLow  255/255/0 gpml:NavdatSampleFelsicLow
+NavdatSampleFelsicHigh 255/215/0 gpml:NavdatSampleFelsicHigh
+#
+# ------------------------------------------------------------------------
+#
+# General mapping feature types
+#
+#StrainMarker green gpml:StrainMarker
+UnclassifiedFeature 125/125/125 gpml:UnclassifiedFeature
+PoliticalBoundary 50/200/50 gpml:PoliticalBoundary
+#
+# ------------------------------------------------------------------------
+#
+# All other feature types:
+N       128     128     128
