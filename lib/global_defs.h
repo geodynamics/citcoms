@@ -34,6 +34,7 @@ to functions across the whole filespace of CITCOM.
 #include this file everywhere !
 */
 #ifdef USE_GGRD
+#include "hc_ggrd.h"
 #include "hc.h"
 #endif
 #ifdef USE_GZDIR
