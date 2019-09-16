@@ -217,3 +217,6 @@ See diff/ directory for complete record
 1. Stokes\_flow\_incom -> divv calculation for output COMPLETE
 1. tracer\_defs.h -> COMPLETE
 1. Viscosity\_structure.c -> COMPLETE
+
+plume detection code from Rakib Hassan's thesis work can be found here
+https://github.com/rh-downunder/plume-tracker
