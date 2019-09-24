@@ -1759,21 +1759,23 @@ def make_slab_temperature_xyz( master, kk ):
     for line in open( slab_age_xyz ):
         # header line
         if line.startswith( gmt_char ):
+            line_segments = line.split(' ')
             # subduction zone polarity
             # already checked in get_slab_data(), but let us check again!
-            if line[2] == 'R' or line[2] == 'L':
-                polarity = line[2]
+            if line_segments[1] == 'sR':
+                polarity = 'R'
+            elif line_segments[1] == 'sL':
+                polarity = 'L'
             else:
                 errorline = line.rstrip('\n')
                 print( now(), errorline )
                 print( now(), 'ERROR: cannot determine subduction zone polarity' )
                 sys.exit(1)
 
-            line_segments = line.split(' ')
-            slab_depth = float(line_segments[1].lstrip('DEPTH=') )
-            slab_dip = float(line_segments[2].lstrip('DIP=') )
+            slab_depth = float(line_segments[2].lstrip('DEPTH=') )
+            slab_dip = float(line_segments[3].lstrip('DIP=') )
             slab_dip = np.radians(slab_dip) # to radians
-            start_depth = float(line_segments[3].lstrip('START_DEPTH=') )
+            start_depth = float(line_segments[4].lstrip('START_DEPTH=') )
             dist = get_slab_center_dist( depth_km, start_depth, slab_dip, roc,
                        vertical_slab_depth )
             data_list = []

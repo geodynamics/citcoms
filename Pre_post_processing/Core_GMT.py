@@ -53,7 +53,7 @@ out : the output file name.
 '''
 
     # build list of commands
-    cmd_list = [gmtcmd]
+    cmd_list = ['gmt', gmtcmd]
 
     # (required) arguments
     if arg: cmd_list.append( arg )
