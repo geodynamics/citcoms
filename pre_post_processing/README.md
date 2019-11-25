@@ -25,12 +25,3 @@ See each module for details.
 
 
 
-For questions please contact:
-
-Mark Turner
-mturner@gps.caltech.edu
-California Institute of Technology
-Division of Geological and Planetary Sciences, Mail Code 100-23
-Pasadena, CA 91125
-
-
