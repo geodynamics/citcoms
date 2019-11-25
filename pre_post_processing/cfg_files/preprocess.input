@@ -6,13 +6,19 @@
 
 job = smp
 nproc = 4 ; -1
-# jobname = mkhist ; for parallel job only
-# walltime = 3:00:00 ; for parallel job only
-age_start = 230
-age_end = 230
 
-DEBUG = False ; 
-VERBOSE = True ;
+#job = raijin
+#nproc = -1
+#jobname = mchin_test
+#walltime = 3:00:00
+#email = michael.chin@sydney.edu.au
+#mem = 320
+
+age_start = 230
+age_end = 225
+
+DEBUG = False ; generic switch for debugging
+VERBOSE = True ; show terminal output
 
 
 #============
@@ -42,13 +48,14 @@ OUTPUT_LITH_AGE = True
 #===========
 # N.B. use an absolute path for mode = parallel
 
-pid_file = /home/w/Downloads/gld241SZ_IC/pid2162.cfg ; CitcomS pid file
+pid_file = /home/michael/workspace/CitcomS/workspace/citcoms.input ; CitcomS pid file
 
 # default coordinate file path is:
 #     [datadir]/[proc]/[datafile].coord.[proc]
 # or define a user-specified directory to all of the
 # [datafile].coord.[proc] files:
-coord_dir = /home/w/Downloads/gld241SZ_IC/Coord/Coord_129_2_65_384_442 ; CitcomS *.coord.* files
+#coord_dir = /home/michael/workspace/CitcomS/gld241SZ_IC/Coord/Coord_129_2_65_384_442 ; CitcomS *.coord.* files
+coord_dir = /home/michael/workspace/CitcomS/workspace/mchin_coords/12
 
 # spatial resolution of the prescribed ivel bcs
 # for mg solver, must be equal to the multigrid levels
@@ -65,7 +72,7 @@ KEEP_GRIDS = False
 KEEP_PS = True
 PLOT_SUMMARY_POSTSCRIPT = True; make a summary ps file for each depth
 
-model_name = gld241SZ ; history model name for output
+model_name = mchin-test ; history model name for output
 temperature_mantle = 0.5
 
 BUILD_LITHOSPHERE = True ; include an upper thermal boundary layer
@@ -209,14 +216,14 @@ no_tracer_max_depth = 2604 ; km
 OUTPUT_IVEL = False
 OUTPUT_LITH_AGE = True
 
-grid_dir =       /home/w/Downloads/gld241SZ_IC/IC-gld/grid ; intermediate grids
-hist_dir =       /home/w/Downloads/gld241SZ_IC/IC-gld/hist ; history
-ic_dir =         /home/w/Downloads/gld241SZ_IC/IC-gld/ic ; initial condition
-ivel_dir =       /home/w/Downloads/gld241SZ_IC/IC-gld/ivel ; ivel
-lith_age_dir =   /home/w/Downloads/gld241SZ_IC/IC-gld/age ; age
-log_dir =        /home/w/Downloads/gld241SZ_IC/IC-gld/IC-1210-230 ; parameters
-ps_dir =         /home/w/Downloads/gld241SZ_IC/IC-gld/IC-1210-230/ps ; postscripts
-trac_dir =       /home/w/Downloads/gld241SZ_IC/IC-gld/trac ; tracers
+grid_dir =       /home/michael/workspace/CitcomS/workspace/IC-gld/grid ; intermediate grids
+hist_dir =       /home/michael/workspace/CitcomS/workspace/IC-gld/hist ; history
+ic_dir =         /home/michael/workspace/CitcomS/workspace/IC-gld/ic ; initial condition
+ivel_dir =       /home/michael/workspace/CitcomS/workspace/IC-gld/ivel ; ivel
+lith_age_dir =   /home/michael/workspace/CitcomS/workspace/IC-gld/age ; age
+log_dir =        /home/michael/workspace/CitcomS/workspace/IC-gld/ ; parameters
+ps_dir =         /home/michael/workspace/CitcomS/workspace/IC-gld/ps ; postscripts
+trac_dir =       /home/michael/workspace/CitcomS/workspace/IC-gld/trac ; tracers
 #====================
 # regional model only
 #====================
