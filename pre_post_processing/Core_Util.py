@@ -1760,22 +1760,28 @@ def make_slab_temperature_xyz( master, kk ):
         # header line
         if line.startswith( gmt_char ):
             line_segments = line.split(' ')
-            # subduction zone polarity
-            # already checked in get_slab_data(), but let us check again!
-            if line_segments[1] == 'sR':
-                polarity = 'R'
-            elif line_segments[1] == 'sL':
-                polarity = 'L'
-            else:
+            for seg in line_segments:
+                # subduction zone polarity
+                # already checked in get_slab_data(), but let us check again!
+                if seg == 'sR' or seg == '>sR':
+                    polarity = 'R'
+                elif seg == 'sL' or seg == '>sL':
+                    polarity = 'L'
+
+                if seg.startswith('DEPTH='):
+                    slab_depth = float(seg.lstrip('DEPTH=') )
+                if seg.startswith('DIP='):
+                    slab_dip = float(seg.lstrip('DIP=') )
+                    slab_dip = np.radians(slab_dip) # to radians
+                if seg.startswith('START_DEPTH='):
+                    start_depth = float(seg.lstrip('START_DEPTH=') )
+            
+            if polarity != 'R' and polarity != 'L': 
                 errorline = line.rstrip('\n')
                 print( now(), errorline )
                 print( now(), 'ERROR: cannot determine subduction zone polarity' )
                 sys.exit(1)
 
-            slab_depth = float(line_segments[2].lstrip('DEPTH=') )
-            slab_dip = float(line_segments[3].lstrip('DIP=') )
-            slab_dip = np.radians(slab_dip) # to radians
-            start_depth = float(line_segments[4].lstrip('START_DEPTH=') )
             dist = get_slab_center_dist( depth_km, start_depth, slab_dip, roc,
                        vertical_slab_depth )
             data_list = []

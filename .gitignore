@@ -1,3 +1,4 @@
+*__pycache__*
 examples/Create_History
 *.o
 *.Po
@@ -40,4 +41,3 @@ src/visual/Makefile.in
 src/visual/OpenDXMacro/Makefile
 src/visual/OpenDXMacro/Makefile.in
 src/visual/project_geoid
-

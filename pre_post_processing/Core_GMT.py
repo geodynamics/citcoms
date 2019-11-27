@@ -51,9 +51,12 @@ redirect : the termnal redirect symbol, usually '>', sometimes a pipe '|' or inp
 out : the output file name.
 
 '''
-
+    from shutil import which
     # build list of commands
-    cmd_list = ['gmt', gmtcmd]
+    if which('GMT'):
+        cmd_list = ['', gmtcmd] #GMT 4
+    else:
+        cmd_list = ['gmt', gmtcmd] #GMT 5
 
     # (required) arguments
     if arg: cmd_list.append( arg )
@@ -246,7 +249,7 @@ S 0.125 v %(arrow_length_inches)s/0.015/0.06/0.05 0/0/0''' % vars()
 #====================================================================
 def get_T_from_minmax(xyz_filename) :
     ''' get a -T value from minmax on a xyz file'''
-    cmd = 'minmax -C %(xyz_filename)s' % vars()
+    cmd = 'gmt minmax -C %(xyz_filename)s' % vars()
     s = subprocess.check_output( cmd, shell=True, universal_newlines=True)
     if verbose: print( Core_Util.now(), cmd )
     l = s.split()
@@ -279,7 +282,7 @@ def get_T_from_minmax(xyz_filename) :
 def get_T_from_grdinfo(grid_filename):
     '''get a -T value from grdinfo on a grid file'''
 
-    cmd = 'grdinfo -C %(grid_filename)s' % vars()
+    cmd = 'gmt grdinfo -C %(grid_filename)s' % vars()
     s = subprocess.check_output( cmd, shell=True, universal_newlines=True)
     if verbose: print( Core_Util.now(), cmd )
     l = s.split()
@@ -353,7 +356,7 @@ def plot_grid( grid_filename, xy_filename = None, R_value = 'g', T_value = '-T0/
 
     # create a .png image file
     #cmd = 'convert -resize 300% -rotate 90 ' + ps + ' ' + ps.replace('.ps', '.png')
-    cmd = 'convert -rotate 90 ' + ps + ' ' + ps.replace('.ps', '.png')
+    cmd = 'convert -rotate 90 ' + ps + ' +profile "*" ' + ps.replace('.ps', '.png')
     if verbose: print( Core_Util.now(), cmd )
     # call
     subprocess.call( cmd, shell=True )
