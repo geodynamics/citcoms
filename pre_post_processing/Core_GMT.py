@@ -13,6 +13,7 @@
 #=====================================================================
 #=====================================================================
 import os, sys, subprocess
+from shutil import which
 import numpy as np
 import Core_Util
 
@@ -51,7 +52,6 @@ redirect : the termnal redirect symbol, usually '>', sometimes a pipe '|' or inp
 out : the output file name.
 
 '''
-    from shutil import which
     # build list of commands
     if which('GMT'):
         cmd_list = ['', gmtcmd] #GMT 4
@@ -249,7 +249,10 @@ S 0.125 v %(arrow_length_inches)s/0.015/0.06/0.05 0/0/0''' % vars()
 #====================================================================
 def get_T_from_minmax(xyz_filename) :
     ''' get a -T value from minmax on a xyz file'''
-    cmd = 'gmt minmax -C %(xyz_filename)s' % vars()
+    if which('GMT'):
+        cmd = 'minmax -C %(xyz_filename)s' % vars()
+    else:
+        cmd = 'gmt minmax -C %(xyz_filename)s' % vars()
     s = subprocess.check_output( cmd, shell=True, universal_newlines=True)
     if verbose: print( Core_Util.now(), cmd )
     l = s.split()
@@ -281,8 +284,10 @@ def get_T_from_minmax(xyz_filename) :
 #====================================================================
 def get_T_from_grdinfo(grid_filename):
     '''get a -T value from grdinfo on a grid file'''
-
-    cmd = 'gmt grdinfo -C %(grid_filename)s' % vars()
+    if which('GMT'):
+        cmd = 'grdinfo -C %(grid_filename)s' % vars()
+    else:
+        cmd = 'gmt grdinfo -C %(grid_filename)s' % vars()
     s = subprocess.check_output( cmd, shell=True, universal_newlines=True)
     if verbose: print( Core_Util.now(), cmd )
     l = s.split()
