@@ -1884,7 +1884,7 @@ def output_tracer( master_d ):
     rm_list = func_d['rm_list']
     trac_dir = control_d['trac_dir']
     tracer_no_ass_depth = control_d['tracer_no_ass_depth']
-    tracers_per_element = control_d['tracers_per_element']
+    tracers_per_element = pid_d['tracers_per_element']
 
     num = nodex*nodey*nodez*nproc_surf*tracers_per_element
     txt = 'tracers_per_element= %(tracers_per_element)s' % vars()

@@ -198,7 +198,7 @@ widthcmb=0.0058
 # CitcomS.solver.tracer
 tracer=1
 tracer_ic_method=1
-tracers_per_element=
+tracers_per_element=30
 tracer_file=/home/michael/workspace/CitcomS/workspace/IC-gld/trac/mchin-test.tracer.230Ma
 tracer_flavors=6
 ic_method_for_flavors=0

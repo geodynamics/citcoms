@@ -182,12 +182,6 @@ depth_stencil_value_4 = 40,130
 # flavor_stencil_value_5 = 0 
 # depth_stencil_value_5 = 410
 
-#=========================
-# tracer initial condition
-#=========================
-# this is approximate, because tracers are uniformly distributed
-tracers_per_element = 30
-
 # set region around slabs to ambient flavor (0)
 SLAB_STENCIL = True
 # stencil width: 300 km is consistent with the default width of the thermal stencil
