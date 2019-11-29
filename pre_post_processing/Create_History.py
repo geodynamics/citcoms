@@ -26,6 +26,7 @@ import Core_Util
 from Core_Util import now
 from subprocess import PIPE, Popen
 from threading import Thread
+from make_history_for_age import basic_setup, isSerial
 #=====================================================================
 verbose = True
 #=====================================================================
@@ -123,30 +124,6 @@ def taskThreadFunction(config_filename, tasks, icAge):
 #====================================================================
 #====================================================================
 #====================================================================
-def isSerial(control_d):
-    result = False;
-    if(control_d['job']=='smp'):
-        if(control_d['nproc']==1): result = True;
-        elif((control_d['nproc']==-1) and \
-             (int(multiprocessing.cpu_count())==1)): result = True;
-        else: result = False;
-    elif (control_d['job']=='cluster'):
-        result = False;
-    elif (control_d['job']=='raijin'):
-        result = False;
-    elif (control_d['job']=='baloo'):
-        result = False;
-    else:
-        print ("Illegal option for 'job', check config file. Aborting..")
-        sys.exit(0)
-    #end if
-    
-    return result
-#end function
-
-#====================================================================
-#====================================================================
-#====================================================================
 def main():
     '''Main sequence of script actions.'''
 
@@ -156,6 +133,7 @@ def main():
     # read settings from control file
     config_filename = sys.argv[1]
     control_d = Core_Util.parse_configuration_file( config_filename )
+    
     # read job settings
     control_d['serial'] = isSerial(control_d)
 

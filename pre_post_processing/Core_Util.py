@@ -15,7 +15,7 @@
 #=====================================================================
 import datetime, os, pprint, re, subprocess, string, sys, traceback, math, copy
 import numpy as np
-import Core_GMT, random
+import Core_GMT, random, logging
 import bisect
 
 # load the system defaults
@@ -1393,7 +1393,7 @@ def make_dir( directory_name ):
         if verbose: print( now(), cmd )
         subprocess.call( cmd, shell=True )
     else:
-        print( "WARN: directory already exists; not recreating ", directory_name )
+        logging.warning( f'The directory \"{directory_name}\" already exists; not recreating.')
 #=====================================================================
 #=====================================================================
 def make_flat_slab_age_depth_xyz( master, flat_slab_depth_grd,

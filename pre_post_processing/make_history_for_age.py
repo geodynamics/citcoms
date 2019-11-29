@@ -19,7 +19,7 @@
 #=====================================================================
 
 import bisect, datetime, operator, os, random, subprocess, sys, time
-import Core_Citcom, Core_GMT, Core_Util, Create_History
+import Core_Citcom, Core_GMT, Core_Util
 import math
 import numpy as np
 from Core_Util import make_dir, now
@@ -27,7 +27,7 @@ from Core_GMT import callgmt
 from scipy import spatial
 import sys, logging
 sys.path.append('/opt/GMT-4.5.14/bin:GMTHOME')
-verbose = True
+verbose = False
 #=====================================================================
 #=====================================================================
 #=====================================================================
@@ -55,8 +55,8 @@ where:
 #====================================================================
 def main():
 
-    logging.basicConfig(level=logging.DEBUG, 
-            format='%(asctime)s %(levelname)-8s %(threadName)s %(message)s')
+    logging.basicConfig(level=logging.WARNING, 
+            format='%(asctime)s %(levelname)-8s %(message)s')
 
     '''Main sequence of script actions.'''
 
@@ -71,7 +71,7 @@ def main():
         usage()
 
     # master dictionary
-    master_d = basic_setup(sys.argv[1])
+    master_d = basic_setup(sys.argv[1], sys.argv[2], sys.argv[3])
 
     # dictionaries
     coor = master_d['coor_d']
@@ -196,7 +196,7 @@ def get_depth_for_looping( control_d ):
 #=====================================================================
 #=====================================================================
 #=====================================================================
-def basic_setup(cfg_filename):
+def basic_setup(cfg_filename, age, IC):
 
     '''Read parameters from input files and set defaults.'''
 
@@ -215,8 +215,8 @@ def basic_setup(cfg_filename):
     master['geoframe_d'] = geoframe_d
 
     # add arguments from command line to dictionary
-    control_d['age'] = int(sys.argv[2])
-    control_d['IC'] = int(sys.argv[3])
+    control_d['age'] = int(age)
+    control_d['IC'] = int(IC)
 
     # initial condition
     if not control_d['IC']:
@@ -245,7 +245,7 @@ def basic_setup(cfg_filename):
     master['func_d']['rm_list'] = []
 
     # read job settings
-    control_d['serial'] = Create_History.isSerial(control_d)
+    control_d['serial'] = isSerial(control_d)
 
     # set some global defaults
     set_global_defaults( control_d, pid_d )
@@ -639,6 +639,20 @@ def check_input_parameters( master_d ):
 
     # make grid directory in preparation for data generation
     make_dir( control_d['grid_dir'] )
+
+
+    #some parameters are not independent
+    if  pid_d['Solver'] == 'multigrid':
+        nodex = pid_d['mgunitx'] * int(math.pow(2,pid_d['levels']-1)) * pid_d['nprocx'] + 1
+        nodey = pid_d['mgunity'] * int(math.pow(2,pid_d['levels']-1)) * pid_d['nprocy'] + 1
+        nodez = pid_d['mgunitz'] * int(math.pow(2,pid_d['levels']-1)) * pid_d['nprocz'] + 1
+        if nodex != pid_d['nodex'] or nodey != pid_d['nodey'] or nodez != pid_d['nodez']:
+            logging.error('The equations ') 
+            logging.error('nodex = 1 + nprocx + mgunitx + 2**(levels-1)')
+            logging.error('nodey = 1 + nprocy + mgunity + 2**(levels-1)')
+            logging.error('nodez = 1 + nprocz + mgunitz + 2**(levels-1)')
+            logging.error('must be satisfied!')
+            sys.exit(1)
 
 #=====================================================================
 #=====================================================================
@@ -2268,7 +2282,7 @@ def output_ivel( master ):
 def preprocess_gplates_line_data( master, gplates_xy_filename ):
 
     '''Convert lon to [0,360] and increase resolution of line data.'''
-
+    
     control_d = master['control_d']
     func_d = master['func_d']
     res = control_d['gplates_line_resolution_km'] # in km
@@ -3231,6 +3245,32 @@ def write_coordinates_by_cap( master ):
         # update dictionary
         func_d['coarse_coor_cap_names'] = coarse_coor_cap_names
         func_d['coarse_coor_by_cap'] = coarse_coor_by_cap
+
+
+#====================================================================
+#====================================================================
+#====================================================================
+def isSerial(control_d):
+    result = False;
+    if(control_d['job']=='smp'):
+        if(control_d['nproc']==1): result = True;
+        elif((control_d['nproc']==-1) and \
+             (int(multiprocessing.cpu_count())==1)): result = True;
+        else: result = False;
+    elif (control_d['job']=='cluster'):
+        result = False;
+    elif (control_d['job']=='raijin'):
+        result = False;
+    elif (control_d['job']=='baloo'):
+        result = False;
+    else:
+        print ("Illegal option for 'job', check config file. Aborting..")
+        sys.exit(0)
+    #end if
+
+    return result
+#end function
+
 
 #=====================================================================
 #=====================================================================

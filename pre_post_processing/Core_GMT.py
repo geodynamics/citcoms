@@ -12,7 +12,7 @@
 '''Core_GMT.py provides a generalized interface to the various GMT programs, as well as a few specialized plotting functions '''
 #=====================================================================
 #=====================================================================
-import os, sys, subprocess
+import os, sys, subprocess, logging
 from shutil import which
 import numpy as np
 import Core_Util
@@ -77,7 +77,7 @@ out : the output file name.
     cmd = ' '.join(cmd_list)
 
     # always report on calls to GMT for log files 
-    print( Core_Util.now(), cmd )
+    logging.info( cmd )
 
     # capture output (returned as bytes)
     p = subprocess.check_output( cmd, shell=True )
