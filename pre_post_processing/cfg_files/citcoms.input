@@ -48,9 +48,6 @@ theta_min=0
 theta_max=0
 fi_min=0
 fi_max=0
-r_grid_layers=
-rr=
-nr=
 
 
 # CitcomS.solver.tsolver
@@ -102,8 +99,6 @@ toptbcval=0
 bottbc=1
 bottbcval=1
 temperature_bound_adj=0
-depth_bound_adj=
-width_bound_adj=
 
 
 # CitcomS.solver.const
@@ -135,10 +130,6 @@ perturblayer=5
 perturbmag=0.05
 half_space_age=40
 mantle_temp=0.5
-blob_center=
-blob_radius=
-blob_dT=
-blob_bc_persist=
 
 
 # CitcomS.solver.output
@@ -148,14 +139,12 @@ output_ll_max=20
 self_gravitation=0
 use_cbf_topo=0
 write_q_files=0
-vtk_format=
 gzdir_vtkio=0
 gzdir_rnr=0
 
 
 # CitcomS.solver.param
 reference_state=1
-refstate_file=
 mineral_physics_model=3
 file_vbcs=1
 vel_bound_file=/home/michael/workspace/CitcomS/gld241SZ_IC/2015_v2_r887/Reconstruction/Velocity/bvel
@@ -172,7 +161,6 @@ lith_age_stencil_value=-999
 slab_assim=1
 slab_assim_file=/home/michael/workspace/CitcomS/workspace/IC-gld/hist/mchin-test.hist.dat
 internal_vbcs_file=0
-velocity_internal_file=
 remove_buoyancy_above_znode=10000
 start_age=230
 reset_startage=0
@@ -211,7 +199,6 @@ buoy_type=1
 hybrid_method=1
 buoyancy_ratio=-0.8345,-0.235,-0.211,-0.192,0.5
 tracer_enriched=0
-Q0_enriched=
 
 
 # CitcomS.solver.visc
@@ -232,10 +219,7 @@ PDEPV=0
 pdepv_a=1e+20,1e+20,1e+20,1e+20
 pdepv_b=0,0,0,0
 pdepv_y=1e+20,1e+20,1e+20,1e+20
-pdepv_eff=
-pdepv_offset=
 CDEPV=0
-cdepv_ff=
 low_visc_channel=0
 low_visc_wedge=0
 lv_min_radius=0.9764

@@ -25,7 +25,7 @@ import numpy as np
 from Core_Util import make_dir, now
 from Core_GMT import callgmt
 from scipy import spatial
-import sys
+import sys, logging
 sys.path.append('/opt/GMT-4.5.14/bin:GMTHOME')
 verbose = True
 #=====================================================================
@@ -55,6 +55,9 @@ where:
 #====================================================================
 def main():
 
+    logging.basicConfig(level=logging.DEBUG, 
+            format='%(asctime)s %(levelname)-8s %(threadName)s %(message)s')
+
     '''Main sequence of script actions.'''
 
     # ----------------------------------------------------------------
@@ -68,7 +71,7 @@ def main():
         usage()
 
     # master dictionary
-    master_d = basic_setup()
+    master_d = basic_setup(sys.argv[1])
 
     # dictionaries
     coor = master_d['coor_d']
@@ -115,6 +118,7 @@ def main():
     # PART III - build temperature grids, map to nodes
     # ----------------------------------------------------------------
 
+    
     # write surface (lon, lat) coord files by cap
     if OUTPUT_TEMP_IC or OUTPUT_TEMP or OUTPUT_IVEL or OUTPUT_LITH_AGE:
         write_coordinates_by_cap( master_d )
@@ -141,7 +145,7 @@ def main():
         func_d['sten_by_cap'] = track_grids_to_cap_list( master_d, 
                                     sten_grids, background, min, max )
 
-
+    
     # ----------------------------------------------------------------
     # PART IV: make stencils, data export, and clean up
     # ----------------------------------------------------------------
@@ -192,7 +196,7 @@ def get_depth_for_looping( control_d ):
 #=====================================================================
 #=====================================================================
 #=====================================================================
-def basic_setup():
+def basic_setup(cfg_filename):
 
     '''Read parameters from input files and set defaults.'''
 
@@ -200,7 +204,7 @@ def basic_setup():
     master = {} 
 
     # read settings from control file
-    control_d = Core_Util.parse_configuration_file( sys.argv[1] )
+    control_d = Core_Util.parse_configuration_file( cfg_filename )
 
     set_verbose( control_d )
 
@@ -926,7 +930,7 @@ def citcom_data_export( master ):
     OUTPUT_TEMP_IC = control_d['OUTPUT_TEMP_IC']
     OUTPUT_TRAC_IC = control_d['OUTPUT_TRAC_IC']
     SYNTHETIC = control_d['SYNTHETIC']
-
+    
     # bvel (regional only) export
     if SYNTHETIC and OUTPUT_BVEL:
         output_regional_bvel( master )
@@ -946,7 +950,7 @@ def citcom_data_export( master ):
     # usual history (temperature) export
     if OUTPUT_TEMP:
         output_history( master )
-
+    
     # tracer / composition generation
     if OUTPUT_TRAC_IC:
         output_tracer( master )
@@ -1874,9 +1878,17 @@ def output_tracer( master_d ):
     DEEP_LAYER_TRACERS = control_d['DEEP_LAYER_TRACERS']
     model_name = control_d['model_name']
     NO_TRACER_REGION = control_d['NO_TRACER_REGION']
-    nodex = pid_d['nodex']
-    nodey = pid_d['nodey']
-    nodez = pid_d['nodez']
+    if  pid_d['Solver'] == 'multigrid':
+        nodex = pid_d['mgunitx'] * int(math.pow(2,pid_d['levels']-1)) * pid_d['nprocx'] + 1
+        nodey = pid_d['mgunity'] * int(math.pow(2,pid_d['levels']-1)) * pid_d['nprocy'] + 1
+        nodez = pid_d['mgunitz'] * int(math.pow(2,pid_d['levels']-1)) * pid_d['nprocz'] + 1
+        if nodex != pid_d['nodex'] or nodey != pid_d['nodey'] or nodez != pid_d['nodez']:
+            logging.warning('The equation nodex = 1 + nprocx + mgunitx + 2**(levels-1) must be satisfied!')
+            logging.warning('The nodex, nodey and nodez have been modified to satisfy the equation.')
+    else:
+        nodex = pid_d['nodex']
+        nodey = pid_d['nodey']
+        nodez = pid_d['nodez']
     nproc_surf = pid_d['nproc_surf']
     PLOT_SUMMARY_POSTSCRIPT = control_d['PLOT_SUMMARY_POSTSCRIPT']
     radius_km = pid_d['radius_km']
@@ -2377,6 +2389,13 @@ def set_global_defaults( arg, pid_d ):
     
     # allowing the depth of the UM to be different from 660
     arg.setdefault('UM_depth', 660.0) #km
+
+    pid_d.setdefault('tracers_per_element', 10)
+    pid_d.setdefault('Solver', 'multigrid')
+    pid_d.setdefault('levels', 4)
+    pid_d.setdefault('mgunitx', 4)
+    pid_d.setdefault('mgunity', 4)
+    pid_d.setdefault('mgunitz', 4)
 
 #=====================================================================
 #=====================================================================
