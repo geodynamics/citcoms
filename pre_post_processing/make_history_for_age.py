@@ -55,7 +55,7 @@ where:
 #====================================================================
 def main():
 
-    logging.basicConfig(level=logging.WARNING, 
+    logging.basicConfig(level=logging.INFO, 
             format='%(asctime)s %(levelname)-8s %(message)s')
 
     '''Main sequence of script actions.'''
@@ -64,8 +64,7 @@ def main():
     # PART I - initialize
     # ----------------------------------------------------------------
 
-    print( now(), 'make_history_for_age.py:' )
-    print( now(), 'main:' )
+    logging.info('starting make_history_for_age.py' )
 
     if len(sys.argv) != 4:
         usage()
@@ -101,14 +100,17 @@ def main():
     # ----------------------------------------------------------------
 
     if DATA:
-
+        control_d['sub_file'] = preprocess_gplates_line_data( master_d, control_d['sub_file'] )
+        if control_d['FLAT_SLAB']:
+            control_d['flat_slab_leading_file'] = preprocess_gplates_line_data( master_d,
+                control_d['flat_slab_leading_file'] )
+        
         # afile_1 is basically always required.  Even if not building
         # slabs it is used as the GMT grid to construct uniform
         # backgrounds.  Therefore, always make afile_1.
         make_age_grid_to_build_mantle_and_slab_temp( master_d )
         # build slabs for temp ic or temp hist
-        if BUILD_SLAB and (OUTPUT_TEMP_IC or OUTPUT_TEMP) \
-        or OUTPUT_IVEL: \
+        if BUILD_SLAB and (OUTPUT_TEMP_IC or OUTPUT_TEMP) or OUTPUT_IVEL:
             get_global_data( master_d )
 
     else: # if SYNTHETIC
@@ -162,7 +164,7 @@ def main():
 
     if not DEBUG: Core_Util.remove_files( func_d['rm_list'] )
 
-    print( now(), 'make_history_for_age.py completed successfully' )
+    logging.info('make_history_for_age.py completed successfully' )
 
 #=====================================================================
 #=====================================================================
@@ -197,6 +199,8 @@ def get_depth_for_looping( control_d ):
 #=====================================================================
 #=====================================================================
 def basic_setup(cfg_filename, age, IC):
+
+    logging.info('starting some basic setup...')
 
     '''Read parameters from input files and set defaults.'''
 
@@ -525,7 +529,7 @@ def check_input_parameters( master_d ):
     '''Basic checks to ensure that necessary parameters are set
        correctly.'''
 
-    if verbose: print( now(), 'check_input_parameters:' )
+    logging.info('starting checking input parameters...' )
 
     # dictionaries
     control_d = master_d['control_d']
@@ -597,7 +601,6 @@ def check_input_parameters( master_d ):
             if not os.path.exists( ifile ):
                 print( now(), 'ERROR: cannot find file: %(ifile)s' % vars() )
                 sys.exit(1)
-        control_d['sub_file'] = preprocess_gplates_line_data( master_d, control_d['sub_file'] )
 
         if FLAT_SLAB:
             control_d['flat_slab_polygon_file']  =  geoframe_d['gplates_line_dir'] + '/'
@@ -615,9 +618,6 @@ def check_input_parameters( master_d ):
                     # correctly, and this is in the GPML header data
                     control_d['GPML_HEADER'] = True
 
-        # check that flat slabs are still relevant for this age
-        if control_d['FLAT_SLAB']:
-            control_d['flat_slab_leading_file'] = preprocess_gplates_line_data( master_d, control_d['flat_slab_leading_file'] )
 
         # define the names of the gplates vx (colat) and vy (longitude)
         # GMT grids that are required to build the internal velocity
@@ -641,7 +641,7 @@ def check_input_parameters( master_d ):
     make_dir( control_d['grid_dir'] )
 
 
-    #some parameters are not independent
+    #some parameters are not independent, check them and get attention from users.
     if  pid_d['Solver'] == 'multigrid':
         nodex = pid_d['mgunitx'] * int(math.pow(2,pid_d['levels']-1)) * pid_d['nprocx'] + 1
         nodey = pid_d['mgunity'] * int(math.pow(2,pid_d['levels']-1)) * pid_d['nprocy'] + 1
@@ -2281,7 +2281,7 @@ def output_ivel( master ):
 #=====================================================================
 def preprocess_gplates_line_data( master, gplates_xy_filename ):
 
-    '''Convert lon to [0,360] and increase resolution of line data.'''
+    logging.info(f'Convert lon to [0,360] and increase resolution of line data in file {gplates_xy_filename}.')
     
     control_d = master['control_d']
     func_d = master['func_d']

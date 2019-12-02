@@ -77,7 +77,7 @@ out : the output file name.
     cmd = ' '.join(cmd_list)
 
     # always report on calls to GMT for log files 
-    logging.info( cmd )
+    logging.debug( cmd )
 
     # capture output (returned as bytes)
     p = subprocess.check_output( cmd, shell=True )

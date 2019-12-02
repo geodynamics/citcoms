@@ -2190,49 +2190,42 @@ def parse_geodynamic_framework_defaults():
        If the local and user home files are missing, 
        then copy the system file to the current working directory.
 '''
-
     # Alert the user as to which defaults file is being used:
-    print( now(), 'Core_Util.parse_geodynamic_framework_defaults():' )
-
     # check for local framework defaults 
-    file = './geodynamic_framework_defaults.conf'
-    if os.path.exists(file):
-        print(now(), 'Using the local current working directory Geodynamic Framework defaults file:\n', file)
-        return parse_general_key_equal_value_linetype_file( file )
-
+    file_1 = './geodynamic_framework_defaults.conf'
+    file_2 = os.path.expanduser('~/geodynamic_framework_defaults.conf')
+    file_3 = os.path.abspath( os.path.dirname(__file__) ) + "/geodynamic_framework_data/geodynamic_framework_defaults.conf"
+    file_to_parse = file_1
+    
+    logging.info(f'the current working directory is: {os.getcwd()}')
+    
+    if os.path.exists(file_1):
+        logging.info(f'using {file_1}')
     # check for user's default file 
-    file = os.path.expanduser('~/geodynamic_framework_defaults.conf')
-    if os.path.exists(file):
-        print(now(), 'Using the home directory Geodynamic Framework defaults file:\n', file)
-
+    elif os.path.exists(file_2):
+        file_to_parse = file_2
+        logging.info(f'using  {file_2}')
         # copy the home file to the cwd so the user has a record
         # of which defaults were used
-        print(now(), 'Copying the user file to the current working directory as: "geodynamic_framework_defaults.conf"')
-        cmd = 'cp ' + file + ' ' + 'geodynamic_framework_defaults.conf'
-        print( now(), cmd )
+        logging.info(f'copying {file_2} to the current working directory as: "geodynamic_framework_defaults.conf"')
+        cmd = 'cp ' + file_2 + ' ' + 'geodynamic_framework_defaults.conf'
         subprocess.call( cmd, shell=True )
-
-        return parse_general_key_equal_value_linetype_file( file )
-
     # local and user files are missing, parse the default system file:
-
     # check for system default file
-    file = os.path.abspath( os.path.dirname(__file__) ) + "/geodynamic_framework_data/geodynamic_framework_defaults.conf"
-    if os.path.exists(file):
-        print(now(), 'Using the System Geodynamic Framework defaults file:\n', file)
-
+    elif os.path.exists(file_3):
+        file_to_parse = file_3
+        logging.info(f'using the default Geodynamic Framework file: {file_3}')
         # copy the system file to the cwd
-        print(now(), 'Copying the System file to the current working directory as: "geodynamic_framework_defaults.conf"')
-        cmd = 'cp ' + file + ' ' + 'geodynamic_framework_defaults.conf'
-        print( now(), cmd )
+        logging.info('copying the default file to the current working directory as: "geodynamic_framework_defaults.conf"')
+        cmd = 'cp ' + file_3 + ' ' + 'geodynamic_framework_defaults.conf'
         subprocess.call( cmd, shell=True )
-
-        return parse_general_key_equal_value_linetype_file( file )
-
-    # halt the script if we cannot find a valid file 
-    print(now(), 'Cannot find a valid geodynamic_framework defaults file.')
-    print(now(), 'Please update from SVN to get /geodynamic_framework_data/geodynamic_framework_defaults.conf')
-    sys.exit(1)
+    else:
+        # halt the script if we cannot find a valid file 
+        logging.error('cannot find a valid geodynamic_framework defaults file.')
+        logging.error('update from github to get /geodynamic_framework_data/geodynamic_framework_defaults.conf')
+        sys.exit(1)
+    
+    return parse_general_key_equal_value_linetype_file( file_to_parse )
    
 #=====================================================================
 #=====================================================================
