@@ -80,7 +80,7 @@ out : the output file name.
     logging.debug( cmd )
 
     # capture output (returned as bytes)
-    p = subprocess.check_output( cmd, shell=True )
+    p = subprocess.check_output( cmd, shell=True, stderr=subprocess.STDOUT)
 
     # convert bytes output to string
     s = bytes.decode(p)
@@ -94,7 +94,7 @@ def start_postscript( ps ):
 
     '''Start a postscript'''
 
-    if verbose: print( Core_Util.now(), 'start_postscript:' )
+    logging.debug( 'start_postscript:' )
 
     arg = 'PAPER_MEDIA letter MEASURE_UNIT inch '
     arg += 'X_ORIGIN 0 Y_ORIGIN 0'
@@ -112,7 +112,7 @@ def end_postscript( ps ):
 
     '''End a postscript'''
 
-    if verbose: print( Core_Util.now(), 'end_postscript:' )
+    logging.debug( 'end_postscript:' )
 
     opts = {'T':'','O':'','R':'0/1/0/1','J':'x1.0'}
     callgmt( 'psxy', '', opts, '>>', ps )

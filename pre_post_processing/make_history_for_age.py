@@ -64,7 +64,7 @@ def main():
     # PART I - initialize
     # ----------------------------------------------------------------
 
-    logging.info('starting make_history_for_age.py' )
+    logging.info('start make_history_for_age.py' )
 
     if len(sys.argv) != 4:
         usage()
@@ -98,13 +98,13 @@ def main():
     # ----------------------------------------------------------------
     # PART II - get data files required for building temperature
     # ----------------------------------------------------------------
-
+    
     if DATA:
         control_d['sub_file'] = preprocess_gplates_line_data( master_d, control_d['sub_file'] )
         if control_d['FLAT_SLAB']:
             control_d['flat_slab_leading_file'] = preprocess_gplates_line_data( master_d,
                 control_d['flat_slab_leading_file'] )
-        
+            
         # afile_1 is basically always required.  Even if not building
         # slabs it is used as the GMT grid to construct uniform
         # backgrounds.  Therefore, always make afile_1.
@@ -124,7 +124,7 @@ def main():
     # write surface (lon, lat) coord files by cap
     if OUTPUT_TEMP_IC or OUTPUT_TEMP or OUTPUT_IVEL or OUTPUT_LITH_AGE:
         write_coordinates_by_cap( master_d )
-
+    
     if UTBL_AGE_GRID and (BUILD_LITHOSPHERE or BUILD_SLAB):
         make_age_grid_to_build_utbl( master_d )
 
@@ -200,7 +200,7 @@ def get_depth_for_looping( control_d ):
 #=====================================================================
 def basic_setup(cfg_filename, age, IC):
 
-    logging.info('starting some basic setup...')
+    logging.info('start some basic setup...')
 
     '''Read parameters from input files and set defaults.'''
 
@@ -411,7 +411,7 @@ def build_slab_temperature( master, kk, mantle_xyzs ):
 def build_temperature_for_all_znodes( master ):
 
     '''Main loop over znodes (depth) to build GMT temperature grids.'''
-
+    logging.info('start build_temperature_for_all_znodes')
     control_d = master['control_d']
     coor_d = master['coor_d']
     func_d = master['func_d']
@@ -529,7 +529,7 @@ def check_input_parameters( master_d ):
     '''Basic checks to ensure that necessary parameters are set
        correctly.'''
 
-    logging.info('starting checking input parameters...' )
+    logging.info('start checking input parameters...' )
 
     # dictionaries
     control_d = master_d['control_d']
@@ -564,11 +564,11 @@ def check_input_parameters( master_d ):
     # temperature and lower thermal boundary layer error handling
     if temperature_mantle > temperature_cmb:
         err = 'ERROR: temperature_mantle > temperature_cmb'
-        print( now(), err )
+        logging.critical( err )
         exit(1)
     elif temperature_mantle == temperature_cmb and BUILD_LTBL:
         err = 'ERROR: BUILD_LTBL but temperature_mantle = temperature_cmb!'
-        print( now(), err )
+        logging.critical( err )
         exit(1)
 
     # force some directories to be local otherwise files are
@@ -599,7 +599,7 @@ def check_input_parameters( master_d ):
         # ensure that these files exist
         for ifile in [ control_d['age1_file'], control_d['age2_file'], control_d['sub_file'] ]:
             if not os.path.exists( ifile ):
-                print( now(), 'ERROR: cannot find file: %(ifile)s' % vars() )
+                logging.critical(f'cannot find file: {ifile}' )
                 sys.exit(1)
 
         if FLAT_SLAB:
@@ -610,8 +610,8 @@ def check_input_parameters( master_d ):
             for ifile in [ control_d['flat_slab_polygon_file'], control_d['flat_slab_leading_file'] ]:
                 if not os.path.exists( ifile ):
                     # turn off flat slab
-                    print( now(), 'WARNING: cannot find file: %(ifile)s' % vars())
-                    print( now(), 'WARNING: turning OFF flat slab')
+                    logging.warning(f'cannot find file: {ifile}')
+                    logging.warning(f'turning OFF flat slab')
                     control_d['FLAT_SLAB'] = False
                 else:
                     # a start depth is required for flat slabs to work
@@ -654,6 +654,9 @@ def check_input_parameters( master_d ):
             logging.error('must be satisfied!')
             sys.exit(1)
 
+    if 'tracers_per_element' in control_d:
+        logging.error(f"the tracers_per_element parameter should be moved into {control_d['pid_file']}.")
+        sys.exit(' - XXXX - preprocessing failed due to unexpected parameter in control file!')
 #=====================================================================
 #=====================================================================
 #=====================================================================
@@ -662,7 +665,7 @@ def make_age_grid_to_build_mantle_and_slab_temp( master_d ):
     '''Process the unmasked age grid to be used to build slabs.  Also
        used to make temperature and stencil backgrounds.'''
 
-    if verbose: print( now(), 'make_age_grid_to_build_mantle_and_slab_temp:' )
+    logging.info('start make_age_grid_to_build_mantle_and_slab_temp' )
 
     control_d = master_d['control_d']
     func_d = master_d['func_d']
@@ -688,12 +691,12 @@ def make_age_grid_to_build_mantle_and_slab_temp( master_d ):
     # sample to grd_res to reduce processing time
     # do not specify 'Rg' in this argument because for some
     # reason it converts lon to -360 to 0!
-    if verbose: print( now(), 'sampling %(afile_out)s to grd_res=%(grd_res)s' % vars() )
+    logging.debug(f'sampling {afile_out} to grd_res={grd_res}' )
     args = '%(afile_out)s -I%(grd_res)s -F' % vars()
     callgmt( 'grdsample', args, '', '', '-G%(afile_out)s' % vars() )
 
     # truncate age between lith_age_min and oceanic_lith_age_max
-    if verbose: print( now(), 'clipping age grid', afile_out )
+    logging.debug('clipping age grid{afile_out}')
     cmd = afile_out
     cmd += ' -Sa%(oceanic_lith_age_max)s/%(oceanic_lith_age_max)s' % vars()
     cmd += ' -Sb%(lith_age_min)s/%(lith_age_min)s' % vars()
@@ -1579,7 +1582,7 @@ def make_tracer_summary_postscript( master_d ):
 
     '''Create a summary postscript of tracer distribution.'''
 
-    if verbose: print( now(), 'make_tracer_summary_postscript:' )
+    logging.info('make_tracer_summary_postscript' )
 
     # dictionaries
     control_d = master_d['control_d']
@@ -1657,7 +1660,7 @@ def make_summary_postscript( master, master_grids, kk,
 
     '''Create a summary postscript for this depth.'''
 
-    if verbose: print( now(), 'make_summary_postscript:' )
+    logging.info('start make_summary_postscript') 
 
     coor_d = master['coor_d']
     control_d = master['control_d']
@@ -1875,7 +1878,7 @@ def output_tracer( master_d ):
 
     '''Output tracer initial condition.'''
 
-    if verbose: print( now(), 'output_tracer:' )
+    logging.info('start output_tracer' )
 
     # XXX DJB - for testing efficiency
     t0 = time.time() # start time
@@ -1926,7 +1929,7 @@ def output_tracer( master_d ):
         no_tracer_max_depth = control_d['no_tracer_max_depth']
         txt = 'WARNING: removing tracers between '
         txt += '%(no_tracer_min_depth)s km and %(no_tracer_max_depth)s km depth' % vars()
-        print( now(), txt )
+        logging.warning( txt )
         max_rad = radius_outer - ( no_tracer_min_depth / radius_km )
         min_rad = radius_outer - ( no_tracer_max_depth / radius_km )
         index = np.where(((r > max_rad) | (r < min_rad)))
@@ -1935,7 +1938,7 @@ def output_tracer( master_d ):
         phi = phi[index]
         # redefine number of tracers to truncated range
         num = np.size( index )
-        print( now(), 'WARNING: total number of tracers reduced to %(num)s' % vars() )
+        logging.warning(f'total number of tracers reduced to {num}')
 
     # ambient tracers are flavor zero
     # N.B. this is reset if TRACER_NO_ASSIM is True
@@ -2056,10 +2059,9 @@ def output_tracer( master_d ):
     # XXX DJB - for testing efficiency
     t1 = time.time() # end time
     runtime = datetime.timedelta(seconds=t1-t0)
-    print( now(), 'output_tracer: runtime', str(runtime) )
+    logging.info(f'output_tracer: runtime {runtime}' )
     runtime_per_mil = round((t1-t0) / num * 1E6,3)
-    print( now(), 'output_tracer: runtime per million tracers (s)',
-        str(runtime_per_mil) )
+    logging.info(f'output_tracer: runtime per million tracers (s) {runtime_per_mil}')
 
 #=====================================================================
 #=====================================================================
@@ -2281,7 +2283,7 @@ def output_ivel( master ):
 #=====================================================================
 def preprocess_gplates_line_data( master, gplates_xy_filename ):
 
-    logging.info(f'Convert lon to [0,360] and increase resolution of line data in file {gplates_xy_filename}.')
+    logging.info(f'start converting lon to [0,360] and increase resolution of line data in file {gplates_xy_filename}.')
     
     control_d = master['control_d']
     func_d = master['func_d']

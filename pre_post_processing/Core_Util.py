@@ -1390,10 +1390,10 @@ def make_dir( directory_name ):
     '''Make a directory.'''
     if not os.path.isdir( directory_name ):
         cmd = 'mkdir -v -p '+ directory_name
-        if verbose: print( now(), cmd )
+        logging.debug( cmd )
         subprocess.call( cmd, shell=True )
     else:
-        logging.warning( f'The directory \"{directory_name}\" already exists; not recreating.')
+        logging.debug( f'The directory \"{directory_name}\" already exists; not recreating.')
 #=====================================================================
 #=====================================================================
 def make_flat_slab_age_depth_xyz( master, flat_slab_depth_grd,
@@ -1931,10 +1931,14 @@ def remove_files( file_list ):
 
     '''Remove files.'''
 
-    print( now(), 'remove_files:' )
-
-    arg_l = ['rm','-rf'] + flatten( file_list )
-    print( now(), ' '.join(arg_l) )
+    logging.debug('remove_files:' )
+    #make sure the to-be-removed-files exist
+    fl=[]
+    for f in flatten(file_list):
+        if os.path.exists(f):
+            fl.append(f)
+    arg_l = ['rm','-rf'] + fl 
+    logging.debug(' '.join(arg_l) )
     subprocess.call( arg_l )
 
 #=====================================================================

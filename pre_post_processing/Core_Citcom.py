@@ -18,7 +18,7 @@ Most functions take a dictionary of arguments to pass and adjust parameters.
 '''
 #=====================================================================
 #=====================================================================
-import os, re, string, sys, traceback, glob, subprocess
+import os, re, string, sys, traceback, glob, subprocess, logging
 import numpy as np
 
 # Caltech geodynamic framework modules:
@@ -327,7 +327,7 @@ def define_cap_or_proc_names( arg, filename, cap_or_proc ):
        the cap or proc number.  Also determines possible header 
        lines.'''
 
-    if verbose: print( Core_Util.now(), 'define_cap_or_proc_names:' )
+    logging.info('start defining cap or proc names' )
 
     # parameters for proc
     if cap_or_proc == 'proc':
@@ -372,7 +372,7 @@ def derive_extra_citcom_parameters( arg ):
     '''Derive additional quantities from CitcomS pid file that are
        required for the geodynamic framework.'''
 
-    if verbose: print( Core_Util.now(), 'derive_extra_citcom_parameters:' )
+    logging.info('start deriving extra citcom parameters' )
 
     ndict = {}
 
@@ -458,7 +458,7 @@ def get_proc_list_from_cap_list( arg, cap_list ):
     '''Map a list of data by cap to a list of data by processor.  This
        is effectively an autoUNcombine(.py) operation.'''
 
-    if verbose: print( Core_Util.now(), 'get_proc_list_from_cap_list:' ) 
+    logging.info('start get_proc_list_from_cap_list') 
 
     nodex = arg['nodex']
     nodey = arg['nodey']
@@ -572,7 +572,7 @@ def read_citcom_coor_type( arg, filename='' ):
        user-specified path first and then try [datadir]/[proc]/
        [datafile].coord.[proc] second.'''
 
-    if verbose: print( Core_Util.now(), 'read_citcom_coor_type:' )
+    logging.info('start reading citcom coor type' )
 
     datadir = arg['datadir']
     datafile = arg['datafile']
@@ -614,7 +614,7 @@ def read_citcom_coor_type( arg, filename='' ):
     num_lines = sum(1 for line in infile)
     infile.close()
 
-    if verbose: print( Core_Util.now(), 'read_citcom_coor_type: number of lines=', num_lines )
+    logging.debug(f'read_citcom_coor_type: number of lines= { num_lines }' )
 
     try:
         mytype = options[num_lines]
@@ -640,7 +640,7 @@ def read_citcom_z_coor( arg, filename='' ):
        *.coord.* files upto proc=nodez-1 must be at the same location
        (path).'''
 
-    if verbose: print( Core_Util.now(), 'read_citcom_z_coor:' )
+    logging.info('start reading citcom z coor')
 
     nodex = arg['nodex']
     nodey = arg['nodey']
@@ -746,7 +746,7 @@ def read_citcom_surface_coor( arg, filename='' ):
        files upto nproc_surf, or all processor *.coord.* files upto
        total_proc, must be at the same location (path).'''
 
-    print( Core_Util.now(), 'read_citcom_surface_coor:' )
+    logging.info('start read_citcom_surface_coor' )
 
     nproc_surf = arg['nproc_surf']
     radius = arg['radius']
@@ -767,7 +767,7 @@ def read_citcom_surface_coor( arg, filename='' ):
 
     for cc in range(nproc_surf):
         surf_list.append([])
-        if verbose: print( Core_Util.now(), 'processing: cap%(cc)02d' % vars() )
+        logging.debug(f'processing: cap{cc}')
         # skip over nodez for theta, phi only
         for cols in cap_list[cc][0::nodez]:
             theta = cols[0]
@@ -817,7 +817,7 @@ def read_proc_files_to_cap_list( arg, filename, field_name ):
     #if 'coord' in filename:
     #    verbose = False
 
-    print( Core_Util.now(), 'read_proc_files_to_cap_list:' )
+    logging.info('start read_proc_files_to_cap_list' )
 
     nproc_surf = arg['nproc_surf']
     nodex = arg['nodex']
@@ -836,10 +836,10 @@ def read_proc_files_to_cap_list( arg, filename, field_name ):
     # Get the proc names and list of potential headers for this filename type 
     proc_names, header_list = define_cap_or_proc_names( arg, filename, 'proc' )
 
-    if verbose: print( Core_Util.now(), 'read_proc_files_to_cap_list: filename = ', filename)
-    if verbose: print( Core_Util.now(), 'read_proc_files_to_cap_list: field_name = ', field_name)
-    if verbose: print( Core_Util.now(), 'read_proc_files_to_cap_list: proc_names = ', proc_names)
-    if verbose: print( Core_Util.now(), 'read_proc_files_to_cap_list: header_list = ', header_list)
+    logging.debug(f'read_proc_files_to_cap_list: filename = {filename}')
+    logging.debug(f'read_proc_files_to_cap_list: field_name = {field_name}')
+    logging.debug(f'read_proc_files_to_cap_list: proc_names = {proc_names}')
+    logging.debug(f'read_proc_files_to_cap_list: header_list = {header_list}')
 
     # Set up an empty cap list to populate 
     cap_list = []
@@ -847,12 +847,12 @@ def read_proc_files_to_cap_list( arg, filename, field_name ):
     # Loop over 0 .. nproc_surf
     for nn in range( nproc_surf ):
 
-      if verbose: print( Core_Util.now(), '======================================')
-      if verbose: print( Core_Util.now(), 'read_proc_files_to_cap_list: nn = ', nn)
+      logging.debug( '======================================')
+      logging.debug( f'fread_proc_files_to_cap_list: nn = {nn}')
 
       # Set up lists to store data for each cap
       cap_data = [0 for cc in range(nodex*nodey*nodez)]
-      if verbose: print( Core_Util.now(), 'read_proc_files_to_cap_list: len(cap_data) = ', len(cap_data))
+      logging.debug('read_proc_files_to_cap_list: len(cap_data) = {len(cap_data)}')
 
       for jj in range( nprocy ):
         for ii in range( nprocx ):
@@ -888,7 +888,7 @@ def read_proc_files_to_cap_list( arg, filename, field_name ):
 
                 # close up shop
                 gpfile.close()
-                print( Core_Util.now(), 'read_proc_files_to_cap_list: reading processor data from file :', gpname)
+                logging.debug('read_proc_files_to_cap_list: reading processor data from file : {gpname}')
 
             # Usually this clause will be called when reading CitcomS surface data
             except FileNotFoundError:
@@ -983,15 +983,15 @@ def read_proc_files_to_cap_list( arg, filename, field_name ):
         # End of Loop: for ii in range( nprocx ):
       # End of Loop: for jj in range( nprocy ):
       
-      if verbose: print( Core_Util.now(), ' ')
-      if verbose: print( Core_Util.now(), 'read_proc_files_to_cap_list: CAP summary: ')
-      if verbose: print( Core_Util.now(), 'read_proc_files_to_cap_list: len(cap_data) = ', len(cap_data) )
+      logging.debug(' ')
+      logging.debug('read_proc_files_to_cap_list: CAP summary: ')
+      logging.debug(f'read_proc_files_to_cap_list: len(cap_data) = {len(cap_data)}' )
 
       cap_list.append( cap_data )
 
     # End of loop: for nn in range( nproc_surf ):
-    print( Core_Util.now(), 'read_proc_files_to_cap_list: CAP LIST summary (End of loop: for nn in range( nproc_surf ): ')
-    print( Core_Util.now(), 'read_proc_files_to_cap_list: len(cap_list) = ', len(cap_list) )
+    logging.info(f'read_proc_files_to_cap_list: CAP LIST summary (End of loop: for nn in range( nproc_surf ): ')
+    logging.info(f'read_proc_files_to_cap_list: len(cap_list) = {len(cap_list)}' )
     return cap_list
 
 #=====================================================================
@@ -1001,7 +1001,7 @@ def read_proc_z_coor( arg, filename ):
 
     '''Read CitcomS radius from several processor *.coord.* files.'''
 
-    if verbose: print( Core_Util.now(), 'read_proc_z_coor:' )
+    logging.info('start reading proc z coor' )
 
     nprocz = arg['nprocz']
     nodez = arg['nodez']
@@ -1014,12 +1014,12 @@ def read_proc_z_coor( arg, filename ):
 
     for procz in range(nprocz):
         coorname = proc_names[procz]
-        if verbose: print( Core_Util.now(), 'read_proc_z_coor: reading=', coorname)
+        logging.info(f'read_proc_z_coor: reading {coorname}')
         levz = (nz-1)*procz
         infile = open(coorname,'r')
         for lnz, line in enumerate(infile):
             if line.rstrip('\n') in header_list:
-                if verbose: print( Core_Util.now(), 'strip header:',line.rstrip('\n'))
+                logging.debug("strip header: 'line.rstrip('\n')")
                 continue
             else:
                 val = line.split()[2]
@@ -1066,7 +1066,7 @@ def write_cap_or_proc_list_to_files( arg, filename, inp_list, \
        inp_list = (X,) to pass only one list to this function, where
        X is the list for output.'''
 
-    if verbose: print( Core_Util.now(), 'write_cap_or_proc_list_to_files:' )
+    logging.info('start write_cap_or_proc_list_to_files' )
 
     out_names, header_list = define_cap_or_proc_names( arg, filename, cap_or_proc )
 
@@ -1094,8 +1094,7 @@ def write_cap_or_proc_list_to_files( arg, filename, inp_list, \
     for nn in range( len(inp_list[0]) ):
 
         out_name = out_names[nn]
-        #if verbose: print( Core_Util.now(), 'writing:', out_name )
-        print( Core_Util.now(), 'writing:', out_name )
+        logging.debug(f'writing: {out_name}' )
         out_file = open( out_name, 'w' )
         out_file.write( head )
 
@@ -2072,7 +2071,7 @@ def create_level_stack_nc(CASE, FIELD, nc_filename, grid_list):
     for n, item in enumerate ( grid_list ) :
         G = item[0]
         depth = -item[1]
-        print( Core_Util.now(), 'processing: n=', n, 'grid=', G, 'depth=', depth)
+        logging.debug(f'processing: n={n}, grid={G}, depth={depth}')
 
         # dump the data to ascii
         cmd = 'ncdump ' + G
