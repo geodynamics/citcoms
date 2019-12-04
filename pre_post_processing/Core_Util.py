@@ -341,7 +341,7 @@ def convert_coordinates( in_name, incol1, incol2,
        be a combination of "lon" and "lat".
        R is "d" for lon [-180,180] and "g" for lon [0,360].'''
 
-    if verbose: print( now(), 'convert_coordinates:' )
+    logging.info('start convert_coordinates') 
 
     gmt_char = '>'
     error = ' columns must be a combination of "lon" and "lat"'
@@ -1031,7 +1031,7 @@ def increase_resolution_of_xy_line( in_filename, res, out_filename, Q ):
        X is lon, Y is lat (both decimal degrees), res in km.
        -Q argument applied to GMT project if 'Q' is True'''
 
-    if verbose: print( now(), 'increase_resolution_of_xy_line:' )
+    logging.info('start increase_resolution_of_xy_line' )
 
     gmt_char = '>'
     rm_list = []
@@ -1042,7 +1042,8 @@ def increase_resolution_of_xy_line( in_filename, res, out_filename, Q ):
     in_file.close()
 
     # open file (remove previous version, since appending)
-    subprocess.call( 'rm ' + out_filename, shell=True)
+    if os.path.isfile(out_filename):
+        subprocess.call( 'rm ' + out_filename, shell=True)
     out_file = open( out_filename, 'ab')
 
     project_file = 'increase_resolution_of_xy_line.xyp'
@@ -1937,9 +1938,10 @@ def remove_files( file_list ):
     for f in flatten(file_list):
         if os.path.exists(f):
             fl.append(f)
-    arg_l = ['rm','-rf'] + fl 
-    logging.debug(' '.join(arg_l) )
-    subprocess.call( arg_l )
+    if len(fl) > 0:
+        arg_l = ['rm','-rf'] + fl 
+        logging.debug(' '.join(arg_l) )
+        subprocess.call( arg_l )
 
 #=====================================================================
 #=====================================================================
@@ -2853,7 +2855,7 @@ def write_dictionary_to_file( arg, filename ):
     '''Sort dictionary keys in alphabetical order and write out
     key: value pairs to a file.'''
 
-    if verbose: print( now(), 'write_dictionary_to_file:')
+    logging.info('start write_dictionary_to_file')
 
     log_file = open( filename, 'w' )
     log_file.write( now() + '\n' )

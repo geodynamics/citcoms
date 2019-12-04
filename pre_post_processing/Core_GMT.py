@@ -82,6 +82,9 @@ out : the output file name.
     # capture output (returned as bytes)
     p = subprocess.check_output( cmd, shell=True, stderr=subprocess.STDOUT)
 
+    if len(p):
+        logging.debug(p)
+
     # convert bytes output to string
     s = bytes.decode(p)
 

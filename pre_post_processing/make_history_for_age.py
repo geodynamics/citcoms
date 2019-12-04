@@ -240,6 +240,8 @@ def basic_setup(cfg_filename, age, IC):
 
     # get radial coordinates
     control_d['coord_file'] = control_d.get('coord_dir','') + '/' + pid_d['datafile']+'.coord.#'
+    pid_d['coord_type'], pid_d['coord_file_in_use'] =\
+            Core_Citcom.read_citcom_coor_type( pid_d, control_d['coord_file'] )
     coor_d = Core_Citcom.read_citcom_z_coor( pid_d, control_d['coord_file'] )
     master['coor_d'] = coor_d
 
@@ -327,7 +329,7 @@ def build_slab_temperature( master, kk, mantle_xyzs ):
     '''Build (and return) a GMT grid of slab temperatures for a given
        depth node (kk).'''
 
-    if verbose: print( now(), 'build_slab_temperature:' )
+    logging.info('start build_slab_temperature' )
 
     coor_d = master['coor_d']
     control_d = master['control_d']
@@ -411,7 +413,9 @@ def build_slab_temperature( master, kk, mantle_xyzs ):
 def build_temperature_for_all_znodes( master ):
 
     '''Main loop over znodes (depth) to build GMT temperature grids.'''
+    
     logging.info('start build_temperature_for_all_znodes')
+    
     control_d = master['control_d']
     coor_d = master['coor_d']
     func_d = master['func_d']
@@ -710,7 +714,7 @@ def make_age_grid_to_build_utbl( master_d ):
     '''Process the masked (or stenciled) age grid to be used to build
        the upper thermal boundary layer.'''
 
-    if verbose: print( now(), 'make_age_grid_to_build_utbl:' )
+    logging.info('start make_age_grid_to_build_utbl' )
 
     control_d = master_d['control_d']
     func_d = master_d['func_d']
@@ -896,7 +900,7 @@ def track_grids_to_cap_list( master, grid_list, background, min, max ):
 
     '''Export gridded data by depth to nodal values by cap.'''
 
-    if verbose: print( now(), 'track_grids_to_cap_list:' )
+    logging.info('start track_grids_to_cap_list' )
 
     control_d = master['control_d']
     func_d = master['func_d']
@@ -935,7 +939,7 @@ def citcom_data_export( master ):
 
     '''Main func_dtion to export CitcomS data.'''
 
-    if verbose: print( now(), 'citcom_data_export:' )
+    logging.info('start citcom_data_export' )
 
     control_d = master['control_d']
     pid_d = master['pid_d']
@@ -1008,7 +1012,7 @@ def get_global_data( master_d ):
     '''Determine slab header data and thermal ages along the
        subduction zones.'''
 
-    if verbose: print( now(), 'get_global_data:' )
+    logging.info('start get_global_data' )
 
     # dictionaries
     control_d = master_d['control_d']
@@ -2304,7 +2308,7 @@ def preprocess_gplates_line_data( master, gplates_xy_filename ):
     # save this out
     out_name1 = Core_Util.increase_resolution_of_xy_line( in_name, res, 
         out_name, True )
-
+    
     return out_name1
 
 #=====================================================================
@@ -3146,7 +3150,7 @@ def get_synthetic_data( master_d ):
 
     '''Produce synthetic data files for regional trial models.'''
 
-    if verbose: print( now(), 'get_synthetic_data:')
+    logging.info('start get_synthetic_data')
 
     control_d = master_d['control_d']
     func_d = master_d['func_d']
@@ -3200,7 +3204,7 @@ def write_coordinates_by_cap( master ):
        exported, additionally write out the coordinates of a coarsened
        mesh (coarsened by a factor of 2**(levels-1)).'''
 
-    if verbose: print( now(), 'write_coordinates_by_cap:' )
+    logging.info('start write_coordinates_by_cap' )
 
     control_d = master['control_d']
     func_d = master['func_d']

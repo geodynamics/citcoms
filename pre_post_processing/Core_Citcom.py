@@ -572,7 +572,7 @@ def read_citcom_coor_type( arg, filename='' ):
        user-specified path first and then try [datadir]/[proc]/
        [datafile].coord.[proc] second.'''
 
-    logging.info('start reading citcom coor type' )
+    logging.debug('start reading citcom coor type' )
 
     datadir = arg['datadir']
     datafile = arg['datafile']
@@ -597,31 +597,34 @@ def read_citcom_coor_type( arg, filename='' ):
     try:
         infile = open( filename2, 'r' )
     except FileNotFoundError:
-        print( now(), 'WARNING: cannot find file', filename2 )
+        logging.warning(f'cannot find file {filename2}. try pid data directory again.' )
         # second, try pid data directory for *.coord.* files
         # of the form: [datadir]/[proc]/[datafile].coord.[proc]
         try:
             filename = datadir.replace( '%RANK', '#' ) + '/' + datafile
             filename += '.coord.#' # to return as template
-            filename2 = datadir.replace( '%RANK', '0' ) + '/' + datafile
-            filename2 += '.coord.0' # to check it exists
-            infile = open( filename2, 'r' )
+            filename3 = datadir.replace( '%RANK', '0' ) + '/' + datafile
+            filename3 += '.coord.0' # to check it exists
+            infile = open( filename3, 'r' )
         except FileNotFoundError:
-            print( now(), 'ERROR: cannot find file', filename2 )
-            print( now(), 'Please correctly specify the path of a coordinate file (e.g., /path/to/[prefix].coor.global.dat or /path/to/[prefix].coor.regional.dat) in the parsed pid file' )
+            logging.critical(f'cannot find either "{filename2}" or "{filename3}".' )
+            logging.critical('at lease one of the files is required!')
+            logging.info('check the "coord_dir" parameter in preprocessing input file and' + 
+                    ' "datafile" parameter in citcoms input file!' )
             sys.exit( 1 )
 
     num_lines = sum(1 for line in infile)
     infile.close()
 
     logging.debug(f'read_citcom_coor_type: number of lines= { num_lines }' )
-
+    
     try:
         mytype = options[num_lines]
     except KeyError:
-        print('Unknown coordinate file format')
         #print(traceback.format_exc())
-        sys.exit( 1 )
+        logging.critical(f'the line number {num_lines} must be one of these numbers ' + 
+                f'{nodex + nodey + nodez + 3, nodez + 1 , nodex * nodey * nodez + 1, nx * ny * nz + 1}')
+        sys.exit( ' - XXXX - Unknown coordinate file format!!' )
 
     # if the user-specified files did not exist, filename may have
     # been updated to a new template based on the datadir location.
@@ -656,8 +659,7 @@ def read_citcom_z_coor( arg, filename='' ):
              'cap'      : read_cap_z_coor,
              'proc'     : read_proc_z_coor    }   
 
-    mytype, filename = read_citcom_coor_type( arg, filename )
-    rad = funct[mytype]( arg, filename )
+    rad = funct[arg['coord_type']]( arg, arg['coord_file_in_use'] )
 
     # non-dimensional radius (to 6 d.p.s)
     rad = np.around(np.array(rad),6).tolist()
@@ -752,13 +754,11 @@ def read_citcom_surface_coor( arg, filename='' ):
     radius = arg['radius']
     nodez = arg['nodez']
 
-    mytype, filename = read_citcom_coor_type( arg, filename )
-
     funct = { 'cap'      : read_cap_files_to_cap_list,
               'proc'     : read_proc_files_to_cap_list }
-
+    
     try:
-        cap_list = funct[mytype]( arg, filename, 'coord' )
+        cap_list = funct[arg['coord_type']]( arg, arg['coord_file_in_use'], 'coord' )
     except KeyError:
         print('Filename must be for a cap (0) or processor (0)')
         sys.exit(1)
