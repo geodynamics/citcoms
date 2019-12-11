@@ -1392,7 +1392,13 @@ def make_dir( directory_name ):
     if not os.path.isdir( directory_name ):
         cmd = 'mkdir -v -p '+ directory_name
         logging.debug( cmd )
-        subprocess.call( cmd, shell=True )
+        #subprocess.call( cmd, shell=True )
+        p = subprocess.run([cmd], shell=True, universal_newlines=True, 
+            stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        if p.returncode == 0:
+            logging.info(p.stdout)
+        else:
+            logging.error(p.stderr)
     else:
         logging.debug( f'The directory \"{directory_name}\" already exists; not recreating.')
 #=====================================================================
