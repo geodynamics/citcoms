@@ -76,6 +76,7 @@ CIT_CHECK_HEADER_HDF5
 
 if test "$want_hdf5" != no; then
     want_hdf5=yes
+    CPPFLAGS="-DH5_USE_16_API $CPPFLAGS"
 fi
 AM_CONDITIONAL([COND_HDF5], [test "$want_hdf5" = yes])
 AC_SEARCH_LIBS([gzopen], [z], [
