@@ -2275,7 +2275,8 @@ and 'make_example_config_file()'
         com = ''
         if ';' in val:
             val, com = val.split(';')
-
+        elif '#' in val:
+            val, com = val.split('#')
         # clean up white space
         var = var.strip() 
         var = var.rstrip() 
@@ -2334,6 +2335,15 @@ and 'make_example_config_file()'
         if val == 'false':
             type_dict[k] = 'bool', val, com
             continue # to next variable
+
+        if val.lower() == 'on':
+            type_dict[k] = 'int', 1, com
+            continue # to next variable
+
+        if val.lower() == 'off':
+            type_dict[k] = 'int', 0, com
+            continue # to next variable
+
 
         # check for time values ( 3:00:00 )
         if ':' in val:
@@ -2541,6 +2551,8 @@ def parse_configuration_file( filename, update_top_level_dict_from_section=False
         com = ''
         if ';' in val:
             val, com = val.split(';')
+        elif '#' in val:
+            val, com = val.split('#') #the '#' also can be used in front of the comments
 
         # clean up white space
         var = var.strip() 
@@ -2548,7 +2560,7 @@ def parse_configuration_file( filename, update_top_level_dict_from_section=False
        
         val = val.strip() 
         val = val.rstrip() 
-
+        
         com = com.strip() 
         com = com.rstrip() 
 
@@ -2567,7 +2579,7 @@ def parse_configuration_file( filename, update_top_level_dict_from_section=False
         # check for values with no type; probably from a blank entry like: 'param = '
         if type == 'unk':
             print('Core_Util: parse_configuration_file: in file =', filename)
-            print('Core_Util: parse_configuration_file: trying to read  "', var, '" with value ="', val, '" but no value is set; type is not defined')
+            print(f'Core_Util: parse_configuration_file: trying to read "{var}" with value ="{val}" but no value is set; type is not defined')
             sys.exit(1)
 
         # Variable to hold a typed value (bool, int, etc.)
@@ -2599,10 +2611,15 @@ def parse_configuration_file( filename, update_top_level_dict_from_section=False
 
         elif type == 'int':
             try:
-                i = int(val)
+                if str(val).lower() == 'on':
+                    i = 1
+                elif str(val).lower() == 'off':
+                    i = 0
+                else: 
+                    i = int(val)
             except ValueError:
                 print('Core_Util: parse_configuration_file: in file =', filename)
-                print('Core_Util: parse_configuration_file: trying to read  "', var, '" with value =', val, 'as an int failed')
+                print(f'Core_Util: parse_configuration_file: trying to read "{var}" with value ={val} as an int failed!')
                 print(traceback.format_exc())
                 sys.exit(1)
 

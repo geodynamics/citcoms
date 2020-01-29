@@ -1677,7 +1677,9 @@ with a set of nested dictionaries, with this structure:
     # Step 4: read the coor data
     if verbose: print(Core_Util.now(), 'get_all_pid_data: Step 4: Read the coor data')
     if master_d['pid_d']['coor'] == 1:
+        pid_d = master_d['pid_d']
         coor_file = master_d['pid_d']['coor_file']
+        pid_d['coord_type'], pid_d['coord_file_in_use'] = read_citcom_coor_type( pid_d )
         coor_d = read_citcom_z_coor(pid_d, coor_file)
         master_d['coor_d'] = coor_d
  

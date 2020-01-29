@@ -246,9 +246,14 @@ def create_restart_run_cfg(control_d, master_run_cfg_d, rs_replace_d, rs_dir, rs
     # Now set some specific values based upon restart type, age and timestep 
 
     # Get a copy of the master run datafile value
-    master_run_datafile = restart_run_cfg_d['CitcomS.solver']['datafile']
-    master_run_datadir = restart_run_cfg_d['CitcomS.solver']['datadir']
-
+    if 'CitcomS.solver' in restart_run_cfg_d and all(x in restart_run_cfg_d['CitcomS.solver'] for x in ['datafile', 'datadir']):
+        master_run_datafile = restart_run_cfg_d['CitcomS.solver']['datafile']
+        master_run_datadir = restart_run_cfg_d['CitcomS.solver']['datadir']
+    elif all(x in restart_run_cfg_d for x in ['datafile', 'datadir']):
+        master_run_datafile = restart_run_cfg_d['datafile']
+        master_run_datadir = restart_run_cfg_d['datadir']
+    else:
+        sys.exit('unable to find data files!!')
     # Set the new values for datafile, datafile_old, datadir, datadir_old 
 
     # FIXME: are the new values for these 4 params ^ ^ ^ ^  
@@ -288,10 +293,10 @@ def create_restart_run_cfg(control_d, master_run_cfg_d, rs_replace_d, rs_dir, rs
     else:
         print(now(), 'ERROR: unknown restart type.  Value must be either "dynamic_topography" or "total_topography"')
 
-# coor_file needs special tackle. maybe can move into the loop above?
-    if not os.path.isabs(restart_run_cfg_d['CitcomS.solver.mesher']['coor_file']):
-        tmp1=os.path.normpath(os.path.join('../',restart_run_cfg_d['CitcomS.solver.mesher']['coor_file']))
-        restart_run_cfg_d['CitcomS.solver.mesher']['coor_file']=tmp1
+    # coor_file needs special tackle. maybe can move into the loop above?
+    if not os.path.isabs(restart_run_cfg_d['coor_file']):
+        tmp1=os.path.normpath(os.path.join('../',restart_run_cfg_d['coor_file']))
+        restart_run_cfg_d['coor_file']=tmp1
 
     # Write out the new input cfg dictionary
     cfg_name = rs_dir + '/' + master_run_datafile + '_' + rs_inp_cfg_suffix + '.cfg'
@@ -332,6 +337,8 @@ def create_no_lith_temp(control_d, master_run_d, rs_replace_d, rs_dir, rs_inp_cf
         file_format = master_run_d['pid_d']['datadir']+ '/#/' + master_run_d['pid_d']['datafile'] + '.' + file_name_component + '.#.' + str(timestep)
     elif os.path.exists( master_run_d['pid_d']['datadir']+ '/' ) :
         file_format = master_run_d['pid_d']['datadir']+ '/' + master_run_d['pid_d']['datafile'] + '.' + file_name_component + '.#.' + str(timestep)
+    elif os.path.exists( master_run_d['pid_d']['datadir'].replace( '%RANK', '0' )) :
+        file_format = master_run_d['pid_d']['datadir'].replace( '%RANK', '#' )+ '/' + master_run_d['pid_d']['datafile'] + '.' + file_name_component + '.#.' + str(timestep)
     else :
         file_format = 'data/#/' + datafile + '.' + file_name_component + '.#.' + str(timestep)
     print( now(), 'create_no_lith_temp: create_no_lith_temp: file_format = ', file_format )
