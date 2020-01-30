@@ -2910,18 +2910,18 @@ def write_cfg_dictionary( input_d, filename = False, write_top_level_data = True
         section_names = out_d['_SECTIONS_']
         for name in section_names :
             if verbose: print( now(), 'write_cfg_dictionary: -------- name =', name)
-            sec_str += '[%(name)s]\n' % vars() 
+            sec_str += '#%(name)s\n' % vars() 
             s = out_d[name]
             del s['_SECTION_NAME_'] # remove special key 
             keys = sorted( s ) 
             for k in keys :
                 if type( s[k] ) is list:
-                    sec_str += '%s = ' % k
+                    sec_str += '%s=' % k
                     for item in s[k][:-1] :
                         sec_str += '%s,' % str(item) 
                     sec_str += '%s\n' % s[k][-1]
                 else : 
-                    sec_str += '%s = %s\n' % (k, s[k])
+                    sec_str += '%s=%s\n' % (k, s[k])
             sec_str += '\n'
             # delete this section from the main dict 
             del out_d[name]
@@ -2937,12 +2937,12 @@ def write_cfg_dictionary( input_d, filename = False, write_top_level_data = True
         for k in keys : 
 
             if type( out_d[k] ) is list:
-                out_str += '%s = ' % k
+                out_str += '%s=' % k
                 for item in out_d[k][:-1] :
                     out_str += '%s,' % str(item) 
                 out_str += '%s\n' % out_d[k][-1]
             else : 
-                out_str += '%s = %s\n' % (k, out_d[k])
+                out_str += '%s=%s\n' % (k, out_d[k])
 
     # if needed append the sections string
     if not sec_str == '' : out_str += sec_str 
