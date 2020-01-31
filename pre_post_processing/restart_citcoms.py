@@ -149,7 +149,8 @@ def main() :
         if rs_structure == 'separate':
             # create restart directory from section name
             rs_dir = rs_dir_prefix + '_' + str(age) + 'Ma' 
-            Core_Util.make_dir( rs_dir ) 
+            Core_Util.make_dir( rs_dir )
+            Core_Util.make_dir( rs_dir + f'/Age{age}Ma')
         else: 
             # this is an all-in-on case
             rs_dir = rs_dir_prefix
