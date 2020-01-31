@@ -541,7 +541,7 @@ def read_cap_z_coor( arg, filename ):
 
     '''Read CitcomS radius from cap file.'''
 
-    if verbose: print( Core_Util.now(), 'read_cap_z_coor:' )
+    logging.debug('start read_cap_z_coor')
 
     nodex = arg['nodex']
     nodey = arg['nodey']
@@ -848,7 +848,7 @@ def read_proc_files_to_cap_list( arg, filename, field_name ):
     for nn in range( nproc_surf ):
 
       logging.debug( '======================================')
-      logging.debug( f'fread_proc_files_to_cap_list: nn = {nn}')
+      logging.debug( f'read_proc_files_to_cap_list: nn = {nn}')
 
       # Set up lists to store data for each cap
       cap_data = [0 for cc in range(nodex*nodey*nodez)]

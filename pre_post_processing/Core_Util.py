@@ -2570,6 +2570,9 @@ def parse_configuration_file( filename, update_top_level_dict_from_section=False
         com = com.strip() 
         com = com.rstrip() 
 
+        if len(val) == 0:
+            continue
+
         # now check for type, and correct entries
         type = ''
 
