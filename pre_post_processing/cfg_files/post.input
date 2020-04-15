@@ -1,0 +1,102 @@
+#=====================================================================
+# config.cfg file for the grid_maker.py script
+# This example has information on creating grids for Citcom data.
+# ==============================================================================
+# Set the basic model coordinate information common to both source types:
+
+# set path to the model pid file 
+pid_file = /home/michael/workspace/CitcomS/workspace/citcoms.input
+
+# CitcomS coordinate files by processor (i.e. [datafile].coord.[proc])
+# first, look in this user-specified directory for all files
+coord_dir = /home/michael/workspace/CitcomS/workspace/mchin_coords/12
+
+# second, look in data/%RANK
+
+# NOTE: grid_maker.py will fail if coord files cannot be located
+
+# Optional global settings
+
+# If 'shift_lon' is set to True, then the grids will have data in the -180/+180 longitude range
+# The default is for data in the 0/360 longitude range.
+# shift_lon = True
+
+# If 'make_plate_frame_grid' is set to True, then this script with produce additional data on the plate frame
+#make_plate_frame_grid = True
+
+# ==============================================================================
+# Set the times to grid 
+
+# Citcoms : use model time steps or reconstruction age, in one of these forms:
+
+# single value:
+#time_spec = 4500
+#time_spec = 7Ma
+
+# comma separated list:
+#time_spec = 5400, 6200, 6961
+#time_spec = 0Ma, 50Ma, 100Ma
+
+# range of values: start/stop/step
+# time_spec = 2000/2700/100
+time_spec = 229Ma/230Ma/1Ma
+
+# ==============================================================================
+# Set the levels to grid 
+
+# Citcoms : use int values from 0 to nodez-1, in one of these forms:
+
+# single value:
+#level_spec = 63
+
+# comma separated list:
+#level_spec = 64/0/10
+
+# range of values: start/stop/step
+#level_spec = 64/0/10
+
+# NOTE: The level_spec settings must match the Citcoms field data types:
+
+# Volume data fields : the level_spec may be values from 0 to nodez-1
+level_spec = 6
+
+# Surface (surf) data fields : the level_spec must be set to only nodez-1 
+#level_spec = 64 ; for surf data 
+
+# Botttom (botm) data fields : lthe evel_spec must be set to only 0 
+#level_spec = 0 ; for bot data 
+
+# ==============================================================================
+# Set the fields to grid 
+#
+# Each field will be a separate section, delimited by brackets [Section_1], 
+# each field requires the field name, e.g. 
+# field = temp
+# Each field may set optional arguments to set GMT parameters.
+# Each field may set the optional parameter 'dimensional' to 'True',
+# to produce an additional dimensionalized grid with the '.dimensional' filename component.
+#
+# See Core_Citcoms.field_to_file_map data struct for a list of field names.
+#
+
+# Citcoms :
+
+[Grid_1]
+field = temp
+dimensional = True
+#blockmedian_I = 0.5
+#surface_I = 0.25
+#Ll = 
+#Lu = 
+#T = 
+
+#[Grid_2]
+#field = surf_topography
+#dimensional = True
+#blockmedian_I = 0.5
+#surface_I = 0.25
+#Ll = 
+#Lu =
+#T = 
+#=====================================================================
+
