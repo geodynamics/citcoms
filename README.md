@@ -34,6 +34,9 @@ You will need to setup your job submission script.  See a slurm example in jobsu
 
 IMPORTANT: This code *only* implements assimilation in the CitcomS code.  There are other python scripts that generate the *input* data and these are stored in a different svn repository hosted at Caltech. 
 
+You may receive a locale setting warning from Perl.  See here for the reason and fix:
+https://stackoverflow.com/questions/2499794/how-to-fix-a-locale-setting-warning-from-perl
+
 ### Quick start for Mac OSX
 
 Note that the following instructions assume you have MacPorts (https://www.macports.org) installed.  In principle you can use either Open MPI or MPICH as an MPI distribution to run CitcomS.  However, unfortunately the LLDB (debugger) prefers Open MPI, whereas valgrind prefers MPICH.  Therefore I install both MPI distributions and switch between them using ```sudo port select --set mpi```.
