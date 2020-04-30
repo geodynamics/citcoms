@@ -18,8 +18,7 @@ For example, at the University of Bern I use:
 
 For NCI Australia:
 
-```module load openmpi```
-```module load python2```
+```module load openmpi python2```
 
 Note that loading python2 is only necessary for running the ```mymake.py``` script below (python is not used by CitcomS itself).
 
