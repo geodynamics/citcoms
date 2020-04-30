@@ -16,6 +16,13 @@ For example, at the University of Bern I use:
 
 ```module load iomkl/2018b```
 
+For NCI Australia:
+
+```module load openmpi```
+```module load python2```
+
+Note that loading python2 is only necessary for running the ```mymake.py``` script below (python is not used by CitcomS itself).
+
 For reasons relating to compilers, the cluster and node setup, some mpi versions may be preferred for your particular cluster.
 
 To install CitcomS v3.3.1 with data assimilation go to `src/` and execute
