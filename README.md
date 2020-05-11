@@ -1,100 +1,102 @@
 # CitcomS with Data Assimilation
 
-## Reference
+This repository *only* contains the C code that implements data assimilation in CitcomS using pregenerated input files.  There are other python scripts that generate the *input* data and these are stored in a different svn repository hosted at Caltech.
+
+## Citation
 
 Bower, D.J., M. Gurnis, and N. Flament (2015), Assimilating lithosphere and slab history in 4-D Earth models, Phys. Earth Planet. Inter., 238, 8-22, doi: 10.1016/j.pepi.2014.10.013.
 
-The manuscript is also available in an open access repository: https://eartharxiv.org/9aey5/
+Open access version: https://eartharxiv.org/9aey5/
 
 ## Installation
 
 ### Quick start for a cluster
 
-This version of CitcomS only requires a valid MPI distribution (no more python / pyre).  Most clusters can load an MPI distribute using `modules`
+The source code is in `src/` and the only prerequisite for installation is an MPI distribution.  Clusters can often load an MPI distribution using `modules`
 
-For example, at the University of Bern I use:
+For example, at the University of Bern:
 
 ```module load iomkl/2018b```
 
 For NCI Australia:
 
-```module load openmpi python2```
+```module load openmpi```
 
-Note that loading python2 is only necessary for running the ```mymake.py``` script below (python is not used by CitcomS itself).
+Python 2 is also necessary for running a script that configures and builds the C code: this script is ```mymake.py```.  You may therefore also need to run ```module load python2``` to provide a python2 distribution.  For reasons relating to compilers, the cluster and node setup, some MPI versions may be preferred for your particular cluster.  You should ask your HPC system administrators.  Install CitcomS v3.3.1 with data assimilation using these commands (update the ```module``` commands as appropriate):
 
-For reasons relating to compilers, the cluster and node setup, some mpi versions may be preferred for your particular cluster.
+```
+module load openmpi
+module load python2
+cd src/
+./mymake.py
+```
 
-To install CitcomS v3.3.1 with data assimilation go to `src/` and execute
+To run jobs, you will need to setup a job submission script.  See a slurm example in jobsubmit/.
 
-```./mymake.py```
-
-For this step you need a python distribution, but this is only to run the commands that configure and make Citcoms.  Python is not actually used for running the code.  Note that the other directories with a prefix of `src_` relate to older versions of the code and should not be used.  They are kept for reference only.
-
-Example input and output configuration files are provided in:
-
-```examples/```
-
-This example is a good one to try and run first:
-
-```src/examples/Full```
-
-You will need to setup your job submission script.  See a slurm example in jobsubmit/  Please add your own submission scripts to the same directory so we have more examples
-
-IMPORTANT: This code *only* implements assimilation in the CitcomS code.  There are other python scripts that generate the *input* data and these are stored in a different svn repository hosted at Caltech. 
-
-You may receive a locale setting warning from Perl.  See here for the reason and fix:
-https://stackoverflow.com/questions/2499794/how-to-fix-a-locale-setting-warning-from-perl
 
 ### Quick start for Mac OSX
 
-Note that the following instructions assume you have MacPorts (https://www.macports.org) installed.  In principle you can use either Open MPI or MPICH as an MPI distribution to run CitcomS.  However, unfortunately the LLDB (debugger) prefers Open MPI, whereas valgrind prefers MPICH.  Therefore I install both MPI distributions and switch between them using ```sudo port select --set mpi```.
+The following instructions assume you have MacPorts (https://www.macports.org) installed, but you can also use a different package manager (e.g. Homebrew) or install the prerequisite software from source.   
 
-#### Install build tools:
+#### 1. Install build tools:
 
 ```sudo port install automake autoconf libtool```
 
-Note that you should use the command ```glibtoolize```, since ```libtool``` already exists on Mac OSX although it is not the GNU version.  So MacPorts uses a program name transform.  This means you should replace ```libtoolize``` in ```mymake.py``` with ```glibtoolize```.
+Note that ```libtool``` already exists on Mac OSX although it is not the GNU version.  Therefore, MacPorts uses a program name transform such that you must replace ```libtoolize``` in ```mymake.py``` with ```glibtoolize```.
 
-#### MPI option 1. Install Open MPI and HDF5 (later is probably optional):
+#### 2. Install an MPI distribution
 
-```sudo port install openmpi```
+#### 2a. MPI option 1: Install Open MPI (and optionally, HDF5)
 
-```sudo port install hdf5 +openmpi```
+```
+sudo port install openmpi
+sudo port install hdf5 +openmpi
+sudo port select --set mpi openmpi-mp-fortran
+```
 
-```sudo port select --set mpi openmpi-mp-fortran```
+#### 2b. MPI option 2: Install MPICH
 
-#### and/or MPI option 2. Install MPICH
+```
+sudo port install mpich
+sudo port select --set mpi mpich-mp-fortran
+```
 
-```sudo port install mpich```
-
-```sudo port select --set mpi mpich-mp-fortran```
-
-#### mymake.py
-
-To compile on a Mac, ensure you have edited ```mymake.py``` as follows:
+#### 3. Edit ```mymake.py``` in ```src/```
 
 1. Replace ```libtoolize``` with ```glibtoolize```
-1. (Optional) Add ```CFLAGS=-g -O0 CXXFLAGS=-g -O0``` to the compile command.  This ensures that valgrind and LLDB will be able to identify line numbers of problematic code precisely.
+1. (Optional, if you are wanting to locally debug and test code) Add ```CFLAGS=-g -O0 CXXFLAGS=-g -O0``` to the compile command.  This ensures that valgrind and LLDB will be able to identify line numbers of problematic code precisely.
 
-#### Install valgrind (memory leak checker):
+#### 4. Configure and install
 
-```sudo port install valgrind-devel```
+```./mymake.py```
 
-or install version 3.14 from the website
+#### 5. Run
 
-#### Install LLDB (debugger)
-
-This comes with Xcode
-
-#### To run a uniprocessor job:
+An example command to run a uniprocessor job is:
 
 ```mpirun -np 1 CitcomSRegional input.sample```
 
-## Features that are implemented
+#### Developer notes
 
-A data assimilation manual is hosted in an svn repository located at ```https://svn.gps.caltech.edu/repos/docs/data_assimilation```.  This manual contains information about the parameters that are used, both for the convection code and also the pre- and post-processing scripts.  Access to the svn can be requested.  Some options in the manual might be out-dated, so prioritise the options in this README.
+1. I found that a popular debugger (LLDB) seems to prefer Open MPI, whereas a memory management tool (valgrind) prefers MPICH.  Therefore I installed both MPI distributions and switch between them using ```sudo port select --set mpi```.
+2. The Valgrind development cycle is always lagging behind Mac, so Valgrind will probably not work on your latest Mac.  However, you can try downloading a version from the website or trying the development version:
+```sudo port install valgrind-devel```
+3. LLDB (debugger) comes with Xcode, and is therefore already available on your Mac.
 
-### Slab and lithosphere assimilation (grep for 'DJB SLAB')
+
+## Examples and User Guide
+
+Example input and output configuration files are provided in```examples``` (there is also a ```src/examples``` directory, but these are the original examples provided by CitcomS without the addition of data assimilation examples).  A simple global model to first run is ```examples/Full```.
+
+A user guide is available at ```docs/user_guide```, although some of this content relates to the original pyre version of the code that has been superceded by this version.  Hence some of the parameter names have changed.  Please refer to the code itself and/or this README.md to confirm the parameter names.  An ongoing project is to update this user guide.
+
+## Code modifications and Parameter Names
+
+The user guide contains information about the input parameters, both for the C code and also the pre- and post-processing python scripts.  Some options in the user guide might be outdated, so prioritise the options in this README.
+
+### Slab and lithosphere assimilation
+These parts of the code are commented with 'DJB SLAB'
+
 1. ```lith_age_depth_function``` (bool)
 1. ```lith_age_exponent``` (double)
 1. ```lith_age_min``` (double)
@@ -106,12 +108,16 @@ A data assimilation manual is hosted in an svn repository located at ```https://
 1. ```velocity_internal_file``` (char)
 1. ```sten_velo``` as an output option (char)
 
-### Composition (grep for 'DJB COMP')
+### Composition
+These parts of the code are commented with 'DJB COMP'
+
 1. ```hybrid_method``` (bool)
-1. increased memory for tracer arrays (icushion parameter)
+1. increased memory for tracer arrays (```icushion``` parameter)
 1. turn off tracer warnings using ```itracer_warnings=off``` in input cfg file
 
-### Viscosity structures (grep for 'DJB VISC')
+### Viscosity structures
+These parts of the code are commented with 'DJB VISC'
+
 1. case 20, used in Flament et al. (2013, 2014)
 1. case 21, used in Flament et al. (2014), model TC8
 1. case 22, used in Flament et al. (2014), model TC7
@@ -126,7 +132,9 @@ A data assimilation manual is hosted in an svn repository located at ```https://
 1. case 117, used by Hassan
 1. case 118, used by Hassan
 
-### Output time (grep for 'DJB TIME')
+### Output time
+These parts of the code are commented with 'DJB TIME'
+
 1. output data in regular increments of age (Myr) as well as/rather than number of time steps
     - ```storage_spacing_Myr``` (int)
     - if you only want to output data by age (Ma), you should set ```storage_spacing``` to a large integer value in order to suppress the regular time outputs
@@ -134,7 +142,9 @@ A data assimilation manual is hosted in an svn repository located at ```https://
 1. exit time loop when the model reaches negative ages (currently hard-coded to be <0 Ma)
     - ```exit_at_present``` (bool)
     
-### Extended-Boussinesq modifications (grep for 'DJB EBA')
+### Extended-Boussinesq modifications
+These parts of the code are commented with 'DJB EBA'
+
 1. depth-dependent scaling for the dissipation number (Di)
     - Di is typically defined at the surface, using surface values of alpha, cp, and g
     - a depth-dependent scaling (typically between 0 and 1) is introduced to additionally scale Di
@@ -147,7 +157,9 @@ A data assimilation manual is hosted in an svn repository located at ```https://
     - [column 4] heat capacity
     - [column 5] dissipation number scaling
 
-### Output (grep for 'DJB OUT')
+### Output
+These parts of the code are commented with 'DJB OUT'
+
 1. Composition and temperature spherical harmonics as an output option (char).  See issue, since output for comp only occurs for the last comp field.
     - ```comp_sph```
     - ```temp_sph```
@@ -158,15 +170,19 @@ A data assimilation manual is hosted in an svn repository located at ```https://
     - ```tracer_dens```
 1. Divergence (div/v) at the nodes.  Useful for debugging convergence issues.
     - ```divv```
-1. Fixed pid file output for lith_age_min, z_interface, and output_optional
+1. Fixed pid file output for ```lith_age_min```, ```z_interface```, and ```output_optional```
 1. Fixed various valgrind uninitialised variable warnings relating to the writing of the pid file
 
-### Topography (grep for 'DJB TOPO')
+### Topography
+These parts of the code are commented with 'DJB TOPO'
+
 1. Parameter to remove buoyancy above a given znode for computing dynamic topography
     - ```remove_buoyancy_above_znode``` (int)
 
-### Ultra-low velocity zone (grep for 'DJB ULVZ")
-1. Modifications to enable ULVZ modelling as in Bower et al. (2011).  These amendments will not affect the data assimilation.
+### Ultra-low velocity zone
+These parts of the code are commented with 'DJB ULVZ'.  These amendments will not affect data assimilation, but are included for completeness.
+
+1. Modifications to enable ULVZ modelling as in Bower et al. (2011).
     - domain volumes for absolute tracer method for different initial ULVZ volumes
     - permeable domain for regional models
     - sine perturbation for initial temperature
