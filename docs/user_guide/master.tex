@@ -1200,149 +1200,155 @@ done
 \end{verbatim}
 You need to change the ages in the script based on your own cases.
 
-\section{Compiling and running CitcomS for data assimilation}
-\subsection{Obtain the base code}
-Parts of the following instructions are taken directly from the CitcomS manual and you should read sections 2.10--2.13.3 of the current (v3.2.0) user manual available from the CIG website \url{http://www.geodynamics.org/cig/software/CitcomS}.
 
-In addition to the usual system requirements, you will need a handful of additional development tools installed in order to work with the source from the CIG software repository.  First, you must have a Subversion client installed.  To check, type svn; it should return a usage message.
+%%% DJB 11/05/2020: all of the following relates to the legacy pyre version of the code, and is no longer relevant
+%%% Commented out for the time being, but can surely remove soon
+%%%
+%\section{Compiling and running CitcomS for data assimilation}
+%\subsection{Obtain the base code}
+%Parts of the following instructions are taken directly from the CitcomS manual and you should read sections 2.10--2.13.3 of the current (v3.2.0) user manual available from the CIG website \url{http://www.geodynamics.org/cig/software/CitcomS}.
 
-\tm{svn} \\
-\tmo{Type `svn help' for usage.}
+%In addition to the usual system requirements, you will need a handful of additional development tools installed in order to work with the source from the CIG software repository.  First, you must have a Subversion client installed.  To check, type svn; it should return a usage message.
 
-For more information on Subversion, visit the Subversion website \url{http://subversion.apache.org}.
-Second, you must have the GNU tools Autoconf, Automake, and Libtool installed.  To check, enter the following commands:
-\begin{itemize}
-\item \tm{autoconf --version}
-\item \tm{automake --version}
-\item \tm{libtoolize --version}
-\end{itemize}
-To check out the latest version of CitcomS, use the svn checkout command:
+%\tm{svn} \\
+%\tmo{Type `svn help' for usage.}
 
-\tm{svn checkout https://geodynamics.org/svn/cig/mc/3D/CitcomS/trunk CitcomS-assim}
+%For more information on Subversion, visit the Subversion website \url{http://subversion.apache.org}.
+%Second, you must have the GNU tools Autoconf, Automake, and Libtool installed.  To check, enter the following commands:
+%\begin{itemize}
+%\item \tm{autoconf --version}
+%\item \tm{automake --version}
+%\item \tm{libtoolize --version}
+%\end{itemize}
+%To check out the latest version of CitcomS, use the svn checkout command:
 
-This will create the local directory `CitcomS-assim' (if it doesn't already exist) and fill it with the latest CitcomS source from the CIG software repository.  The CitcomS directory thus created is called a working copy.  Use the update command to obtain version 16400:
+%\tm{svn checkout https://geodynamics.org/svn/cig/mc/3D/CitcomS/trunk CitcomS-assim}
 
-\tm{cd CitcomS-assim}\\
-\tm{svn up -r16400}
+%This will create the local directory `CitcomS-assim' (if it doesn't already exist) and fill it with the latest CitcomS source from the CIG software repository.  The CitcomS directory thus created is called a working copy.  Use the update command to obtain version 16400:
 
-Unfortunately there is a bug in version 16400 that produces incorrect mechanical boundary conditions.  To solve this problem we `back-out' the following files in the `lib' directory to version 16022 by issuing the following commands:
+%\tm{cd CitcomS-assim}\\
+%\tm{svn up -r16400}
 
-\tm{cd lib}\\
-\tm{svn up -r16022 Ggrd\_handling.c Full\_boundary\_conditions.c BC\_util.c Topo\_gravity.c \\Regional\_boundary\_conditions.c }
+%Unfortunately there is a bug in version 16400 that produces incorrect mechanical boundary conditions.  To solve this problem we `back-out' the following files in the `lib' directory to version 16022 by issuing the following commands:
 
-At this stage you now have an operational `base code'.  However, note that ggrd functionality is likely broken in this base code because it was still being developed at this time (by a different user).  However, we do not use ggrd functionality for data assimilation.
+%\tm{cd lib}\\
+%\tm{svn up -r16022 Ggrd\_handling.c Full\_boundary\_conditions.c BC\_util.c Topo\_gravity.c \\Regional\_boundary\_conditions.c }
 
-\subsection{Patch the base code for data assimilation}
+%At this stage you now have an operational `base code'.  However, note that ggrd functionality is likely broken in this base code because it was still being developed at this time (by a different user).  However, we do not use ggrd functionality for data assimilation.
 
-\textbf{Important:} The data assimilation patches were specifically written for the Pyre version of CitcomS and therefore are not expected to work with the C-version without further development.
+%\subsection{Patch the base code for data assimilation}
 
-There is another svn that contains the modified files that are necessary to patch the base code to provide data assimilation functionality.  Use the svn checkout command (note that you will need checkout privileges):
+%\textbf{Important:} The data assimilation patches were specifically written for the Pyre version of CitcomS and therefore are not expected to work with the C-version without further development.
 
-\tm{svn checkout https://svn.gps.caltech.edu/repos/CitcomS CitcomS-patch}
+%There is another svn that contains the modified files that are necessary to patch the base code to provide data assimilation functionality.  Use the svn checkout command (note that you will need checkout privileges):
 
-Manually copy-and-replace the modified files from CitcomS-patch/CitcomS into your working copy of CitcomS-assim.   Ensure that you copy the modified files into exactly the same directory structure as they appear in CitcomS-patch/CitcomS.
+%\tm{svn checkout https://svn.gps.caltech.edu/repos/CitcomS CitcomS-patch}
 
-Below is a complete list of files that should be copied:
-\begin{itemize}
-\item CitcomS/Components/BC.py
-\item CitcomS/Components/Param.py
-\item CitcomS/Components/Tracer.py
-\item CitcomS/Solver/Solver.py
-\item lib/Advection\_diffusion.c
-\item lib/BC\_util.c
-\item lib/Composition\_related.c
-\item lib/composition\_related.h
-\item lib/Convection.c
-\item lib/Element\_calculations.c
-\item lib/Full\_boundary\_conditions.c
-\item lib/Full\_lith\_age\_read\_files.c
-\item lib/Full\_read\_input\_from\_files.c 
-\item lib/Full\_solver.c
-\item lib/global\_defs.h
-\item lib/Instructions.c
-\item lib/Lith\_age.c
-\item lib/Output.c
-\item lib/Problem\_related.c
-\item lib/Regional\_boundary\_conditions.c
-\item lib/Regional\_lith\_age\_read\_files.c
-\item lib/Regional\_read\_input\_from\_files.c
-\item lib/Regional\_solver.c
-\item lib/solver.h
-\item lib/Stokes\_flow\_Incomp.c
-\item lib/tracer\_defs.h
-\item lib/Tracer\_setup.c
-\item lib/Viscosity\_structures.c
-\item module/bindings.c
-\item module/misc.c
-\item module/misc.h
-\item module/setProperties.c
-\item m4/cit\_python.m4 \footnote{m4/cit\_python.m4 was changed around August 2011 by the pylith team to fix a bug in Merlin.  However, the change disabled the automatic download of Pythia that we require for CitcomS.  Therefore it may be necessary to copy-and-replace this file to prevent the code from exiting with the following error when you run \tm{./configure}:\\
-\tmo{configure: Generating Python egg info\\checking for egg-related flags... failed\\configure: error: cannot scan Python eggs for flags}}
-\end{itemize}
+%Manually copy-and-replace the modified files from CitcomS-patch/CitcomS into your working copy of CitcomS-assim.   Ensure that you copy the modified files into exactly the same directory structure as they appear in CitcomS-patch/CitcomS.
 
-In addition, the ``deps'' directory includes merlin and pythia versions that are currently used for the Citerra installation.  If \tm{./configure} is unable to download the egg files, try copying and pasting the ``deps'' directory into your CitcomS-assim directory.
+%Below is a complete list of files that should be copied:
+%\begin{itemize}
+%\item CitcomS/Components/BC.py
+%\item CitcomS/Components/Param.py
+%\item CitcomS/Components/Tracer.py
+%\item CitcomS/Solver/Solver.py
+%\item lib/Advection\_diffusion.c
+%\item lib/BC\_util.c
+%\item lib/Composition\_related.c
+%\item lib/composition\_related.h
+%\item lib/Convection.c
+%\item lib/Element\_calculations.c
+%\item lib/Full\_boundary\_conditions.c
+%\item lib/Full\_lith\_age\_read\_files.c
+%\item lib/Full\_read\_input\_from\_files.c 
+%\item lib/Full\_solver.c
+%\item lib/global\_defs.h
+%\item lib/Instructions.c
+%\item lib/Lith\_age.c
+%\item lib/Output.c
+%\item lib/Problem\_related.c
+%\item lib/Regional\_boundary\_conditions.c
+%\item lib/Regional\_lith\_age\_read\_files.c
+%\item lib/Regional\_read\_input\_from\_files.c
+%\item lib/Regional\_solver.c
+%\item lib/solver.h
+%\item lib/Stokes\_flow\_Incomp.c
+%\item lib/tracer\_defs.h
+%\item lib/Tracer\_setup.c
+%\item lib/Viscosity\_structures.c
+%\item module/bindings.c
+%\item module/misc.c
+%\item module/misc.h
+%\item module/setProperties.c
+%\item m4/cit\_python.m4 \footnote{m4/cit\_python.m4 was changed around August 2011 by the pylith team to fix a bug in Merlin.  However, the change disabled the automatic download of Pythia that we require for CitcomS.  Therefore it may be necessary to copy-and-replace this file to prevent the code from exiting with the following error when you run \tm{./configure}:\\
+%\tmo{configure: Generating Python egg info\\checking for egg-related flags... failed\\configure: error: cannot scan Python eggs for flags}}
+%\end{itemize}
 
-\subsection{Load modules (Citerra specific)}
-On Citerra you need to load certain modules in the terminal window each time you want to compile your CitcomS code.  You do not need to load the modules to submit jobs to the queue manager; they are only required when compiling the code.  I use the intel compiler and mpi implementation:
+%In addition, the ``deps'' directory includes merlin and pythia versions that are currently used for the Citerra installation.  If \tm{./configure} is unable to download the egg files, try copying and pasting the ``deps'' directory into your CitcomS-assim directory.
 
-\tm{module load intel/intel-12 intel/impi}
+%\subsection{Load modules (Citerra specific)}
+%On Citerra you need to load certain modules in the terminal window each time you want to compile your CitcomS code.  You do not need to load the modules to submit jobs to the queue manager; they are only required when compiling the code.  I use the intel compiler and mpi implementation:
 
-You can check the modules are loaded correctly:
+%\tm{module load intel/intel-12 intel/impi}
 
-\tm{module list}
+%You can check the modules are loaded correctly:
 
-At present, the default Python version on Citerra is 2.4.3, which is suitable for compiling CitcomS with Pyre.  According to the CitcomS manual (v3.2.0), ``Pyre in CitcomS does not work with Python 2.7 or higher'', although I think incompatibilities have also been reported with some versions of Python 2.6.
-\subsection{Compile CitcomS}
-Navigate to the top level of your CitcomS code (CitcomS-assim) and run the following commands:
-\begin{itemize}
-\item \tm{make distclean} \footnote{Remove all files made by previous builds.}
-\item \tm{autoreconf -i --force}
+%\tm{module list}
+
+%At present, the default Python version on Citerra is 2.4.3, which is suitable for compiling CitcomS with Pyre.  According to the CitcomS manual (v3.2.0), ``Pyre in CitcomS does not work with Python 2.7 or higher'', although I think incompatibilities have also been reported with some versions of Python 2.6.
+%\subsection{Compile CitcomS}
+%Navigate to the top level of your CitcomS code (CitcomS-assim) and run the following commands:
+%\begin{itemize}
+%\item \tm{make distclean} \footnote{Remove all files made by previous builds.}
+%\item \tm{autoreconf -i --force}
 % \item \tm{rm -r deps}
-\item \tm{./configure}
-\item \tm{make}
-\end{itemize}
+%\item \tm{./configure}
+%\item \tm{make}
+%\end{itemize}
 
-Note that the assimilation framework requires CitcomS be installed with Pyre (see CitcomS manual).
-\subsection{Change the Scheduler}
-Most users have a configuration file that contains the scheduler information, although that you can also include the scheduler commands in a regular CitcomS .cfg file.
+%Note that the assimilation framework requires CitcomS be installed with Pyre (see CitcomS manual).
+%\subsection{Change the Scheduler}
+%Most users have a configuration file that contains the scheduler information, although that you can also include the scheduler commands in a regular CitcomS .cfg file.
 
-The following steps assume that \verb#$HOME/.pyre/CitcomS/CitcomS.cfg# exists.  If it doesn't, create it.
+%The following steps assume that \verb#$HOME/.pyre/CitcomS/CitcomS.cfg# exists.  If it doesn't, create it.
 %\item Backup original configuration file, which should contain the LSF scheduler.\begin{verbatim}
 %cp $HOME/.pyre/CitcomS/CitcomS.cfg $HOME/.pyre/CitcomS/CitcomS_lsf.cfg
 %\end{verbatim}
-Ensure your \verb#$HOME/.pyre/CitcomS/CitcomS.cfg# looks exactly like this:
+%Ensure your \verb#$HOME/.pyre/CitcomS/CitcomS.cfg# looks exactly like this:
 
-\begin{verbatim}
+%\begin{verbatim}
 
-[CitcomS]
-scheduler = pbs
+%[CitcomS]
+%scheduler = pbs
 
-[CitcomS.launcher]
-command = /opt/intel/impi/4.0.3.008/bin/mpirun -np ${nodes} -machinefile ${PBS_NODEFILE}
+%[CitcomS.launcher]
+%command = /opt/intel/impi/4.0.3.008/bin/mpirun -np ${nodes} -machinefile ${PBS_NODEFILE}
 
-[CitcomS.job]
-queue = default
-\end{verbatim}
-There is also a \verb#[CitcomS.pbs]# group, but you shouldn't need to use this unless you wish to specify advanced options with your job submission.
+%[CitcomS.job]
+%queue = default
+%\end{verbatim}
+%There is also a \verb#[CitcomS.pbs]# group, but you shouldn't need to use this unless you wish to specify advanced options with your job submission.
 
-You should now be able to submit and run jobs.
-\subsection{Monitor jobs (Citerra specific)}
-Citerra uses the Maui scheduler and Torque resource manager, and the commands are a little different from LSF.
-\begin{itemize}
-\item To view jobs in the queue: \tm{showq} or \tm{qstat}
-\item To diagnose a job: \tm{checkjob}
-\item To delete a job: \tm{qdel}
-\end{itemize}
-\subsection{Path (bash specific)}
-If you are only working with one installation of CitcomS-assim, or have a preferred default, then you can add the following lines to your \$HOME/.bash\_profile so you can call the binary by simply typing \tm{CitcomS} rather than the full path name.  Change the CitcomS\_DIR variable to the path of your CitcomS-assim directory.  For example, your modified \$HOME/.bash\_profile will contain entries similar to these:
-\begin{verbatim}
-CitcomS_DIR=cig/CitcomS
-export PATH=$HOME/$CitcomS_DIR/bin:$PATH
-\end{verbatim}
-Finally, remember to apply your changes by re-sourcing:\\
-\tm{source \$HOME/.bash\_profile}
+%You should now be able to submit and run jobs.
+%\subsection{Monitor jobs (Citerra specific)}
+%Citerra uses the Maui scheduler and Torque resource manager, and the commands are a little different from LSF.
+%\begin{itemize}
+%\item To view jobs in the queue: \tm{showq} or \tm{qstat}
+%\item To diagnose a job: \tm{checkjob}
+%\item To delete a job: \tm{qdel}
+%\end{itemize}
+%\subsection{Path (bash specific)}
+%If you are only working with one installation of CitcomS-assim, or have a preferred default, then you can add the following lines to your \$HOME/.bash\_profile so you can call the binary by simply typing \tm{CitcomS} rather than the full path name.  Change the CitcomS\_DIR variable to the path of your CitcomS-assim directory.  For example, your modified \$HOME/.bash\_profile will contain entries similar to these:
+%\begin{verbatim}
+%CitcomS_DIR=cig/CitcomS
+%export PATH=$HOME/$CitcomS_DIR/bin:$PATH
+%\end{verbatim}
+%Finally, remember to apply your changes by re-sourcing:\\
+%\tm{source \$HOME/.bash\_profile}
 
 \subsection{Assimilation parameters}
+Note that some of these may only relate to the legacy pyre version of the code.  See README.md at \url{https://github.com/EarthByte/citcoms} for a more recent list of parameter names relevant to the latest version of the code.
+
 \label{ss:assim_param}
 CitcomS with assimilation includes several new parameters that can be included in the input model *.cfg file:
 \begin{itemize}
