@@ -90,7 +90,7 @@ Example input and output configuration files are provided in```examples``` (ther
 
 A user guide is available at ```docs/user_guide```, although some of this content relates to the original pyre version of the code that has been superceded by this version.  Hence some of the parameter names have changed.  Please refer to the code itself and/or this README.md to confirm the parameter names.  An ongoing project is to update this user guide.
 
-## Code modifications and Parameter Names
+## Code Modifications and Parameter Names
 
 The user guide contains information about the input parameters, both for the C code and also the pre- and post-processing python scripts.  Some options in the user guide might be outdated, so prioritise the options in this README.
 
@@ -187,6 +187,12 @@ These parts of the code are commented with 'DJB ULVZ'.  These amendments will no
     - permeable domain for regional models
     - sine perturbation for initial temperature
 
+## Affiliated codes
+
+A plume detection code from Rakib Hassan's thesis work is available at
+https://github.com/rh-downunder/plume-tracker
+
+<!--
 ## Dan's work area follows
 
 ### Rakib's code
@@ -244,6 +250,4 @@ See diff/ directory for complete record
 1. Stokes\_flow\_incom -> divv calculation for output COMPLETE
 1. tracer\_defs.h -> COMPLETE
 1. Viscosity\_structure.c -> COMPLETE
-
-plume detection code from Rakib Hassan's thesis work can be found here
-https://github.com/rh-downunder/plume-tracker
+-->
