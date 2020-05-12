@@ -47,7 +47,7 @@ cd src/
 ./mymake.py
 ```
 
-To run jobs, you will need to setup a job submission script.  See a slurm example in jobsubmit/.
+To run jobs, you will need to setup a job submission script.  See a slurm example in ```jobsubmit/```.
 
 
 ### Quick start for Mac OSX
