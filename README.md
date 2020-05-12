@@ -1,3 +1,19 @@
+- [CitcomS with Data Assimilation](#citcoms-with-data-assimilation)
+    - [Citation](#citation)
+    - [Installation](#installation)
+        - [Quick start for a cluster](#quick-start-for-a-cluster)
+        - [Quick start for Mac OSX](#quick-start-for-mac-osx)
+    - [Examples and User Guide](#examples-and-user-guide)
+    - [Code Modifications and Parameter Names](#code-modifications-and-parameter-names)
+        - [Slab and lithosphere assimilation](#slab-and-lithosphere-assimilation)
+        - [Composition](#composition)
+        - [Viscosity structures](#viscosity-structures)
+        - [Time output](#time-output)
+        - [Extended-Boussinesq modifications](#extended-boussinesq-modifications)
+        - [Output fields](#output-fields)
+        - [Topography](#topography)
+    - [Affiliated codes](#affiliated-codes)
+
 # CitcomS with Data Assimilation
 
 This repository *only* contains the C code that implements data assimilation in CitcomS using pregenerated input files.  There are other python scripts that generate the *input* data and these are stored in a different svn repository hosted at Caltech.
@@ -132,7 +148,7 @@ These parts of the code are commented with 'DJB VISC'
 1. case 117, used by Hassan
 1. case 118, used by Hassan
 
-### Output time
+### Time output
 These parts of the code are commented with 'DJB TIME'
 
 1. output data in regular increments of age (Myr) as well as/rather than number of time steps
@@ -157,7 +173,7 @@ These parts of the code are commented with 'DJB EBA'
     - [column 4] heat capacity
     - [column 5] dissipation number scaling
 
-### Output
+### Output fields
 These parts of the code are commented with 'DJB OUT'
 
 1. Composition and temperature spherical harmonics as an output option (char).  See issue, since output for comp only occurs for the last comp field.
