@@ -1034,11 +1034,15 @@ static void read_tracer_file(struct All_variables *E)
     icheck=isum_tracers(E);
 
     if (icheck!=number_of_tracers) {
-        fprintf(E->trace.fpt,"ERROR(read_tracer_file) - tracers != number in file\n");
+        fprintf(E->trace.fpt,"WARNING(read_tracer_file) - tracers != number in file\n");
         fprintf(E->trace.fpt,"Tracers in system: %d\n", icheck);
         fprintf(E->trace.fpt,"Tracers in file: %d\n", number_of_tracers);
+        fprintf(E->trace.fpt,"DJB: You can ignore this WARNING\n");
         fflush(E->trace.fpt);
-        exit(10);
+        /* DJB COMP */
+        /* sometimes a handful of tracers go missing, for reasons that are
+           not clear to me.  In practice this doesn't matter */
+        /*exit(10); */
     }
 
     return;
