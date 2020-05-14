@@ -1,5 +1,6 @@
 - [CitcomS with Data Assimilation](#citcoms-with-data-assimilation)
     - [Citation](#citation)
+    - [Obtaining the code](#obtaining-the-code)
     - [Installation](#installation)
         - [Quick start for a cluster](#quick-start-for-a-cluster)
         - [Quick start for Mac OSX](#quick-start-for-mac-osx)
@@ -13,6 +14,7 @@
         - [Output fields](#output-fields)
         - [Topography](#topography)
     - [Affiliated codes](#affiliated-codes)
+    - [Frequently asked questions (FAQ)](#faq)
 
 # CitcomS with Data Assimilation
 
@@ -24,21 +26,46 @@ Bower, D.J., M. Gurnis, and N. Flament (2015), Assimilating lithosphere and slab
 
 Open access version: https://eartharxiv.org/9aey5/
 
+## Obtaining the code
+
+Please follow the standard development practice of forking this repository and then cloning your fork.  See, for example:
+
+https://blog.scottlowe.org/2015/01/27/using-fork-branch-git-workflow/
+
+https://help.github.com/articles/fork-a-repo/
+
+
 ## Installation
+
+### Directory structure
+
+- ```src/``` is the CitcomS source code with data assimilation
+- ```docs/``` contains a rudimentary (and somewhat outdated) user guide
+- ```deprecated/``` contains previous versions of the code that should not be used anymore (but kept for reference)
+- ```jobsubmit/``` contains example job submission scripts for cluster environments
+
 
 ### Quick start for a cluster
 
-The source code is in `src/` and the only prerequisite for installation is an MPI distribution.  Clusters can often load an MPI distribution using `modules`
+The following instructions clone this repository, although in practice you'll probably prefer to clone your own fork of this repository.  The instructions also assume you can load an MPI distribution using ```modules```, which is standard on most clusters.  For reasons relating to compilers, the cluster and node setup, some MPI versions may be preferred for your particular cluster.  You should ask your HPC system administrators.  Note that ```module load hdf5``` is only reqired for HDF5 support.  For example, for NCI Australia (Gadi):
 
-For example, at the University of Bern:
+```
+git clone https://github.com/EarthByte/citcoms.git citcoms_assim
+cd citcoms_assim
+make distclean
+autoreconf -ivf
+module load openmpi
+module load hdf5
+export LD=ld
+./configure
+make
+```
+
+At the University of Bern you can use the following MPI distribution:
 
 ```module load iomkl/2018b```
 
-For NCI Australia:
-
-```module load openmpi```
-
-Python 2 is also necessary for running a script that configures and builds the C code: this script is ```mymake.py```.  You may therefore also need to run ```module load python2``` to provide a python2 distribution.  For reasons relating to compilers, the cluster and node setup, some MPI versions may be preferred for your particular cluster.  You should ask your HPC system administrators.  Install CitcomS v3.3.1 with data assimilation using these commands (update the ```module``` commands as appropriate):
+<!--Python 2 is also necessary for running a script that configures and builds the C code: this script is ```mymake.py```.  You may therefore also need to run ```module load python2``` to provide a python2 distribution.   
 
 ```
 module load openmpi
@@ -46,8 +73,9 @@ module load python2
 cd src/
 ./mymake.py
 ```
+-->
 
-To run jobs, you will need to setup a job submission script.  See a slurm example in ```jobsubmit/```.
+To run jobs, you will need to setup a job submission script and examples are provided in ```jobsubmit/```.
 
 
 ### Quick start for Mac OSX
@@ -267,3 +295,6 @@ See diff/ directory for complete record
 1. tracer\_defs.h -> COMPLETE
 1. Viscosity\_structure.c -> COMPLETE
 -->
+
+## FAQ
+1. **Why isn't the data assimilation method included in the master version of CitcomS hosted by CIG (https://geodynamics.org)?** To implement data assimilation required changing some functions related to boundary conditions, such that (probably) some of the original functionality is broken (at least for regional models).  Whilst I tried to maintain backwards compatability as much as possible, without a comprehensive series of tests I cannot guarantee that some original functionality has not been disabled.
