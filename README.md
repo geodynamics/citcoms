@@ -84,17 +84,18 @@ The following instructions assume you have MacPorts (https://www.macports.org) i
 
 #### 1. Install build tools:
 
+These commands are for MacPorts:
+
 ```sudo port install automake autoconf libtool```
 
-Note that ```libtool``` already exists on Mac OSX although it is not the GNU version.  Therefore, MacPorts uses a program name transform such that you must replace ```libtoolize``` in ```mymake.py``` with ```glibtoolize```.
+<!--Note that ```libtool``` already exists on Mac OSX although it is not the GNU version.  Therefore, MacPorts uses a program name transform such that you must replace ```libtoolize``` in ```mymake.py``` with ```glibtoolize```.-->
 
 #### 2. Install an MPI distribution
 
-#### 2a. MPI option 1: Install Open MPI (and optionally, HDF5)
+#### 2a. MPI option 1: Install Open MPI
 
 ```
 sudo port install openmpi
-sudo port install hdf5 +openmpi
 sudo port select --set mpi openmpi-mp-fortran
 ```
 
@@ -105,16 +106,18 @@ sudo port install mpich
 sudo port select --set mpi mpich-mp-fortran
 ```
 
-#### 3. Edit ```mymake.py``` in ```src/```
+#### 3. Obtain code and build
 
-1. Replace ```libtoolize``` with ```glibtoolize```
-1. (Optional, if you are wanting to locally debug and test code) Add ```CFLAGS=-g -O0 CXXFLAGS=-g -O0``` to the compile command.  This ensures that valgrind and LLDB will be able to identify line numbers of problematic code precisely.
+```
+git clone https://github.com/EarthByte/citcoms.git citcoms_assim
+cd citcoms_assim
+make distclean
+autoreconf -ivf
+./configure
+make
+```
 
-#### 4. Configure and install
-
-```./mymake.py```
-
-#### 5. Run
+#### 3. Run
 
 An example command to run a uniprocessor job is:
 
@@ -122,10 +125,30 @@ An example command to run a uniprocessor job is:
 
 #### Developer notes
 
-1. I found that a popular debugger (LLDB) seems to prefer Open MPI, whereas a memory management tool (valgrind) prefers MPICH.  Therefore I installed both MPI distributions and switch between them using ```sudo port select --set mpi```.
+1. I found that a popular debugger (LLDB) seems to prefer Open MPI, whereas a memory management tool (valgrind) prefers MPICH.  Therefore I installed both MPI distributions and switch between them using
+
+        sudo port select --set mpi
 2. The Valgrind development cycle is always lagging behind Mac, so Valgrind will probably not work on your latest Mac.  However, you can try downloading a version from the website or trying the development version:
-```sudo port install valgrind-devel```
-3. LLDB (debugger) comes with Xcode, and is therefore already available on your Mac.
+
+        sudo port install valgrind-devel
+3. LLDB (debugger) comes with Xcode and is therefore already available on your Mac.
+4. I did not have success compiling with HDF5 support, which may be related to the fact that HDF5 is configured in an unsupported 'Experimental' mode when installed as a variant using MacPorts:
+
+        sudo port install openmpi
+        sudo port install hdf5 +openmpi
+        sudo port select --set mpi openmpi-mp-fortran
+
+    This returns the message:
+    
+        !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+        hdf5 will been configured in an unsupported "Experimental" mode due to selected variants. See "port variants hdf5 | grep EXPERIMENTAL" for more information.
+        !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+    And during the configuration of CitcomS:
+    
+        configure: WARNING: header 'hdf5.h' not found; disabling HDF5 support
+        
+    I did not investigate futher.
 
 
 ## Examples and User Guide
@@ -302,7 +325,7 @@ See diff/ directory for complete record
     - Reduce the total viscosity contrast in your model and limit the irregularities in viscosity structure.
     - Turn off prescribed velocity boundary conditions and see if you still receive a warning.  Generally, prescribing velocity boundary conditions presents challenges to any Stokes solver (http://lists.geodynamics.org/pipermail/cig-mc/2016-March/000699.html). Ultimately, systematically disentangling the different components of your model is the best way to identify the potential cause of the problem.
     - If you are using GPlates to export your surface velocities, increase the velocity smoothing (in GPlates) to ensure there are no abrupt jumps in surface velocity across plate boundaries.
-    - The augmented Lagrangian number is by default set to 2E3, but increasing this value by  1 to 2 orders of magnitude may help with the convergence of models with large viscosity contrast (http://en.wikipedia.org/wiki/Augmented\_Lagrangian\_method).
+    - The [augmented Lagrangian number](http://en.wikipedia.org/wiki/Augmented_Lagrangian_method) is by default set to 2E3, but increasing this value by  1 to 2 orders of magnitude may help with the convergence of models with large viscosity contrast .
     - Finally, you could look to tweak some of the other solver parameters, notably relating to the multigrid solver.  But this obviously requires some knowledge of multigrid solvers and how to optimise solvers.
     - Clearly, if you find optimal solver parameters for data assimilation models, please let me know so I can update this FAQ!
     
