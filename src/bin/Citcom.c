@@ -194,11 +194,28 @@ int main(argc,argv)
 
   /* DJB TIME */
   age_Ma = E->control.start_age; // initialise
+
+  // DJB debugging
+  if (E->parallel.me == 0)  {
+      fprintf(E->fp,"DJB debug age_Ma %g\n",age_Ma); // Input parameters taken from file '%s'\n",argv[1]);
+      //fprintf(stderr,"Initialization complete after %g seconds\n\n",initial_time);
+      //fprintf(E->fp,"Initialization complete after %g seconds\n\n",initial_time);
+      fflush(E->fp);
+  }
+
   if (E->data.timedir >=0) {
       target_age_Ma = E->control.start_age - E->control.record_every_Myr;
   }
   else{
       target_age_Ma = E->control.start_age + E->control.record_every_Myr;
+  }
+
+  // DJB debugging
+  if (E->parallel.me == 0)  {
+      fprintf(E->fp,"DJB debug target_age_Ma %g\n",target_age_Ma); // Input parameters taken from file '%s'\n",argv[1]);
+      //fprintf(stderr,"Initialization complete after %g seconds\n\n",initial_time);
+      //fprintf(E->fp,"Initialization complete after %g seconds\n\n",initial_time);
+      fflush(E->fp);
   }
 
   /* this section advances the time step;
@@ -255,6 +272,14 @@ int main(argc,argv)
                 target_age_Ma += E->control.record_every_Myr; // update
             }
         }
+    }
+
+    // DJB debugging
+    if (E->parallel.me == 0)  {
+      fprintf(E->fp,"DJB debug age_Ma %g\n",age_Ma); // Input parameters taken from file '%s'\n",argv[1]);
+      fprintf(E->fp,"DJB debug dim_output %d\n",dim_output); // Input parameters taken from file '%s'\n",argv[1]);
+      fprintf(E->fp,"DJB debug target_age_Ma %g\n",target_age_Ma); // Input parameters taken from file '%s'\n",argv[1]);
+      fflush(E->fp);
     }
 
     /* DJB TIME now an additional condition to exit the loop */
