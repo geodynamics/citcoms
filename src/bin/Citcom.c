@@ -260,7 +260,8 @@ int main(argc,argv)
     if(E->control.record_every_Myr!=0){
         if (E->data.timedir >= 0) { /* forward convection */
             age_Ma = E->control.start_age - E->monitor.elapsed_time*E->data.scalet;
-            if( (target_age_Ma-age_Ma) >= 0 ){
+            /* FIXME: since target age is wrong, this is always satisfied */
+	    if( (target_age_Ma-age_Ma) >= 0 ){
                 dim_output = 1; // update
                 target_age_Ma -= E->control.record_every_Myr; // update
             }        
