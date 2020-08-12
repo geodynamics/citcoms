@@ -125,6 +125,7 @@ void get_initial_elapsed_time(E)
 
     E->monitor.elapsed_time = 0.0;
 
+    /* DJB - a checkpoint restart reads in the elapsed_time after this function */
     if (E->convection.tic_method == -1) {
 
 #ifdef USE_GZDIR		/* gzdir output */
@@ -185,9 +186,19 @@ void set_elapsed_time(E)
 void set_starting_age(E)
   struct All_variables *E;
 {
-/* remember start_age is in MY */
-    if (E->control.reset_startage)
-	E->control.start_age = E->monitor.elapsed_time*E->data.scalet;
+
+   /* remember start_age is in MY */
+    /* DJB: original is below, but this behaviour makes less sense since it does
+     * not account for the time direction, or the starting age specified in the
+     * input cfg file */
+   //if (E->control.reset_startage)
+   //   E->control.start_age = E->monitor.elapsed_time*E->data.scalet;
+
+   /* DJB TIME: instead, makes more sense to use find_age_in_MY(E), which
+    * accounts for the starting age in the cfg file, and the time
+    * direction */
+   if (E->control.reset_startage)
+      E->control.start_age = find_age_in_MY(E);
 
    return;
 }
@@ -205,6 +216,10 @@ void set_starting_age(E)
 {
    float age_in_MY, e_4;
 
+   /* DJB - debugging */
+   //if (E->parallel.me == 0) fprintf(stderr,"E->control.start_age = %g Ma\n",E->control.start_age);
+   //if (E->parallel.me == 0) fprintf(stderr,"E->monitor.elapsed_time = %g\n",E->monitor.elapsed_time);
+   //if (E->parallel.me == 0) fprintf(stderr,"E->data.scalet = %g\n",E->data.scalet);
 
    e_4=1.e-4;
 
