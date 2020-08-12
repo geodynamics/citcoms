@@ -335,4 +335,4 @@ See diff/ directory for complete record
 
 1. **How do I restart a model?** To restart a model you have two options:
     1. ```tic_method=-1``` to specify a velo file, similar to starting a model.  However, now you should set ```zero_elapsed_time=0``` since you want to keep the elapsed time information from the header of the input velo file to enable continuation of elapsed time.
-    1. ```restart=1``` to resume from a checkpoint.  In this case, all of the time data is read from the checkpoint and ```zero_elapsed_time``` (and ```reset_startage```) are both not used.
+    1. ```restart=1``` to resume from a checkpoint.  In this case, all of the time data is read from the checkpoint and ```zero_elapsed_time``` (and ```reset_startage```) are both not used.  Note that ```restart=1``` takes precedence over ```tic_method=-1```.
