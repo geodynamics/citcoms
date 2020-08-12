@@ -120,7 +120,7 @@ void initial_mesh_solver_setup(struct All_variables *E)
     allocate_velocity_vars(E);
     if(chatty)fprintf(stderr,"velocity vars done\n");
 
-    /* DJB - some of this timing information is subsequently overwritten
+    /* DJB - debug some of this timing information is subsequently overwritten
      * if the user choses to restart from a checkpoint file */
     get_initial_elapsed_time(E);  /* Set elapsed time */
     set_starting_age(E);  /* set the starting age to elapsed time, if desired */
