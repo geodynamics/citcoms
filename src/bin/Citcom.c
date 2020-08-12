@@ -70,9 +70,13 @@ int main(argc,argv)
   double CPU_time0(),time,initial_time,start_time;
 
   /* DJB TIME */
-  double age_Ma; // initialised below
-  double target_age_Ma; // initialised below
-  int dim_output=0; // initialised
+  /* parameters for outputting data every dimensional time unit */
+  double age_Ma = 0.0;
+  /* beyond age_min_Ma, outputs occur every time step since it's the 
+   * simplest way to obtain output close to 0 Ma (but not negative ages) */
+  double age_min_Ma = 0.2; // minimum dimensional age
+  double target_age_Ma = 0.0;
+  int dim_output = 0;
 
   struct All_variables *E;
   MPI_Comm world;
@@ -83,7 +87,6 @@ int main(argc,argv)
     fprintf(stderr,"Usage: %s PARAMETERFILE\n", argv[0]);
     parallel_process_termination();
   }
-
 
 
   /* this section reads input, allocates memory, and set some initial values;
@@ -120,8 +123,6 @@ int main(argc,argv)
 
   /* write all config parameters to a file named pidXXXXXXXXX */
   print_all_config_parameters(E);
-
-
 
   /* this section sets the initial condition;
    * replaced by CitcomS.Controller.launch() ->
@@ -160,6 +161,38 @@ int main(argc,argv)
       initial_conditions(E);
       need_init_sol = 1;	/*  */
   }
+
+  /* DJB TIME flag for dimensional time output */
+  if(E->control.record_every_Myr!=0){
+      /* DJB TIME */
+      age_Ma = find_age_in_MY(E); // current age
+      /* loop to find the next target age, accounting for the
+       * current age */
+      target_age_Ma = E->control.start_age; /* starting point */
+      /* calculate new target age for output in Ma */
+      if (E->data.timedir >=0) {
+        while( target_age_Ma > age_Ma ){
+          target_age_Ma -= E->control.record_every_Myr;
+        }
+      }
+      else{
+        while( target_age_Ma < age_Ma ){
+          target_age_Ma += E->control.record_every_Myr;
+         }
+      }
+      /* impose non-zero minimum target age to initiate outputs
+       * every time step */
+      target_age_Ma = max( target_age_Ma, age_min_Ma );
+      if( age_Ma < age_min_Ma )
+	      dim_output = 1; // prob not req for 1st step, but here for completeness
+      if (E->parallel.me == 0)  {
+        fprintf(E->fp,"Output: Current age (Ma) = %g\n",age_Ma);
+        fprintf(E->fp,"Output: Next output age (Ma) = %g\n",target_age_Ma);
+        fflush(E->fp);
+      }
+  }
+
+
   if(need_init_sol){
     /* find first solution */
       if(E->control.pseudo_free_surf) {
@@ -190,16 +223,6 @@ int main(argc,argv)
 				   checkpoint, else leave as is to
 				   allow reusing directories */
     output_checkpoint(E);
-
-
-  /* DJB TIME */
-  age_Ma = E->control.start_age; // initialise
-  if (E->data.timedir >=0) {
-      target_age_Ma = E->control.start_age - E->control.record_every_Myr;
-  }
-  else{
-      target_age_Ma = E->control.start_age + E->control.record_every_Myr;
-  }
 
   /* this section advances the time step;
    * replaced by CitcomS.Controller.march() in Pyre. */
@@ -241,23 +264,33 @@ int main(argc,argv)
 
     /* DJB TIME flag for dimensional time output */
     if(E->control.record_every_Myr!=0){
-        if (E->data.timedir >= 0) { /* forward convection */
-            age_Ma = E->control.start_age - E->monitor.elapsed_time*E->data.scalet;
-            if( (target_age_Ma-age_Ma) >= 0 ){
+        age_Ma = find_age_in_MY(E); // current age
+    	if (E->data.timedir >= 0) { /* forward convection */
+	    if( age_Ma < target_age_Ma ){
                 dim_output = 1; // update
                 target_age_Ma -= E->control.record_every_Myr; // update
             }        
         }
         else { /* backward convection */
-            age_Ma = E->control.start_age + E->monitor.elapsed_time*E->data.scalet;
-            if( (age_Ma-target_age_Ma) >= 0 ){
+            if( age_Ma > target_age_Ma ){
                 dim_output = 1; // update
                 target_age_Ma += E->control.record_every_Myr; // update
             }
         }
+	/* impose non-zero minimum target age to initiate outputs
+	 * every time step */
+	target_age_Ma = max( target_age_Ma, age_min_Ma );
+        if( age_Ma < age_min_Ma )
+	      dim_output = 1; // always output when close to zero age
+	/* DJB TIME */
+        if (dim_output && E->parallel.me == 0)  {
+            fprintf(E->fp,"Output: Current age (Ma) = %g\n",age_Ma);
+            fprintf(E->fp,"Output: Next output age (Ma) = %g\n",target_age_Ma);
+            fflush(E->fp);
+    	}
     }
 
-    /* DJB TIME now an additional condition to exit the loop */
+    /* DJB TIME now an additional condition to exit the loop (age_Ma) */
     if( (E->control.exit_at_present) && (E->data.timedir >= 0) && (age_Ma<0.0) ){
         E->control.keep_going = 0;
     }
@@ -321,11 +354,6 @@ int main(argc,argv)
       fprintf(E->fp,"CPU total = %g & CPU = %g for step %d time = %.4e dt = %.4e  maxT = %.4e sub_iteration%d\n",CPU_time0()-start_time,CPU_time0()-time,E->monitor.solution_cycles,E->monitor.elapsed_time,E->advection.timestep,E->monitor.T_interior,E->advection.last_sub_iterations);
 
       time = CPU_time0();
-
-      /* DJB TIME */
-      if(E->control.record_every_Myr!=0){
-        fprintf(E->fp, "Current age = %g Ma\n", age_Ma);
-      }
 
     }
 

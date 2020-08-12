@@ -120,7 +120,8 @@ void initial_mesh_solver_setup(struct All_variables *E)
     allocate_velocity_vars(E);
     if(chatty)fprintf(stderr,"velocity vars done\n");
 
-
+    /* DJB - debug some of this timing information is subsequently overwritten
+     * if the user choses to restart from a checkpoint file */
     get_initial_elapsed_time(E);  /* Set elapsed time */
     set_starting_age(E);  /* set the starting age to elapsed time, if desired */
     set_elapsed_time(E);         /* reset to elapsed time to zero, if desired */
@@ -133,7 +134,10 @@ void initial_mesh_solver_setup(struct All_variables *E)
       E->output.fpqt = E->output.fpqb = NULL;
     }
 
-
+    /* DJB - these functions are likely the cause of 'Age' and 'Velocity' outputs
+     * during the initialization routines (outputs in the log).  This adds some confusion
+     * regarding which times are actually used, since this occurs prior to potential
+     * time overwriting when reading in from checkpoint files */
 
     if(E->control.lith_age)
         lith_age_init(E);
