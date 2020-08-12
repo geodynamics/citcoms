@@ -160,6 +160,28 @@ int main(argc,argv)
       initial_conditions(E);
       need_init_sol = 1;	/*  */
   }
+
+  /* DJB TIME */
+  age_Ma = find_age_in_MY(E); // current age
+  target_age_Ma = E->control.start_age;
+  /* calculate new target age for output in Ma */
+  if (E->data.timedir >=0) {
+    while( target_age_Ma > age_Ma ){
+      target_age_Ma -= E->control.record_every_Myr;
+    }
+  }
+  else{
+    while( target_age_Ma < age_Ma ){
+      target_age_Ma += E->control.record_every_Myr;
+    }
+  }
+
+  if (E->parallel.me == 0)  {
+      fprintf(E->fp,"Output: Current age (Ma) = %g\n",age_Ma);
+      fprintf(E->fp,"Output: Next output age (Ma) = %g\n",target_age_Ma);
+      fflush(E->fp);
+  }
+
   if(need_init_sol){
     /* find first solution */
       if(E->control.pseudo_free_surf) {
@@ -190,33 +212,6 @@ int main(argc,argv)
 				   checkpoint, else leave as is to
 				   allow reusing directories */
     output_checkpoint(E);
-
-
-  /* DJB TIME */
-  age_Ma = E->control.start_age; // initialise
-
-  // DJB debugging
-  if (E->parallel.me == 0)  {
-      fprintf(E->fp,"DJB debug age_Ma %g\n",age_Ma); // Input parameters taken from file '%s'\n",argv[1]);
-      //fprintf(stderr,"Initialization complete after %g seconds\n\n",initial_time);
-      //fprintf(E->fp,"Initialization complete after %g seconds\n\n",initial_time);
-      fflush(E->fp);
-  }
-
-  if (E->data.timedir >=0) {
-      target_age_Ma = E->control.start_age - E->control.record_every_Myr;
-  }
-  else{
-      target_age_Ma = E->control.start_age + E->control.record_every_Myr;
-  }
-
-  // DJB debugging
-  if (E->parallel.me == 0)  {
-      fprintf(E->fp,"DJB debug target_age_Ma %g\n",target_age_Ma); // Input parameters taken from file '%s'\n",argv[1]);
-      //fprintf(stderr,"Initialization complete after %g seconds\n\n",initial_time);
-      //fprintf(E->fp,"Initialization complete after %g seconds\n\n",initial_time);
-      fflush(E->fp);
-  }
 
   /* this section advances the time step;
    * replaced by CitcomS.Controller.march() in Pyre. */
@@ -260,27 +255,25 @@ int main(argc,argv)
     if(E->control.record_every_Myr!=0){
         if (E->data.timedir >= 0) { /* forward convection */
             age_Ma = E->control.start_age - E->monitor.elapsed_time*E->data.scalet;
-            /* FIXME: since target age is wrong, this is always satisfied */
-	    if( (target_age_Ma-age_Ma) >= 0 ){
+	    if( age_Ma < target_age_Ma ){
                 dim_output = 1; // update
                 target_age_Ma -= E->control.record_every_Myr; // update
             }        
         }
         else { /* backward convection */
             age_Ma = E->control.start_age + E->monitor.elapsed_time*E->data.scalet;
-            if( (age_Ma-target_age_Ma) >= 0 ){
+            if( age_Ma > target_age_Ma ){
                 dim_output = 1; // update
                 target_age_Ma += E->control.record_every_Myr; // update
             }
         }
     }
 
-    // DJB debugging
-    if (E->parallel.me == 0)  {
-      fprintf(E->fp,"DJB debug age_Ma %g\n",age_Ma); // Input parameters taken from file '%s'\n",argv[1]);
-      fprintf(E->fp,"DJB debug dim_output %d\n",dim_output); // Input parameters taken from file '%s'\n",argv[1]);
-      fprintf(E->fp,"DJB debug target_age_Ma %g\n",target_age_Ma); // Input parameters taken from file '%s'\n",argv[1]);
-      fflush(E->fp);
+    /* DJB TIME */
+    if (dim_output && E->parallel.me == 0)  {
+        fprintf(E->fp,"Output: Current age (Ma) = %g\n",age_Ma);
+        fprintf(E->fp,"Output: Next output age (Ma) = %g\n",target_age_Ma);
+        fflush(E->fp);
     }
 
     /* DJB TIME now an additional condition to exit the loop */
