@@ -80,8 +80,9 @@ struct VISC_OPT {
     /* non-Newtonian stress dependence */
     int SDEPV;
     float sdepv_misfit;
-    int sdepv_normalize, sdepv_visited;
-    float *sdepv_expt;
+    int sdepv_normalize, sdepv_visited,sdepv_rheol,sdepv_start_from_newtonian;
+    float *sdepv_expt,*sdepv_trns;
+  
 
 
     /* compositional viscosity */

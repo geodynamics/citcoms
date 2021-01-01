@@ -786,13 +786,11 @@ z_layer
 int layers_r(struct All_variables *E,float r)
 {
   int llayers, i;
-  float rl;
   /* 
      the z-values, as read in, are non-dimensionalized depth
      convert to radii
 
   */
-  rl = r + E->sphere.ro;
   llayers = 0;
   for(i = 0;i < E->viscosity.num_mat;i++)
     if(r > (E->sphere.ro - E->viscosity.zbase_layer[i])){
@@ -838,16 +836,18 @@ void construct_mat_group(E)
               E->mat[m][el] = E->mesh.elz - (nz + E->lmesh.ezs) + 1;
           }
   } else {
-      for (m=1;m<=E->sphere.caps_per_proc;m++) {
-          for(el=1;el<=E->lmesh.nel;el++) {
-              E->mat[m][el] = 1;
-              nodea = E->ien[m][el].node[2];
-              llayer = layers(E,m,nodea);
-              if (llayer)  {
-                  E->mat[m][el] = llayer;
-              }
-          }
+    /* depends on depth layers */
+    for (m=1;m<=E->sphere.caps_per_proc;m++) {
+      for(el=1;el<=E->lmesh.nel;el++) {
+	E->mat[m][el] = 1;
+	nodea = E->ien[m][el].node[2];
+	llayer = layers(E,m,nodea);
+	if (llayer)  {
+	  E->mat[m][el] = llayer;
+	}
+	//fprintf(stderr,"el: %i z: %g layer: %i/%i\n",el, E->sx[m][3][nodea], E->mat[m][el],E->viscosity.num_mat);
       }
+    }
   }
   return;
 }

@@ -144,6 +144,11 @@ void viscosity_system_input(struct All_variables *E)
     if (E->viscosity.SDEPV) {
       E->viscosity.sdepv_visited = 0;
       input_float_vector("sdepv_expt",E->viscosity.num_mat,(E->viscosity.sdepv_expt),m);
+      input_int("sdepv_rheol",&(E->viscosity.sdepv_rheol),"1",m); /* different types of stress dependence 
+								     1: default (for backward compatibility/doesn't make sense?) 
+								     2: new implementation */
+      input_float_vector("sdepv_trns",E->viscosity.num_mat,(E->viscosity.sdepv_trns),m); /* transition strain-rate */
+      input_boolean("sdepv_start_from_newtonian",&(E->viscosity.sdepv_start_from_newtonian),"on",m);
     }
 
 
@@ -211,6 +216,10 @@ void viscosity_system_input(struct All_variables *E)
     if (E->viscosity.MIN)
         input_float("visc_min",&(E->viscosity.min_value),"1e20",m);
 
+
+
+    
+    
     return;
 }
 
@@ -243,7 +252,9 @@ void allocate_visc_vars(struct All_variables *E)
     i = E->mesh.noz - 1;
   } else {
     i = E->viscosity.num_mat;
+    
   }
+  i++;
   
   E->viscosity.N0 = (float*) malloc(i*sizeof(float));
   E->viscosity.E = (float*) malloc(i*sizeof(float));
@@ -253,6 +264,7 @@ void allocate_visc_vars(struct All_variables *E)
   E->viscosity.pdepv_b = (float*) malloc(i*sizeof(float));
   E->viscosity.pdepv_y = (float*) malloc(i*sizeof(float));
   E->viscosity.sdepv_expt = (float*) malloc(i*sizeof(float));
+  E->viscosity.sdepv_trns = (float*) malloc(i*sizeof(float));
   
   if(E->viscosity.N0 == NULL ||
      E->viscosity.E == NULL ||
@@ -693,12 +705,11 @@ void visc_from_T(E,EEta,propogate)
 	      EEta[m][ (i-1)*vpts + jj ] = tempa*
 		exp( E->viscosity.E[l]*(E->viscosity.T[l] - temp) +
 		     zzz *  E->viscosity.Z[l]);
-	      /*
-               if(E->parallel.me == 0)
-	         fprintf(stderr,"z %11g km mat %i N0 %11g T %11g T0 %11g E %11g Z %11g mat: %i log10(eta): %11g\n",
-                        zzz *E->data.radius_km ,l+1,
-                        tempa,temp,E->viscosity.T[l],E->viscosity.E[l], E->viscosity.Z[l],l+1,log10(EEta[m][ (i-1)*vpts + jj ]));
-              */
+	      
+	      /* if(E->parallel.me == 0) */
+	      /* 	fprintf(stderr,"z %11g km mat %i N0 %11g T %11g T0 %11g E %11g Z %11g eta: %12g\n", */
+	      /* 		zzz *E->data.radius_km ,l+1, */
+	      /* 		tempa,temp,E->viscosity.T[l],E->viscosity.E[l], E->viscosity.Z[l],EEta[m][ (i-1)*vpts + jj ]); */
 	    }
 	  }
         break;
@@ -907,45 +918,65 @@ void visc_from_S(E,EEta,propogate)
      float **EEta;
      int propogate;
 {
-    float one,two,scale,stress_magnitude,depth,exponent1;
-    float *eedot;
+  float scale,exponent1;
+  float *eedot;
+  int m,e,l,z,jj,kk;
 
-    void strain_rate_2_inv();
-    int m,e,l,z,jj,kk;
+  const int vpts = vpoints[E->mesh.nsd];
+  const int nel = E->lmesh.nel;
 
-    const int vpts = vpoints[E->mesh.nsd];
-    const int nel = E->lmesh.nel;
-
-    eedot = (float *) malloc((2+nel)*sizeof(float));
-    one = 1.0;
-    two = 2.0;
-
-    for(m=1;m<=E->sphere.caps_per_proc;m++)  {
-      if(E->viscosity.sdepv_visited){
-	
-        /* get second invariant for all elements */
-        strain_rate_2_inv(E,m,eedot,1);
-      }else{
-	for(e=1;e<=nel;e++)	/* initialize with unity if no velocities around */
-	  eedot[e] = 1.0;
-	E->viscosity.sdepv_visited = 1;
-
-      }
-        /* eedot cannot be too small, or the viscosity will go to inf */
-	for(e=1;e<=nel;e++){
-	  eedot[e] = max(eedot[e], 1.0e-16);
-	}
-
-        for(e=1;e<=nel;e++)   {
-            exponent1= one/E->viscosity.sdepv_expt[E->mat[m][e]-1];
-            scale=pow(eedot[e],exponent1-one);
-            for(jj=1;jj<=vpts;jj++)
-                EEta[m][(e-1)*vpts + jj] = scale*pow(EEta[m][(e-1)*vpts+jj],exponent1);
-        }
+  eedot = (float *) malloc((2+nel)*sizeof(float));
+  
+  for(m=1;m<=E->sphere.caps_per_proc;m++)  {
+    if(E->viscosity.sdepv_visited){
+      
+      /* get second invariant for all elements */
+      strain_rate_2_inv(E,m,eedot,1);
+    }else{
+      for(e=1;e<=nel;e++)	/* initialize with unity if no velocities around */
+	eedot[e] = 1.0;
+      E->viscosity.sdepv_visited = 1;
+      
     }
+    /* eedot cannot be too small, or the viscosity will go to inf */
+    for(e=1;e<=nel;e++){
+      eedot[e] = max(eedot[e], 1.0e-16);
+    }
+    if(!E->viscosity.sdepv_start_from_newtonian){
+      switch(E->viscosity.sdepv_rheol){
+      case 1:		/* old default - not sure this is any good */ 
+	for(e=1;e<=nel;e++)   {
+	  exponent1= 1.0/E->viscosity.sdepv_expt[E->mat[m][e]-1];
+	  scale=pow(eedot[e],exponent1-1.0);
+	  for(jj=1;jj<=vpts;jj++)
+	    EEta[m][(e-1)*vpts + jj] = scale*pow(EEta[m][(e-1)*vpts+jj],exponent1);
+	}
+	break;
+      case 2:			/* new */
+	for(e=1;e<=nel;e++)   {
+	  exponent1 = 1.0 - 1.0 / E->viscosity.sdepv_expt[E->mat[m][e] - 1];
+	  scale = pow(2.0 * eedot[e] / E->viscosity.sdepv_trns[E->mat[m][e] - 1], exponent1);
+	  //if(E->parallel.me==0){      /* control output */
+	  // fprintf(stderr,"Power-law, strain = %e, trans_strain = %e, exp1 = %e  ET = %e ETP = %e \n",
+	  //	    eedot[e],E->viscosity.sdepv_trns[E->mat[m][e] - 1],exponent1,EEta[m][(e - 1) * vpts + 1],
+	  //	    EEta[m][(e - 1) * vpts + 1] / (1.0 + scale * pow(EEta[m][(e - 1) * vpts + 1], exponent1)));
+	  //}
+	  for(jj = 1; jj <= vpts; jj++){
+	    EEta[m][(e - 1) * vpts + jj] = 
+	      EEta[m][(e - 1) * vpts + jj] / (1.0 + scale * pow(EEta[m][(e - 1) * vpts + jj], exponent1));
+	  }
+	}
+	
+	break;
+      default:
+	myerror(E,"stress dependent rheology mode undefined");
+	break;
+      }
+    }
+  }
 
-    free ((void *)eedot);
-    return;
+  free ((void *)eedot);
+  return;
 }
 
 void visc_from_P(E,EEta) /* "plasticity" implementation

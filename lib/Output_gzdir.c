@@ -990,7 +990,7 @@ void gzdir_output_horiz_avg(struct All_variables *E, int cycles)
 
         if (E->composition.on) {
             int n;
-            for(n=0; n<E->composition.ncomp; n++)
+            for(n=0; n < E->composition.ncomp; n++)
                 gzprintf(fp1," %.4e", E->Have.C[n][j]);
         }
         gzprintf(fp1,"\n");

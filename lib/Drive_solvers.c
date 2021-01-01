@@ -101,7 +101,7 @@ void general_stokes_solver(struct All_variables *E)
 
     E->monitor.visc_iter_count++;
     while (1) {    
-     
+      E->viscosity.sdepv_start_from_newtonian = FALSE;
 
       for (m=1;m<=E->sphere.caps_per_proc;m++)
 	for (i=0;i<neq;i++) {
