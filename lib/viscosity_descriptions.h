@@ -81,9 +81,10 @@ struct VISC_OPT {
     int SDEPV;
     float sdepv_misfit;
     int sdepv_normalize, sdepv_visited,sdepv_rheol,sdepv_start_from_newtonian;
+
     float *sdepv_expt,*sdepv_trns;
   
-
+    int visc_adjust_N0;
 
     /* compositional viscosity */
     int CDEPV;

@@ -150,7 +150,8 @@ void viscosity_system_input(struct All_variables *E)
       input_float_vector("sdepv_trns",E->viscosity.num_mat,(E->viscosity.sdepv_trns),m); /* transition strain-rate */
       input_boolean("sdepv_start_from_newtonian",&(E->viscosity.sdepv_start_from_newtonian),"on",m);
     }
-
+    input_boolean("visc_adjust_N0",&(E->viscosity.visc_adjust_N0),"off",m); /* iterate on prefactors */
+      
 
     input_boolean("PDEPV",&(E->viscosity.PDEPV),"off",m); /* plasticity addition by TWB */
     if (E->viscosity.PDEPV) {
@@ -324,7 +325,7 @@ void get_system_viscosity(E,propogate,evisc,visc)
 
 
     if(E->viscosity.TDEPV)
-        visc_from_T(E,evisc,propogate);
+        visc_from_T(E,evisc);
     else
         visc_from_mat(E,evisc);
 
@@ -332,7 +333,7 @@ void get_system_viscosity(E,propogate,evisc,visc)
       visc_from_C(E,evisc);
 
     if(E->viscosity.SDEPV)
-      visc_from_S(E,evisc,propogate);
+      visc_from_S(E,evisc);
 
     if(E->viscosity.PDEPV)	/* "plasticity" */
       visc_from_P(E,evisc);
@@ -365,6 +366,10 @@ void get_system_viscosity(E,propogate,evisc,visc)
                     if(evisc[m][(i-1)*vpts + j] < E->viscosity.min_value)
                         evisc[m][(i-1)*vpts + j] = E->viscosity.min_value;
     }
+    if(E->viscosity.visc_adjust_N0 &&
+       (E->monitor.solution_cycles == E->monitor.solution_cycles_init))
+      adjust_visc_N0(E,evisc);	/* adjust N0 to match layers on next
+				   step, for first time step */
 
     if (E->control.verbose)  {
       fprintf(E->fp_out,"output_evisc \n");
@@ -440,6 +445,60 @@ void visc_from_mat(E,EEta)
 
     return;
 }
+/* 
+   
+   adjust N0 to match layer average
+
+
+*/
+void adjust_visc_N0(E,EEta)
+     struct All_variables *E;
+     float **EEta;
+{
+  int i,m,jj,nel,vp,ind;
+  float laya[CITCOM_MAX_VISC_LAYER],glaya[CITCOM_MAX_VISC_LAYER];
+  int laya_c[CITCOM_MAX_VISC_LAYER],glaya_c[CITCOM_MAX_VISC_LAYER];
+  static int init=0;
+  static float N0_orig[CITCOM_MAX_VISC_LAYER];
+  
+  nel = E->lmesh.nel;
+  vp = vpoints[E->mesh.nsd];
+  /* compute average for all layers */
+  for(i=0;i < E->viscosity.num_mat;i++){
+    laya[i] = glaya[i] = 0.;
+    laya_c[i] = glaya_c[i] =0;
+    if(!init)
+      N0_orig[i] = E->viscosity.N0[i]; /* store original prefactor */
+  }
+  if(E->sphere.caps_per_proc != 1)
+    myerror(E,"not setup for more than one cap");
+  for(m=1;m<=E->sphere.caps_per_proc;m++){
+    for(i=1;i <= nel;i++)
+      for(jj=1;jj <= vp;jj++){
+	ind = E->mat[m][i]-1;
+	laya[ind] += log(EEta[m][(i-1)*vp+jj]); /* log average */
+	laya_c[ind]++;
+      }
+  }
+  MPI_Allreduce(laya,glaya,E->viscosity.num_mat,
+		MPI_FLOAT,MPI_SUM,E->parallel.horizontal_comm);
+  MPI_Allreduce(laya_c,glaya_c,E->viscosity.num_mat,
+		MPI_INT,MPI_SUM,E->parallel.horizontal_comm);
+  for(i=0;i < E->viscosity.num_mat;i++){
+    if(glaya_c[i]){
+      glaya[i] /= (float)glaya_c[i];
+      glaya[i] = exp(glaya[i]);
+      /* adjust */
+      if(init>1)
+	E->viscosity.N0[i] = N0_orig[i]/glaya[i];
+      if(E->parallel.me == 0)
+	fprintf(stderr,"adjust_visc_N0-%i: lay %i: visc_avg: %10.3e N0_orig: %8.2f N0: %8.2f\n",
+		init,i+1, glaya[i],N0_orig[i],E->viscosity.N0[i]);
+    }
+  }
+  init++;
+  return;
+}
 
 
 void read_visc_layer_file(struct All_variables *E)
@@ -488,10 +547,9 @@ void read_visc_layer_file(struct All_variables *E)
 }
 
 
-void visc_from_T(E,EEta,propogate)
+void visc_from_T(E,EEta)
      struct All_variables *E;
      float **EEta;
-     int propogate;
 {
     int m,i,k,l,z,jj,kk;
     float zero,one,eta0,temp,tempa,TT[9];
@@ -913,10 +971,9 @@ void visc_from_T(E,EEta,propogate)
 }
 
 
-void visc_from_S(E,EEta,propogate)
+void visc_from_S(E,EEta)
      struct All_variables *E;
      float **EEta;
-     int propogate;
 {
   float scale,exponent1;
   float *eedot;
