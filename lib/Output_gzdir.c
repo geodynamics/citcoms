@@ -188,6 +188,10 @@ void gzdir_output(struct All_variables *E, int out_cycles)
   if (E->output.horiz_avg)
       gzdir_output_horiz_avg(E, out_cycles);
 
+  if (E->output.horiz_e2_avg)
+      gzdir_output_horiz_strain_rate_avg(E, out_cycles);
+  
+  
   if(E->control.tracer){
     if(E->output.tracer ||
        (out_cycles == E->advection.max_timesteps))
@@ -930,7 +934,7 @@ void gzdir_output_geoid(struct All_variables *E, int cycles)
 
 void gzdir_output_stress(struct All_variables *E, int cycles)
 {
-  int m, node;
+  int m, node,n6;
   char output_file[255];
   gzFile fp1;
   /* for stress computation */
@@ -954,22 +958,56 @@ void gzdir_output_stress(struct All_variables *E, int cycles)
 
   for(m=1;m<=E->sphere.caps_per_proc;m++) {
     gzprintf(fp1,"%3d %7d\n",m,E->lmesh.nno);
-    for (node=1;node<=E->lmesh.nno;node++)
+    for (node=1;node <= E->lmesh.nno;node++){
+      n6 = (node-1)*6;
       gzprintf(fp1, "%.4e %.4e %.4e %.4e %.4e %.4e\n",
-              E->gstress[m][(node-1)*6+1], /*  stt */
-              E->gstress[m][(node-1)*6+2], /*  spp */
-              E->gstress[m][(node-1)*6+3], /*  srr */
-              E->gstress[m][(node-1)*6+4], /*  stp */
-              E->gstress[m][(node-1)*6+5], /*  str */
-              E->gstress[m][(node-1)*6+6]); /* srp */
+              E->gstress[m][n6+1], /*  stt */
+              E->gstress[m][n6+2], /*  spp */
+              E->gstress[m][n6+3], /*  srr */
+              E->gstress[m][n6+4], /*  stp */
+              E->gstress[m][n6+5], /*  str */
+              E->gstress[m][n6+6]); /* srp */
+    }
   }
   gzclose(fp1);
 }
 
+void gzdir_output_horiz_strain_rate_avg(struct All_variables *E, int cycles)
+{
+  const int elz = E->lmesh.elz;
+  const int vpts = vpoints[E->mesh.nsd];
+  const int ends = enodes[E->mesh.nsd];
+  
+  char output_file[255];
+  gzFile fp1;
+  float *edot,r;
+  int i,e,kk,jj,m;
+  edot = (float *)malloc(sizeof(float)*(elz+1));
+  calc_radial_strain_rate_averages(E, edot);
 
+  if (E->parallel.me < E->parallel.nprocz)  {
+   snprintf(output_file,255,"%s/%d/horiz_e2_avg.%d.%d.gz", E->control.data_dir,
+	    cycles,E->parallel.me, cycles);
+    fp1=gzdir_output_open(output_file,"w");
+    for (m=1;m<=E->sphere.caps_per_proc;m++){
+      for(i=1;i <= elz;i++)  { 	/* this is also the element number, as ix and iy are zero */
+	
+	for(r=0.,jj=1;jj <= vpts;jj++) /* loop through integration points */
+	  for(kk=1;kk <= ends;kk++)
+	    r += E->sx[m][3][E->ien[m][i].node[kk]] * E->N.vpt[GNVINDEX(kk,jj)]; /* weighted nodal radius */
+	
+	gzprintf(fp1,"%.4e %i %i %.4e",r,i, E->mat[m][i],edot[i]); /* radius i-el mat strain-rate */
+      }
+    }
+    gzclose(fp1);
+  }
+  free(edot);
+}
 void gzdir_output_horiz_avg(struct All_variables *E, int cycles)
 {
-  /* horizontal average output of temperature, composition and rms velocity*/
+  /* 
+     horizontal average output of temperature, composition and rms velocity
+  */
   void compute_horiz_avg();
 
   int j;

@@ -47,8 +47,8 @@ void construct_ien(E)
 
 {
   int lev,p,q,r,rr,j;
-  int element,start,nel,nno;
-  int elz,elx,ely,nox,noy,noz;
+  int element,start;
+  int elz,elx,ely,nox,noz;
 
   const int dims=E->mesh.nsd;
   const int ends=enodes[dims];
@@ -61,9 +61,9 @@ void construct_ien(E)
       ely = E->lmesh.ELY[lev];
       nox = E->lmesh.NOX[lev];
       noz = E->lmesh.NOZ[lev];
-      noy = E->lmesh.NOY[lev];
-      nel=E->lmesh.NEL[lev];
-      nno=E->lmesh.NNO[lev];
+      //noy = E->lmesh.NOY[lev];
+      //nel=E->lmesh.NEL[lev];
+      //nno=E->lmesh.NNO[lev];
 
       for(r=1;r<=ely;r++)
         for(q=1;q<=elx;q++)
@@ -264,67 +264,69 @@ void construct_node_maps(E)
     int max_eqn;
 
   dims2 = dims-1;
-  for(lev=E->mesh.gridmax;lev>=E->mesh.gridmin;lev--)
+  for(lev=E->mesh.gridmax;lev>=E->mesh.gridmin;lev--){
     for (m=1;m<=E->sphere.caps_per_proc;m++)             {
-       neq=E->lmesh.NEQ[lev];
-       nno=E->lmesh.NNO[lev];
-       noxz = E->lmesh.NOX[lev]*E->lmesh.NOZ[lev];
-       noz = E->lmesh.NOZ[lev];
-       noy = E->lmesh.NOY[lev];
-       nox = E->lmesh.NOX[lev];
-       max_eqn = 14*dims;
-       matrix = max_eqn*nno;
+      neq=E->lmesh.NEQ[lev];
+      nno=E->lmesh.NNO[lev];
+      noxz = E->lmesh.NOX[lev]*E->lmesh.NOZ[lev];
+      noz = E->lmesh.NOZ[lev];
+      noy = E->lmesh.NOY[lev];
+      nox = E->lmesh.NOX[lev];
+      max_eqn = 14*dims;
+      matrix = max_eqn*nno;
+      
+      E->Node_map[lev][m]=(int *) malloc (matrix*sizeof(int));
+      
+      for(i=0;i<matrix;i++)
+	E->Node_map[lev][m][i] = neq;  /* neq indicates an invalid eqn # */
+      
+      for (ii=1;ii<=noy;ii++){
+	for (jj=1;jj<=nox;jj++){
+	  for (kk=1;kk<=noz;kk++)  {
+	    nn = kk + (jj-1)*noz+ (ii-1)*noxz;
+	    for(doff=1;doff<=dims;doff++)
+	      E->Node_map[lev][m][(nn-1)*max_eqn+doff-1] = E->ID[lev][m][nn].doff[doff];
+	    
+	    ia = 0;
+	    is=1; ie=dims2;
+	    js=1; je=dims;
+	    ks=1; ke=dims;
+	    if (kk==1  ) ks=2;
+	    if (kk==noz) ke=2;
+	    if (jj==1  ) js=2;
+	    if (jj==nox) je=2;
+	    if (ii==1  ) is=2;
+	    if (ii==noy) ie=2;
+	    for (i=is;i<=ie;i++)
+	      for (j=js;j<=je;j++)
+		for (k=ks;k<=ke;k++)  {
+		  ja = nn-((2-i)*noxz + (2-j)*noz + 2-k);
+		  if (ja<nn)   {
+		    ia++;
+		    for (doff=1;doff<=dims;doff++)
+		      E->Node_map[lev][m][(nn-1)*max_eqn+ia*dims+doff-1]=E->ID[lev][m][ja].doff[doff];
+		  }
+		}
+	  }
+	}
+      }
+      
+      E->Eqn_k1[lev][m] = (higher_precision *)malloc(matrix*sizeof(higher_precision));
+      E->Eqn_k2[lev][m] = (higher_precision *)malloc(matrix*sizeof(higher_precision));
+      E->Eqn_k3[lev][m] = (higher_precision *)malloc(matrix*sizeof(higher_precision));
+      
+      E->mesh.matrix_size[lev] = matrix;
+      
+      if(E->control.verbose) {
+	fprintf(E->fp_out, "output Node_map lev=%d m=%d\n", lev, m);
+	fprintf(E->fp_out, "neq=%d nno=%d max_eqn=%d matrix=%d\n", neq, nno, max_eqn, matrix);
+	for(i=0;i<matrix;i++)
+	  fprintf(E->fp_out, "%d %d\n", i, E->Node_map[lev][m][i]);
+      }
+    }
+  }         /* end for level and m */
 
-       E->Node_map[lev][m]=(int *) malloc (matrix*sizeof(int));
-
-       for(i=0;i<matrix;i++)
-	   E->Node_map[lev][m][i] = neq;  /* neq indicates an invalid eqn # */
-
-       for (ii=1;ii<=noy;ii++)
-       for (jj=1;jj<=nox;jj++)
-       for (kk=1;kk<=noz;kk++)  {
-	 nn = kk + (jj-1)*noz+ (ii-1)*noxz;
-	 for(doff=1;doff<=dims;doff++)
-	   E->Node_map[lev][m][(nn-1)*max_eqn+doff-1] = E->ID[lev][m][nn].doff[doff];
-
-         ia = 0;
-	 is=1; ie=dims2;
-	 js=1; je=dims;
-	 ks=1; ke=dims;
-	 if (kk==1  ) ks=2;
-	 if (kk==noz) ke=2;
-	 if (jj==1  ) js=2;
-	 if (jj==nox) je=2;
-	 if (ii==1  ) is=2;
-	 if (ii==noy) ie=2;
-         for (i=is;i<=ie;i++)
-           for (j=js;j<=je;j++)
-             for (k=ks;k<=ke;k++)  {
-               ja = nn-((2-i)*noxz + (2-j)*noz + 2-k);
-               if (ja<nn)   {
-		 ia++;
-                 for (doff=1;doff<=dims;doff++)
-                   E->Node_map[lev][m][(nn-1)*max_eqn+ia*dims+doff-1]=E->ID[lev][m][ja].doff[doff];
-                 }
-               }
-         }
-
-       E->Eqn_k1[lev][m] = (higher_precision *)malloc(matrix*sizeof(higher_precision));
-       E->Eqn_k2[lev][m] = (higher_precision *)malloc(matrix*sizeof(higher_precision));
-       E->Eqn_k3[lev][m] = (higher_precision *)malloc(matrix*sizeof(higher_precision));
-
-       E->mesh.matrix_size[lev] = matrix;
-
-       if(E->control.verbose) {
-           fprintf(E->fp_out, "output Node_map lev=%d m=%d\n", lev, m);
-           fprintf(E->fp_out, "neq=%d nno=%d max_eqn=%d matrix=%d\n", neq, nno, max_eqn, matrix);
-           for(i=0;i<matrix;i++)
-               fprintf(E->fp_out, "%d %d\n", i, E->Node_map[lev][m][i]);
-       }
-
-    }         /* end for level and m */
-
-    return;
+  return;
 }
 
 
@@ -333,7 +335,7 @@ void construct_node_ks(E)
 {
     int m,level,i,j,k,e;
     int node,node1,eqn1,eqn2,eqn3,loc0,loc1,loc2,loc3,found,element,index,pp,qq;
-    int neq,nno,nel,max_eqn;
+    int neq,nel,max_eqn;
 
     double elt_K[24*24];
     double w1,w2,w3,ww1,ww2,ww3,zero;
@@ -358,7 +360,7 @@ void construct_node_ks(E)
 
         neq=E->lmesh.NEQ[level];
         nel=E->lmesh.NEL[level];
-        nno=E->lmesh.NNO[level];
+        //nno=E->lmesh.NNO[level];
 	for(i=0;i<neq;i++)
 	    E->BI[level][m][i] = zero;
         for(i=0;i<E->mesh.matrix_size[level];i++) {
@@ -549,15 +551,15 @@ void construct_masks(E)		/* Add lid/edge masks/nodal weightings */
      struct All_variables *E;
 {
   int i,j,k,l,node,el,elt;
-  int lev,elx,elz,ely,nno,nox,noz,noy;
+  int lev;
 
   for(lev=E->mesh.gridmax;lev>=E->mesh.gridmin;lev--)
     for (j=1;j<=E->sphere.caps_per_proc;j++)           {
-      elz = E->lmesh.ELZ[lev];
-      ely = E->lmesh.ELY[lev];
-      noy = E->lmesh.NOY[lev];
-      noz = E->lmesh.NOZ[lev];
-      nno = E->lmesh.NNO[lev];
+      //elz = E->lmesh.ELZ[lev];
+      //ely = E->lmesh.ELY[lev];
+      //noy = E->lmesh.NOY[lev];
+      //noz = E->lmesh.NOZ[lev];
+      //nno = E->lmesh.NNO[lev];
 
         if (E->parallel.me_loc[3]==0 )
           for (i=1;i<=E->parallel.NUM_NNO[lev][j].bound[5];i++)   {
@@ -597,9 +599,9 @@ void construct_masks(E)		/* Add lid/edge masks/nodal weightings */
 
 void construct_sub_element(E)
      struct All_variables *E;
-
+     
 {    int i,j,k,l,m;
-     int lev,nox,noy,noz,nnn,elx,elz,ely,elzu,elxu,elt,eltu;
+     int lev,nnn,elx,elz,ely,elzu,elxu,elt,eltu;
 
 
   for(lev=E->mesh.levmax-1;lev>=E->mesh.levmin;lev--)
@@ -607,9 +609,9 @@ void construct_sub_element(E)
           elx = E->lmesh.ELX[lev];
 	  elz = E->lmesh.ELZ[lev];
 	  ely = E->lmesh.ELY[lev];
-          nox = E->lmesh.NOX[lev];
-          noy = E->lmesh.NOY[lev];
-          noz = E->lmesh.NOZ[lev];
+          //nox = E->lmesh.NOX[lev];
+          //noy = E->lmesh.NOY[lev];
+          //noz = E->lmesh.NOZ[lev];
 	  elz = E->lmesh.ELZ[lev];
 	  ely = E->lmesh.ELY[lev];
 	  elxu = 2 * elx;

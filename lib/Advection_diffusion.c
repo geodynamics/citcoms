@@ -465,7 +465,6 @@ static void pg_shape_fn(struct All_variables *E, int el,
                         double diffusion, int m)
 {
     int i,j;
-    int *ienm;
 
     double uc1,uc2,uc3;
     double u1,u2,u3,sint[9];
@@ -473,7 +472,7 @@ static void pg_shape_fn(struct All_variables *E, int el,
 
     double prod1,unorm,twodiff;
 
-    ienm=E->ien[m][el].node;
+    //ienm=E->ien[m][el].node;
 
     twodiff = 2.0*diffusion;
 

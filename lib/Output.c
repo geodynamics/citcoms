@@ -146,6 +146,9 @@ void output(struct All_variables *E, int cycles)
 
   if (E->output.horiz_avg)
       output_horiz_avg(E, cycles);
+  
+  if (E->output.horiz_e2_avg)
+    myerror(E,"horizontal strain-rate avg output only implemented for gzdir version");
 
   if (E->output.seismic)
       output_seismic(E, cycles);

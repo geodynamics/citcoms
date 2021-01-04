@@ -183,11 +183,11 @@ int need_to_iterate(struct All_variables *E){
 					       first  */
       return 1;
     else
-      return (E->viscosity.SDEPV || E->viscosity.PDEPV)?(1):(0);
+      return (E->viscosity.SDEPV || E->viscosity.PDEPV || E->viscosity.adjust_N0)?(1):(0);
   }else{
 #endif
   /* regular operation */
-  return ((E->viscosity.SDEPV || E->viscosity.PDEPV)?(1):(0));
+  return ((E->viscosity.SDEPV || E->viscosity.PDEPV || E->viscosity.adjust_N0)?(1):(0));
 #ifdef CITCOM_ALLOW_ANISOTROPIC_VISC
   }
 #endif

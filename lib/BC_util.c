@@ -94,11 +94,11 @@ void strip_bcs_from_residual(E,Res,level)
 {
     int m,i;
 
-  for (m=1;m<=E->sphere.caps_per_proc;m++)
-    if (E->num_zero_resid[level][m])
-      for(i=1;i<=E->num_zero_resid[level][m];i++)
-         Res[m][E->zero_resid[level][m][i]] = 0.0;
-
+    for (m=1;m<=E->sphere.caps_per_proc;m++){
+      if (E->num_zero_resid[level][m])
+	for(i=1;i<=E->num_zero_resid[level][m];i++)
+	  Res[m][E->zero_resid[level][m][i]] = 0.0;
+    }
     return;
 }
 
@@ -216,7 +216,7 @@ toplayerbc  < 0: assign surface boundary condition within medium at node -toplay
 void assign_internal_bc(struct All_variables *E)
 {
   
-  int lv, j, noz, k,lay,ncount,ontop,onbottom;
+  int lv, j, noz, k,ncount,ontop,onbottom;
   /* stress or vel BC within a layer */
   ncount = 0;
 
@@ -231,7 +231,6 @@ void assign_internal_bc(struct All_variables *E)
 	  onbottom = ((k==1) && (E->parallel.me_loc[3]==0))?(1):(0);
 	  /* node number is k, assuming no dependence on x and y  */
 	  if(E->SX[lv][j][3][k] >= E->mesh.toplayerbc_r){
-	    lay = layers(E,j,k);
 	    if((!ontop)&&(!onbottom)&&(lv==E->mesh.gridmax))
 	      ncount++;		/* not in top or bottom */
 	    if(E->mesh.topvbc != 1) {	/* free slip */

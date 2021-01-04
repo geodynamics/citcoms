@@ -176,7 +176,7 @@ double multi_grid(E,d1,F,acc,hl)
     const int levmin = E->mesh.levmin;
     const int levmax = E->mesh.levmax;
 
-    double time1,time,CPU_time0();
+    double time1,CPU_time0();
     double *res[MAX_LEVELS][NCS],*AU[MAX_LEVELS][NCS];
     double *vel[MAX_LEVELS][NCS],*del_vel[MAX_LEVELS][NCS];
     double *rhs[MAX_LEVELS][NCS],*fl[MAX_LEVELS][NCS];
@@ -212,7 +212,7 @@ double multi_grid(E,d1,F,acc,hl)
     gauss_seidel(E,vel[levmin],fl[levmin],AU[levmin],acc*0.01,&cycles,levmin,0);
 
     for(lev=levmin+1;lev<=levmax;lev++) {
-      time=CPU_time0();
+      //time=CPU_time0();
 
                          /* Utilize coarse solution and smooth at this level */
       interp_vector(E,lev-1,vel[lev-1],vel[lev]);
@@ -274,25 +274,25 @@ double multi_grid(E,d1,F,acc,hl)
         }
       }
 
-   for(m=1;m<=E->sphere.caps_per_proc;m++)
-     for(j=0;j<E->lmesh.NEQ[levmax];j++)   {
+    for(m=1;m<=E->sphere.caps_per_proc;m++){
+      for(j=0;j<E->lmesh.NEQ[levmax];j++)   {
         F[m][j]=res[levmax][m][j];
         d1[m][j]+=vel[levmax][m][j];
-        }
-
-     residual = sqrt(global_vdot(E,F,F,hl));
-
-      for(i=E->mesh.levmin;i<=E->mesh.levmax;i++)
-        for(m=1;m<=E->sphere.caps_per_proc;m++) {
-	  free((double*) del_vel[i][m]);
-	  free((double*) AU[i][m]);
-	  free((double*) vel[i][m]);
-	  free((double*) res[i][m]);
-	  if (i<E->mesh.levmax)
-	    free((double*) fl[i][m]);
-	  }
-
-
+      }
+    }
+    residual = sqrt(global_vdot(E,F,F,hl));
+    
+    for(i=E->mesh.levmin;i<=E->mesh.levmax;i++)
+      for(m=1;m<=E->sphere.caps_per_proc;m++) {
+	free((double*) del_vel[i][m]);
+	free((double*) AU[i][m]);
+	free((double*) vel[i][m]);
+	free((double*) res[i][m]);
+	if (i<E->mesh.levmax)
+	  free((double*) fl[i][m]);
+      }
+    
+    
     return(residual);
 }
 
@@ -621,7 +621,7 @@ void gauss_seidel(E,d0,F,Ad,acc,cycles,level,guess)
     void n_assemble_del2_u();
 
     double U1,U2,U3,UU;
-    double sor,residual,global_vdot();
+    double residual,global_vdot();
 
     higher_precision *B1,*B2,*B3;
 
@@ -639,7 +639,7 @@ void gauss_seidel(E,d0,F,Ad,acc,cycles,level,guess)
     const double zeroo = 0.0;
 
     steps=*cycles;
-    sor = 1.3;
+    //sor = 1.3;
 
     if(guess) {
       n_assemble_del2_u(E,d0,Ad,level,1);
@@ -728,7 +728,7 @@ void gauss_seidel(E,d0,F,Ad,acc,cycles,level,guess)
 
       (E->solver.exchange_id_d)(E, Ad, level);
 
-      for (m=1;m<=E->sphere.caps_per_proc;m++)
+      for (m=1;m<=E->sphere.caps_per_proc;m++){
  	for(i=1;i<=E->lmesh.NNO[level];i++)
           if(E->NODE[level][m][i] & OFFSIDE)   {
 	    eqn1=E->ID[level][m][i].doff[1];
@@ -738,9 +738,9 @@ void gauss_seidel(E,d0,F,Ad,acc,cycles,level,guess)
 	    Ad[m][eqn2] += E->temp1[m][eqn2];
 	    Ad[m][eqn3] += E->temp1[m][eqn3];
 	    }
+      }
 
-
-	count++;
+      count++;
 
 /*     for (m=1;m<=E->sphere.caps_per_proc;m++)
 	for(i=0;i<neq;i++)          {

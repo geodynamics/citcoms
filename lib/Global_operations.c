@@ -311,6 +311,55 @@ void return_elementwise_horiz_ave(E,X,H)
 
   return;
 }
+void return_elementwise_horiz_ave_float(struct All_variables *E,int m,float *X,float *H) /* same as float and X
+											    is an [nel+1] vector
+											    H is nelz+1 */
+{
+  
+  int i,j,k,d,noz,noy,el,elz,elx,ely,nproc;
+  int sizeofH;
+  int elz2,elxz;
+  float *Have,*temp,weight;
+  
+  sizeofH = (2*E->lmesh.elz+2)*sizeof(float);
+
+  Have = (float *)malloc(sizeofH);
+  temp = (float *)malloc(sizeofH);
+
+  noz = E->lmesh.noz;
+  noy = E->lmesh.noy;
+  elz = E->lmesh.elz;
+  elx = E->lmesh.elx;
+  elxz = elx*elz;
+  
+  ely = E->lmesh.ely;
+  elz2 = 2*elz;
+
+  for (i=0;i<=(elz*2+1);i++)
+  {
+    temp[i]=0.0;
+  }
+
+  for (i=1;i<=elz;i++){
+    for (k=1;k<=ely;k++){
+      for (j=1;j<=elx;j++){
+	el = i + (j-1)*elz + (k-1)*elxz;
+	weight = E->ECO[E->mesh.levmax][m][el].area;
+	temp[i] +=     X[el]*weight;
+	temp[i+elz] +=       weight;
+      }
+    }
+  }
+  MPI_Allreduce(temp,Have,elz2+1,MPI_FLOAT,MPI_SUM,E->parallel.horizontal_comm);
+  for (i=1;i<=elz;i++) {
+    //if(Have[i+elz] != 0.0){
+    H[i] = Have[i]/Have[i+elz];	/* allow for NaN */
+  }
+
+  free ((void *) Have);
+  free ((void *) temp);
+  return;
+}
 
 float return_bulk_value(E,Z,average)
      struct All_variables *E;

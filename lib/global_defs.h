@@ -668,7 +668,7 @@ struct Output {
 
   /* flags used by GZDIR */
   struct gzd_struc gzdir;
-
+  int horiz_e2_avg;
 
   int write_q_files;
   FILE *fpqt,*fpqb;		/* additional heat flux output */

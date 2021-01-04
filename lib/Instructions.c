@@ -1618,6 +1618,7 @@ static void output_parse_optional(struct  All_variables *E)
     E->output.botm = 0;
     E->output.geoid = 0;
     E->output.horiz_avg = 0;
+    E->output.horiz_e2_avg = 0;
     E->output.seismic = 0;
     E->output.coord_bin = 0;
     E->output.tracer = 0;
@@ -1663,6 +1664,8 @@ static void output_parse_optional(struct  All_variables *E)
 	    }
         else if(strcmp(prev, "horiz_avg")==0)
             E->output.horiz_avg = 1;
+        else if(strcmp(prev, "horiz_e2_avg")==0)
+            E->output.horiz_e2_avg = 1;
         else if(strcmp(prev, "seismic")==0) {
             E->output.seismic = E->output.coord_bin = 1;
 

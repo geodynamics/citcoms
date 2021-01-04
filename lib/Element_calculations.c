@@ -621,14 +621,14 @@ void build_diagonal_of_Ahat(E)
     double assemble_dAhatp_entry();
 
     double BU;
-    int m,e,npno,neq,level;
+    int m,e,npno,level;
 
  for (level=E->mesh.gridmin;level<=E->mesh.gridmax;level++)
 
    for (m=1;m<=E->sphere.caps_per_proc;m++)    {
 
      npno = E->lmesh.NPNO[level];
-     neq=E->lmesh.NEQ[level];
+     //neq=E->lmesh.NEQ[level];
 
      for(e=1;e<=npno;e++)
 	E->BPI[level][m][e]=1.0;
@@ -792,7 +792,7 @@ double assemble_dAhatp_entry(E,e,level,m)
      int e,level,m;
 
 {
-    int i,j,p,a,b,node,npno;
+  int i,j,p,a,b,node;
     void strip_bcs_from_residual();
 
     double gradP[81],divU;
@@ -800,7 +800,7 @@ double assemble_dAhatp_entry(E,e,level,m)
     const int ends=enodes[E->mesh.nsd];
     const int dims=E->mesh.nsd;
 
-    npno=E->lmesh.NPNO[level];
+    //npno=E->lmesh.NPNO[level];
 
     for(i=0;i<81;i++)
 	gradP[i] = 0.0;
@@ -1025,8 +1025,8 @@ void get_elt_f(E,el,elt_f,bcs,m)
 
 {
 
-  int i,p,a,b,j,k,q,es;
-  int got_elt_k,nodea,nodeb;
+  int i,p,a,b,j,k,q,nodeb;
+  int got_elt_k;
   unsigned int type;
   const unsigned int vbc_flag[] = {0, VBX, VBY, VBZ};
 
@@ -1038,7 +1038,7 @@ void get_elt_f(E,el,elt_f,bcs,m)
   const int ends=enodes[dims];
   const int vpts=vpoints[dims];
 
-  es = (el-1)/E->lmesh.elz + 1;
+  //es = (el-1)/E->lmesh.elz + 1;
 
   if ((el-1)%E->lmesh.elz==0)
       construct_c3x3matrix_el(E,el,&E->element_Cc,&E->element_Ccx,E->mesh.levmax,m,0);
@@ -1056,7 +1056,7 @@ void get_elt_f(E,el,elt_f,bcs,m)
 
   for(i=1;i<=dims;i++)  {
     for(a=1;a<=ends;a++)  {
-      nodea=E->ien[m][el].node[a];
+      //nodea=E->ien[m][el].node[a];
       p= dims*(a-1)+i-1;
 
       for(j=1;j<=vpts;j++)     /*compute sum(Na(j)*F(j)*det(j)) */
@@ -1296,7 +1296,7 @@ void get_aug_k(E,el,elt_k,level,m)
      double elt_k[24*24];
      int level;
 {
-     int i,p[9],a,b,nodea,nodeb;
+  int i,p[9],a,b;
      double Visc;
 
      const int n=loc_mat_size[E->mesh.nsd];
@@ -1312,9 +1312,9 @@ void get_aug_k(E,el,elt_k,level,m)
      Visc = Visc/vpts;
 
      for(a=1;a<=ends;a++) {
-        nodea=E->IEN[level][m][el].node[a];
+       //nodea=E->IEN[level][m][el].node[a];
         for(b=1;b<=ends;b++) {
-           nodeb=E->IEN[level][m][el].node[b];      /* for Kab dims*dims  */
+	  //nodeb=E->IEN[level][m][el].node[b];      /* for Kab dims*dims  */
 	   i = (a-1)*n*dims+(b-1)*dims;
 	   elt_k[i  ] += Visc*E->control.augmented*
 	              E->elt_del[level][m][el].g[p[a]][0]*

@@ -319,6 +319,8 @@ static void h5output_timedep(struct All_variables *E, int cycles)
     if (E->output.horiz_avg == 1)
         h5output_horiz_avg(E, cycles);
 
+    if (E->output.horiz_e2_avg)
+      myerror(E,"horizontal strain-rate avg output only implemented for gzdir version");
     h5output_close(E);
 
 }
