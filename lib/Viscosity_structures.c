@@ -151,9 +151,9 @@ void viscosity_system_input(struct All_variables *E)
       input_boolean("sdepv_start_from_newtonian",&(E->viscosity.sdepv_start_from_newtonian),"on",m);
     }
     input_boolean("visc_adjust_N0",&(E->viscosity.adjust_N0),"off",m); /* iterate on prefactors */
-    input_float("adjust_N0_alpha",&(E->viscosity.adjust_N0_alpha),"0.95",m); /* damping factor */
+    input_float("adjust_N0_alpha",&(E->viscosity.adjust_N0_alpha),"0.95",m); /* damping factor, not sure 
+										if this should be simply unity */
     
-
     input_boolean("PDEPV",&(E->viscosity.PDEPV),"off",m); /* plasticity addition by TWB */
     if (E->viscosity.PDEPV) {
       E->viscosity.pdepv_visited = 0;

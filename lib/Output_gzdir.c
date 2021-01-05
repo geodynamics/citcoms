@@ -992,11 +992,14 @@ void gzdir_output_horiz_strain_rate_avg(struct All_variables *E, int cycles)
     for (m=1;m<=E->sphere.caps_per_proc;m++){
       for(i=1;i <= elz;i++)  { 	/* this is also the element number, as ix and iy are zero */
 	
-	for(r=0.,jj=1;jj <= vpts;jj++) /* loop through integration points */
-	  for(kk=1;kk <= ends;kk++)
+	for(r=0.,jj=1;jj <= vpts;jj++){ /* loop through integration points */
+	  for(kk=1;kk <= ends;kk++){
 	    r += E->sx[m][3][E->ien[m][i].node[kk]] * E->N.vpt[GNVINDEX(kk,jj)]; /* weighted nodal radius */
+	  }
+	}
+	r /= (float)vpts;	/* average radius for all points */
 	
-	gzprintf(fp1,"%.4e %i %i %.4e",r,i, E->mat[m][i],edot[i]); /* radius i-el mat strain-rate */
+	gzprintf(fp1,"%.4e %i %i %.4e\n",r,i, E->mat[m][i],edot[i]); /* radius i-el mat strain-rate */
       }
     }
     gzclose(fp1);
