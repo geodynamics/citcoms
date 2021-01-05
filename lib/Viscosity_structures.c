@@ -510,7 +510,7 @@ void adjust_visc_N0(E,EEta)
 	  scale = 1;
 	}
 	
-	if(E->parallel.me == 0)
+	if((E->parallel.me_loc[1]==0)&&(E->parallel.me_loc[2]==0)) /* select one of the horizontal processor chunks */
 	  fprintf(stderr,"adjust_visc_N0-%i: lay %i: visc_avg: %10.3e N0_orig: %8.2f N0: %8.2f scale: %.2e alpha: %g\n",
 		  init,ilay+1, glaya[ilay],N0_orig[ilay],
 		  E->viscosity.N0[ilay],scale,E->viscosity.adjust_N0_alpha);
