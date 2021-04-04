@@ -1172,12 +1172,10 @@ to ASCII files in necessary before using those scripts.
 \end{quote}
 By default, CitcomS will attempt to auto-detect your PHDF5 installation,
 and will disable HDF5 support if it is not found. You may specify
-the location of your PHDF5 installation by setting the PHDF5\_HOME
-environment variable to the appropriate installation prefix.
+the location of your PHDF5 installation by passing the \texttt{-{}-with-hdf5}
+argument with the appropriate installation prefix.
 \begin{lyxcode}
-\$~export~PHDF5\_HOME=/opt/phdf5/1.6.5
-
-\$~./configure~-{}-with-hdf5
+\$~./configure~-{}-with-hdf5=/opt/phdf5/1.6.5
 \end{lyxcode}
 
 \subsection{Additional Tools}

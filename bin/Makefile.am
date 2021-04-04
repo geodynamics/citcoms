@@ -24,12 +24,7 @@
 # $Id$
 
 
-INCLUDES = -I$(top_srcdir)/lib
-
-AM_CPPFLAGS =
-if COND_HDF5
-    AM_CPPFLAGS += -DUSE_HDF5
-endif
+AM_CPPFLAGS = -I$(top_srcdir)/lib
 
 bin_PROGRAMS = CitcomSFull CitcomSRegional
 

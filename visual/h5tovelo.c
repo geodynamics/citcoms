@@ -104,7 +104,7 @@ int main(int argc, char *argv[])
      * Read model parameters from file1
      */
 
-    input = H5Gopen(h5file1, "input");
+    input = H5Gopen(h5file1, "input", H5P_DEFAULT);
     if (input < 0)
     {
         fprintf(stderr, "Could not open /input group in \"%s\"\n", filename1);
@@ -134,7 +134,7 @@ int main(int argc, char *argv[])
         return EXIT_FAILURE;
     }
 
-    input = H5Gopen(h5file2, "/");
+    input = H5Gopen(h5file2, "/", H5P_DEFAULT);
     status = get_attribute_float(input, "time", &time);
     status = H5Gclose(input);
 
