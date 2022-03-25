@@ -106,10 +106,12 @@ def main():
 
     # Check how to read and parse the time spec:
     read_time_d = True
-
+    #read_time_d = False
+    
     # Compute the timesteps to process
     if read_time_d : 
         time_spec_d = Core_Citcom.get_time_spec_dictionary(control_d['time_spec'], master_d['time_d'])
+        
     else :
         time_spec_d = Core_Citcom.get_time_spec_dictionary(control_d['time_spec'])
     print ( now(), 'grid_maker.py: time_spec_d = ')
@@ -173,7 +175,7 @@ def main():
     for tt, time in enumerate( time_spec_d['time_list'] ) :
  
         print( now(), 'grid_maker.py: Processing time = ', time) 
-
+        #print( now(), 'grid_maker.py: Processing time = ', tt) 
         if 'Ma' in time:
  
             # strip off units and make a number
@@ -279,7 +281,7 @@ def main():
 
                 # create the total citcoms data filenames to read 
                 file_format = ''
-
+                
                 # check for various data dirs 
                 if os.path.exists( datadir + '/0/') :
                     print( now(), 'grid_maker.py: path found = ', datadir + '/0/' )
@@ -296,7 +298,12 @@ def main():
                 elif os.path.exists('Data') :
                     print( now(), 'grid_maker.py: path found = ', 'Data' )
                     file_format = './Data/#/' + datafile + '.' + file_name_component + '.#.' + str(timestep)
-
+                    
+                # Added path to dynamic topography restart data - RC
+                elif os.path.exists('Age'+str(start_age)+'Ma') :
+                    print( now(), 'grid_maker.py: path found = ', 'Age'+str(start_age)+'Ma' )
+                    file_format = './Age'+str(start_age)+'Ma/#/' + datafile + '.' + file_name_component + '.#.'+ str(timestep)
+                  
                 # report error 
                 else :
                     print( now() )
@@ -347,7 +354,7 @@ def main():
 
                 print( now(), 'grid_maker.py:  len(field_data) = ', len(field_data) )
                 print( now() )
-
+               
                 #
                 # Loop over levels 
                 #

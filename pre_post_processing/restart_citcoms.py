@@ -67,7 +67,7 @@ def main() :
     # get the control .cfg file as a dictionary 
     control_d = Core_Util.parse_configuration_file(sys.argv[1])
 
-    # parse master run pid file - file number 1 which will include the uodated parameters - RC
+    # parse master run pid file - file number 1 which will include the updated parameters - RC
     master_run_cfg = control_d['master_run_pid']
     master_run_cfg_d = Core_Util.parse_configuration_file(master_run_cfg)
 
@@ -327,7 +327,7 @@ def create_restart_run_cfg( master_run_pid_d, control_d, rs_replace_d, rs_dir, r
         else:
 
         
-           # Check in the PID copy if a parameter has already been defined rs_replace_d, if it has it will be commented - RC
+           # Check in the PID copy if a parameter has already been defined rs_replace_d. if true it will be commented - RC
             if not param_name in restart_run_cfg_d[section_name]:
             
                 # this is a regular value, update restart_run_cfg_d
@@ -358,7 +358,7 @@ def create_restart_run_cfg( master_run_pid_d, control_d, rs_replace_d, rs_dir, r
             #restart_run_cfg_d[param_name] = val
         # Now set some specific values based upon restart type, age and timestep
 
-    # Write out the new input cfg dictionary RC fix make input readable & executable - RC
+    # Write out the new input cfg dictionary, make input file readable & executable - RC
     cfg_name = rs_dir + '/' + master_run_datafile + '_' + rs_inp_cfg_suffix + '.input'
     Core_Util.write_cfg_dictionary( restart_run_cfg_d, cfg_name, True)
     os.chmod(cfg_name , 0o775)

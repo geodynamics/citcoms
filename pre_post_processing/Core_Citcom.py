@@ -206,19 +206,28 @@ total_topography_restart_params = {
 
 # Dynamic Topogrphy Restart parameters   ( also called 'nolith' restarts)
 dynamic_topography_restart_params = {
-    'CitcomS.steps' : 0,
-
+    # Added item - RC
+    'CitcomS.steps' : 'RS_TIMESTEP',
+    
     'CitcomS.controller.monitoringFrequency' : 1,
     'CitcomS.controller.checkpointFrequency' : 1,
-
-    'CitcomS.solver.stokes_flow_only' : 'on',
+    
+    # Added item - RC
+    'CitcomS.solver.stokes_flow_only' : '0',
 
     'CitcomS.solver.output.output_optional' : 'surf,geoid,botm',
     'CitcomS.solver.output.use_cbf_topo' : 1,
     'CitcomS.solver.output.self_gravitation' : 1,
-
     'CitcomS.solver.ic.solution_cycles_init' : 'RS_TIMESTEP',
-
+    
+    # Added items - RC
+    'CitcomS.solver.bc.topvbc'   : 0.0,
+    'CitcomS.solver.bc.topvbxval' : 0.0,
+    'CitcomS.solver.bc.topvbyval' : 0.0,
+    
+    'CitcomS.solver.bc.bottbc': 1,
+    'CitcomS.solver.bc.bottbcval': 1.0,
+    
     'CitcomS.solver.tracer.tracer' : 'off',
     'CitcomS.solver.tracer.chemical_buoyancy' : 'off',
     'CitcomS.solver.tracer.tracer_file' : 'DELETE',
@@ -230,11 +239,14 @@ dynamic_topography_restart_params = {
     'CitcomS.solver.tracer.regular_grid_deltheta' : 'DELETE',
     'CitcomS.solver.tracer.regular_grid_delphi' : 'DELETE',
     
-    'CitcomS.solver.bc.topvbxval' : 0.0,
-    'CitcomS.solver.bc.topvbyval' : 0.0,
-     
-    'CitcomS.solver.param.file_bcs' : 'DELETE',
+    # Added items to be comment out in the PID copy - RC
+    'CitcomS.solver.datadir':'COMMENT',
+    'CitcomS.solver.mesher.coor_file':'COMMENT',
+    'CitcomS.solver.param.lith_age_file':'COMMENT',
+    'CitcomS.solver.param.slab_assim_file':'COMMENT',
+                
     'CitcomS.solver.param.file_vbcs' : 0,
+    'CitcomS.solver.param.file_bcs' : 'DELETE',
     'CitcomS.solver.param.start_age' : 'RS_AGE',
     'CitcomS.solver.param.reset_startage' : 'off',
     'CitcomS.solver.param.vel_bound_file' : 'DELETE',
@@ -1115,7 +1127,7 @@ def write_cap_or_proc_list_to_files( arg, filename, inp_list, \
 #=====================================================================
 #=====================================================================
 #=====================================================================
-def get_time_spec_dictionary(time_spec, time_d = False) :
+def get_time_spec_dictionary(time_spec, time_d = True) :
     '''Process a time_spec string and return a dictionary, spec_d, with this data:
 
     spec_d['time_spec'] = the original time_spec as a string
@@ -1146,6 +1158,7 @@ A time_spec string may be given as:
 
     # convert the input to a string
     time_spec = str(time_spec)
+    
 
     if verbose: print( Core_Util.now(), 'get_time_spec_dictionary: time_spec =', time_spec )
 
@@ -1221,10 +1234,10 @@ A time_spec string may be given as:
       timestep_l = []
       age_l = []
       runtime_l = []
-
+      
       # process each time on the time_list to get the three equivalent units
       for t in spec_d['time_list']:
-
+        print("timestep",t)
         # check the units on t:
         if t.endswith('Ma'):
 
@@ -1260,7 +1273,7 @@ A time_spec string may be given as:
       spec_d['age_Ma'] = age_l
       spec_d['runtime_Myr'] = runtime_l
       spec_d['timestep'] = timestep_l
-
+        
     # end of check for time_d
 
     return spec_d
@@ -1356,7 +1369,7 @@ def read_citcom_time_file(pid_d):
 def get_time_triple_from_age(triple_list, test_age):
     '''locate and return the closest time triple for given age in Ma
 from the list of tuples: (step, age, runtime) crated from a citcom time file.'''
-
+    
     # check bounds 
     max_age = triple_list[0][1]
     min_age = triple_list[-1][1]
@@ -1491,7 +1504,12 @@ locate the closest available time step data files avaialable for the requested t
 
     # the dictionary to return
     ret_d = {}
-
+        # Get closest the time tripple for request_timestep
+    time_triple = get_time_triple_from_timestep( master_d['time_d']['triples'], request_timestep )
+    
+    request_age = int( time_triple[1] )
+    request_runtime =  time_triple[2]
+    
     # set up some local vars for this case 
     datadir  = master_d['pid_d']['datadir']
     datafile = master_d['pid_d']['datafile']
@@ -1514,6 +1532,11 @@ locate the closest available time step data files avaialable for the requested t
 
     elif os.path.exists('Data') :
         file_patt = './Data/0/' + datafile + '.' + file_name_component + '.0.*'
+   
+    # Added path to dynamic topography restart data - RC
+    elif os.path.exists('Age'+str(request_age)+'Ma') :
+        file_patt = './Age'+str(request_age)+'Ma/0/' + datafile + '.' + file_name_component + '.0.*'
+       
 
     # get a list of all the files that match the pattern
     # sorted by the time step values 
@@ -1525,11 +1548,7 @@ locate the closest available time step data files avaialable for the requested t
         print( now(), 'find_available_timestep_from_timestep: file_patt =', file_patt)
         #print( now(), 'find_available_timestep_from_timestep: file_list =', file_list)
         print( now(), 'find_available_timestep_from_timestep: step_list =', step_list)
-
-    # Get closest the time tripple for request_timestep
-    time_triple = get_time_triple_from_timestep( master_d['time_d']['triples'], request_timestep )
-    request_age = int( time_triple[1] )
-    request_runtime =  time_triple[2]
+# the age initial setting was moved from here
 
     if verbose: 
         print( now(), 'find_available_timestep_from_timestep: request: time_triple =', time_triple)
