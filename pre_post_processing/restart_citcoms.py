@@ -15,7 +15,7 @@ set of citcoms model run directories suitable for restart processing.'''
 #=====================================================================
 
 # Import Python and standard modules 
-import sys, string, os, copy
+import sys, string, os, copy,stat
 import numpy as np
 
 # Import geodynamic framework Core modules
@@ -33,21 +33,22 @@ Core_Citcom.verbose = True
 # Global Variables for this script
 verbose = False
 verbose = True
+
+
 #=====================================================================
 #=====================================================================
 def usage():
     '''print usage message and exit'''
     print('''restart_citcoms.py [-e] configuration_file.cfg 
 
-    restart_citcoms.py is a tool to create a set of Citcom input .cfg files 
+    restart_citcoms.py is a tool to create a set of Citcom input files
     for a set of restart runs based upon an existing prior master Citcom run.
 
     It makes adjusted copies of the master run's pidXXX.cfg file to become 
-    a new set of input .cfg files for the new restart runs.
+    a new set of .input files for the new restart runs.
 
     It uses default parameters from the Core_Citcom.py module, 
-    and from its own input .cfg file, to modify the master run .cfg 
-    to create new restart input .cfg files.
+    and from its own master run .cfg to create new restart .input files.
 
     For 'dynamic_topogrphy' restart runs this script also makes modified 
     copies of the temperature files for input to the restart runs.
@@ -66,11 +67,11 @@ def main() :
     # get the control .cfg file as a dictionary 
     control_d = Core_Util.parse_configuration_file(sys.argv[1])
 
-    # parse master run input pid file 
-    master_run_cfg = control_d['master_run_cfg']
+    # parse master run pid file - file number 1 which will include the uodated parameters - RC
+    master_run_cfg = control_d['master_run_pid']
     master_run_cfg_d = Core_Util.parse_configuration_file(master_run_cfg)
 
-    # parse master run output pid file 
+    # parse master run pid file - file number will be merged with the updated one
     master_run_pid = control_d['master_run_pid']
 
     # get the master dictionary and define aliases
@@ -79,13 +80,13 @@ def main() :
     master_run_pid_d = master_run_d['pid_d']
 
     # report details of input data 
-    if verbose: 
-        print( now(), 'restart_citcoms: control_d = ')
-        Core_Util.tree_print(control_d)
-        print( now(), 'restart_citcoms: master_run_cfg_d = ')
-        Core_Util.tree_print(master_run_cfg_d)
-        print( now(), 'restart_citcoms: master_run_pid_d = ')
-        Core_Util.tree_print(master_run_pid_d)
+        #if verbose:
+           # print( now(), 'restart_citcoms: control_d = ')
+            #Core_Util.tree_print(control_d)
+            #print( now(), 'restart_citcoms: master_run_cfg_d = ')
+            #Core_Util.tree_print(master_run_cfg_d)
+            #print( now(), 'restart_citcoms: master_run_pid_d = ')
+                    #Core_Util.tree_print(master_run_pid_d)
     
     # SAVE, might need later ... ?
     # copy of the geo frame defaults
@@ -168,8 +169,9 @@ def main() :
  
         # create new run input .cfg for this restart run
         restart_run_cfg = {}
-        restart_run_cfg = create_restart_run_cfg(
-            control_d, master_run_cfg_d, rs_replace_d, rs_dir, rs_inp_cfg_suffix, age, timestep)
+        
+        restart_run_cfg = create_restart_run_cfg( master_run_pid_d, control_d,
+             rs_replace_d, rs_dir, rs_inp_cfg_suffix, age, timestep)
 
     # End of loop over restart runs 
 
@@ -177,7 +179,7 @@ def main() :
     sys.exit(0)
 #=====================================================================
 #=====================================================================
-def create_restart_run_cfg(control_d, master_run_cfg_d, rs_replace_d, rs_dir, rs_inp_cfg_suffix, age, timestep) :
+def create_restart_run_cfg( master_run_pid_d, control_d, rs_replace_d, rs_dir, rs_inp_cfg_suffix, age, timestep) :
     '''return a copy of master_run_cfg_dict with adjustments as set in Core_Citcom and control_d'''
 
     # get a copy of the restart type
@@ -185,81 +187,29 @@ def create_restart_run_cfg(control_d, master_run_cfg_d, rs_replace_d, rs_dir, rs
 
     # make a local copy of the master run input cfg 
     restart_run_cfg_d = {}
-    restart_run_cfg_d = copy.deepcopy(master_run_cfg_d)
-
-    # Make changes to local restart_run_cfg_d based upon control_d and rs_replace_d
-
-    # Loop over all the params in rs_replace_d ; these are the values to update for restart
-    for p in sorted(rs_replace_d) :
-
-        # Get the replacement value 
-        val = rs_replace_d[p] 
- 
-        # Get the subsection name and param name
-        strings = p.split('.')
-        section_name = '.'.join( strings[0:-1] )
-        param_name = strings[-1]
-        if verbose: 
-            print( now(), 'create_restart_run_cfg: param = ', p, '; section_name = ', section_name, '; param_name =', param_name, '; val =', val)
-
-        # make sure this section name exists in the cfg dictionary, just in case
-        #if not section_name in restart_run_cfg_d:
-        #    print( now(), 'WARNING: section_name', section_name, ' not found in orginal cfg.  Adding entry to new restart cfg.')
-        #    restart_run_cfg_d['_SECTIONS_'].append( section_name )
-        #    restart_run_cfg_d[section_name] = {}
-        #    restart_run_cfg_d[section_name]['_SECTION_NAME_'] = section_name
-        #    restart_run_cfg_d[section_name][param_name] = None
-
-        # Check if this value is to be deleted 
-        if val == 'DELETE' : 
-            if param_name in restart_run_cfg_d:
-                del restart_run_cfg_d[param_name]
-            
-        # check if this parameter is to be commentd out in the new cfg
-        elif val == 'COMMENT' :
- 
-            # double check this param has a orginal value in the restart_run_cfg_d
-            if not param_name in restart_run_cfg_d[section_name]:
-                continue # the parm name was not in the master run cfg ; skip it 
-
-            # else get master run cfg value 
-            master_run_val = restart_run_cfg_d[section_name][param_name]
-            # remove original param name
-            del restart_run_cfg_d[section_name][param_name]
-            # add new value and commented out 
-            restart_run_cfg_d[section_name][ '# ' + param_name ] = master_run_val
-
-        elif val == 'RS_TIMESTEP':
-            restart_run_cfg_d[param_name] = timestep
-        elif val == 'RS_TIMESTEP+2':
-            restart_run_cfg_d[param_name] = timestep + 2
-
-
-        else: 
-           # this is a regular value, update restart_run_cfg_d
-           restart_run_cfg_d[param_name] = val
-
-        # Double check if this param is set in the control cfg 
-        if section_name + '.' + param_name in control_d :
-            val = control_d[section_name + '.' + param_name]
-            restart_run_cfg_d[param_name] = val
-
-    # Now set some specific values based upon restart type, age and timestep 
-
+    restart_run_cfg_d = copy.deepcopy( master_run_pid_d)
+    
+    
     # Get a copy of the master run datafile value
     if 'CitcomS.solver' in restart_run_cfg_d and all(x in restart_run_cfg_d['CitcomS.solver'] for x in ['datafile', 'datadir']):
-        master_run_datafile = restart_run_cfg_d['CitcomS.solver']['datafile']
-        master_run_datadir = restart_run_cfg_d['CitcomS.solver']['datadir']
-    elif all(x in restart_run_cfg_d for x in ['datafile', 'datadir']):
-        master_run_datafile = restart_run_cfg_d['datafile']
-        master_run_datadir = restart_run_cfg_d['datadir']
+            
+            master_run_datafile = restart_run_cfg_d['CitcomS.solver']['datafile']
+            # This is the Data output dir
+            master_run_datadir = restart_run_cfg_d['CitcomS.solver']['datadir']
+           
+            
+    if all(x in restart_run_cfg_d for x in ['datafile', 'datadir']):
+    
+            master_run_datafile = restart_run_cfg_d['datafile']
+            master_run_datadir = restart_run_cfg_d['datadir']
     else:
-        sys.exit('unable to find data files!!')
-    # Set the new values for datafile, datafile_old, datadir, datadir_old 
+            
+            sys.exit('unable to find data files!!')
+    # Set the new values for datafile, datafile_old, datadir, datadir_old
 
-    # FIXME: are the new values for these 4 params ^ ^ ^ ^  
+    # FIXME: are the new values for these 4 params ^ ^ ^ ^
     # set correctly in the two cases below?
-
+    
     if rs_type == 'total_topography' :
 
         restart_run_cfg_d['CitcomS.solver']['datafile'] = master_run_datafile
@@ -273,36 +223,146 @@ def create_restart_run_cfg(control_d, master_run_cfg_d, rs_replace_d, rs_dir, rs
             restart_run_cfg_d['CitcomS.solver']['datafile_old'] = master_run_datafile
             restart_run_cfg_d['CitcomS.solver']['datadir_old'] =  os.path.normpath(os.path.join('../',master_run_cfg_d['datadir']))
         else :
-            #restart_run_cfg_d['CitcomS.solver']['datafile_old'] = master_run_datafile 
+            #restart_run_cfg_d['CitcomS.solver']['datafile_old'] = master_run_datafile
             #restart_run_cfg_d['CitcomS.solver']['datadir_old'] = '../data/%RANK'
             restart_run_cfg_d['CitcomS.solver']['datafile_old'] = master_run_datafile
             restart_run_cfg_d['CitcomS.solver']['datadir_old'] =  '../data/%RANK'
 
     elif rs_type == 'dynamic_topography' :
-
-        restart_run_cfg_d['datafile'] = master_run_datafile 
-        restart_run_cfg_d['datadir'] = './Age' + str(age) + 'Ma/%RANK' 
-
+    
+        restart_run_cfg_d['datafile'] = str(master_run_datafile)
+        restart_run_cfg_d['datadir'] = './Age' + str(age) + 'Ma/%RANK'
+        
         # FIXME: DJB, TY, and NF to double check this change:
         # NOTE: these two values are derrived in create_no_lith_temp()
         #restart_run_cfg_d['CitcomS.solver']['datafile_old'] = master_run_datafile
         #restart_run_cfg_d['CitcomS.solver']['datadir_old'] = '../%RANK'
+        #restart_run_cfg_d['datadir_old'] = os.path.normpath(control_d['rs_datadir'])
+        
+        # output the directory - RC
         restart_run_cfg_d['datafile_old'] = control_d['rs_datafile']
-        restart_run_cfg_d['datadir_old'] = os.path.normpath(control_d['rs_datadir'])
-
+        restart_run_cfg_d['datadir_old'] = control_d['rs_datadir']
+        
         restart_run_cfg_d['start_age'] = str(age)
+        
+        # Age, Hist and Coor_file need special tackle. These work with relative paths too  - RC
+        if not os.path.isabs(restart_run_cfg_d['coor_file']):
+            tmp1=os.path.normpath(os.path.join('../',restart_run_cfg_d['coor_file']))
+            restart_run_cfg_d['coor_file']=tmp1
+            
+        if not os.path.isabs(restart_run_cfg_d['lith_age_file']):
+            tmp1=os.path.normpath(os.path.join('../',restart_run_cfg_d['lith_age_file']))
+            restart_run_cfg_d['lith_age_file']=tmp1
+
+        if not os.path.isabs(restart_run_cfg_d['slab_assim_file']):
+            tmp1=os.path.normpath(os.path.join('../',restart_run_cfg_d['slab_assim_file']))
+            restart_run_cfg_d['slab_assim_file']=tmp1
+
+
+        # Need to add this on the rs_replace_d with coord and etc
     else:
         print(now(), 'ERROR: unknown restart type.  Value must be either "dynamic_topography" or "total_topography"')
 
-    # coor_file needs special tackle. maybe can move into the loop above?
-    if not os.path.isabs(restart_run_cfg_d['coor_file']):
-        tmp1=os.path.normpath(os.path.join('../',restart_run_cfg_d['coor_file']))
-        restart_run_cfg_d['coor_file']=tmp1
+    
 
-    # Write out the new input cfg dictionary
-    cfg_name = rs_dir + '/' + master_run_datafile + '_' + rs_inp_cfg_suffix + '.cfg'
-    Core_Util.write_cfg_dictionary( restart_run_cfg_d, cfg_name, True) 
+    # Make changes to local restart_run_cfg_d based upon control_d and rs_replace_d
 
+    # Loop over all the params in rs_replace_d ; these are the values to update for restart
+    for p in sorted(rs_replace_d) :
+
+        # Get the replacement value 
+        val = rs_replace_d[p]
+        
+ 
+        # Get the subsection name and param name
+        strings = p.split('.')
+        section_name = '.'.join( strings[0:-1] )
+        
+        
+        param_name = strings[-1]
+        if verbose: 
+            print( now(), 'create_restart_run_cfg: param = ', p, '; section_name = ', section_name, '; param_name =', param_name, '; val =', val)
+
+        # make sure this section name exists in the cfg dictionary, just in case
+                #if not section_name in restart_run_cfg_d:
+                #    print( now(), 'WARNING: section_name', section_name, ' not found in orginal cfg.  Adding entry to new restart cfg.')
+                  #  restart_run_cfg_d['_SECTIONS_'].append( section_name )
+                  #  restart_run_cfg_d[section_name] = {}
+                  #  restart_run_cfg_d[section_name]['_SECTION_NAME_'] = section_name
+                  #  restart_run_cfg_d[section_name][param_name] = None
+
+            # Check if this value is to be deleted
+        if val == 'DELETE' :
+            if param_name in restart_run_cfg_d:
+                del restart_run_cfg_d[param_name]
+                print('This has been deleted:',param_name )
+                
+        # check if this parameter is to be commentd out in the new cfg
+        elif val == 'COMMENT' :
+
+            # double check this param has a orginal value in the restart_run_cfg_d
+            if not param_name in restart_run_cfg_d[section_name]:
+                continue # the parm name was not in the master run cfg ; skip it
+
+            # else get master run cfg value
+            master_run_val = restart_run_cfg_d[section_name][param_name]
+            
+            print('This has been commented',master_run_val)
+            
+            # remove original param name
+            del restart_run_cfg_d[section_name][param_name]
+            
+            # add new value and commented out
+            restart_run_cfg_d[section_name][ '# ' + param_name ] = master_run_val
+            print('commented out?',master_run_val)
+            
+        # Here you can define how many timestep you want to restart for - you can simply change this in core_citcom.py now - RC
+               # elif val == 'RS_TIMESTEP':
+                    #restart_run_cfg_d[param_name] = timestep
+                    #print ("the RS time step",timestep)
+            
+                #elif val == 'RS_TIMESTEP+2':
+                    #print ("the RS time step",timestep)
+                    #restart_run_cfg_d[param_name] = timestep + 2
+        else:
+
+        
+           # Check in the PID copy if a parameter has already been defined rs_replace_d, if it has it will be commented - RC
+            if not param_name in restart_run_cfg_d[section_name]:
+            
+                # this is a regular value, update restart_run_cfg_d
+                restart_run_cfg_d[param_name] = val
+                print('This has been added:', val)
+                continue # the parm name was not in the master run cfg ; skip it
+
+            # else get master run cfg value
+            master_run_val = restart_run_cfg_d[section_name][param_name]
+        
+            # remove original param name
+            del restart_run_cfg_d[section_name][param_name]
+            
+            # add the old value and commented out
+            restart_run_cfg_d[section_name][ '# ' + param_name ] = master_run_val
+            print('This has been commented:',master_run_val)
+            
+            # add the required value
+            restart_run_cfg_d[param_name] = val
+            print('This value has been updated:', val)
+        
+           
+        # Double check if this param is set in the control cfg 
+        #if section_name + '.' + param_name in control_d :
+            #val = control_d[section_name + '.' + param_name]
+        #if section_name + '.' + param_name in restart_run_cfg_d:
+            #val = restart_run_cfg_d[section_name + '.' + param_name]
+            #restart_run_cfg_d[param_name] = val
+        # Now set some specific values based upon restart type, age and timestep
+
+    # Write out the new input cfg dictionary RC fix make input readable & executable - RC
+    cfg_name = rs_dir + '/' + master_run_datafile + '_' + rs_inp_cfg_suffix + '.input'
+    Core_Util.write_cfg_dictionary( restart_run_cfg_d, cfg_name, True)
+    os.chmod(cfg_name , 0o775)
+    
     # And return it 
     return restart_run_cfg_d
 #=====================================================================
@@ -380,16 +440,19 @@ def create_no_lith_temp(control_d, master_run_d, rs_replace_d, rs_dir, rs_inp_cf
 
     ic_dir = rs_dir + '/ic_dir'
     Core_Util.make_dir( ic_dir )
-    out_name = ic_dir + '/' + rs_datafile + '.velo.#.' + str(timestep)
+    
+    # make the output name consistent with routine for /Data - RC
+    out_name = ic_dir + '/' + datafile + '.velo.#.'  + str(timestep)
+    #out_name = ic_dir + '/' + rs_datafile + '.velo.#.' + str(timestep)
     print( now(), 'create_no_lith_temp: out_name =', out_name )
-
+    
     # now write out data to processor files (with header, necessary for restart)
     Core_Citcom.write_cap_or_proc_list_to_files( 
         master_run_d['pid_d'], out_name, (out_data_by_proc,), 'proc', True )
 
     # Update control_d with file name patterns 
     control_d['rs_datafile'] = rs_datafile
-    control_d['rs_datadir'] = './ic_dir/'
+    control_d['rs_datadir'] = './ic_dir'
 
     return
 #=====================================================================
@@ -431,8 +494,7 @@ def make_example_config_file( ):
     text = '''#=====================================================================
 # This is an example config.cfg file for restart_citcoms.py
 # 
-# Set the name of the master run model input RUN.cfg and output PID.cfg files
-master_run_cfg = mcm48.cfg
+# Set the name of the output PID.cfg file
 master_run_pid = pid32395.cfg
 
 
@@ -457,7 +519,7 @@ restart_type = total_topography
 # dynamic_topogrphy restarts also require these two values to be set:
 #
 # depth to remove lithosphere, in km:
-lithosphere_depth_DT = 350.0
+lithosphere_depth_DT = 350.0 ~45 node
 #
 # non-dimensional temperature value to replace in new velo files
 lithosphere_temperature_DT = 0.5 
@@ -485,7 +547,7 @@ restart_structure = separate
 CitcomS.solver.bc.topvbc = 0
 CitcomS.solver.output.output_ll_max = 80
 CitcomS.solver.tsolver.finetunedt = 0.01
-
+CitcomS.solver.param.remove_buoyancy_above_znode = 45
 #=====================================================================
 '''
     print( text )
