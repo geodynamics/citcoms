@@ -51,11 +51,11 @@ The following instructions clone this repository, although in practice you'll pr
 
 ```
 git clone https://github.com/EarthByte/citcoms.git citcoms_assim
-cd citcoms_assim
+cd citcoms_assim/src
 make distclean
 autoreconf -ivf
 module load openmpi
-module load hdf5
+module load hdf5/1.10.7p # check the available hdf5 (p) parallel library
 export LD=ld
 ./configure
 make
@@ -241,10 +241,13 @@ These parts of the code are commented with 'DJB OUT'
 1. Fixed various valgrind uninitialised variable warnings relating to the writing of the pid file
 
 ### Topography
-These parts of the code are commented with 'DJB TOPO'
+These parts of the code are commented with 'DJB TOPO' or "RC"
 
-1. Parameter to remove buoyancy above a given znode for computing dynamic topography
-    - ```remove_buoyancy_above_znode``` (int)
+1. Restart_citcoms.py -e provides an example of config.cfg file for the restart_citcoms.py. This includes the updated ```remove_buoyancy_above_znode``` (int) parameter to remove buoyancy above a given znode for computing dynamic topography.
+1. Restart_citcoms.py requires config.cfg and output PID.cfg to be set consistently and made available
+1. Fixed pid overwritten topograpphy entries during restart
+1. Fixed time-stepping loop
+1. The restart outputs can be post-process by taping grid_maker.py grid_maker.cfg 
 
 ### Ultra-low velocity zone
 These parts of the code are commented with 'DJB ULVZ'.  These amendments will not affect data assimilation, but are included for completeness.
