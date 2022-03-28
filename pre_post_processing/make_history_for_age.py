@@ -581,8 +581,7 @@ def check_input_parameters( master_d ):
         control_d['grid_dir'] = control_d['grid_dir'].split('/')[-1]
 
     # global or regional model
-    if DATA:
-
+    if DATA: 
         # check entries from the geodynamics framework (age grids, subduction xy)
         control_d['age1_file']  =  geoframe_d['age_grid_no_mask_dir'] + '/'
         control_d['age1_file'] += geoframe_d['age_grid_no_mask_prefix'] + '%(age)s.grd' % vars()
@@ -600,6 +599,19 @@ def check_input_parameters( master_d ):
             control_d['age2_file']  =  geoframe_d['age_grid_mask_dir'] + '/'
             control_d['age2_file'] += geoframe_d['age_grid_mask_prefix'] + '%(age)s.grd' % vars()
 
+        # JONO edit: if the .grd files don't exist, try .nc file extension
+        for i in [ 'age1_file', 'age2_file' ]:
+            file = control_d[i]
+            if not os.path.exists( file ): # Check if the existing file with .grd extension exists
+                name, extension = os.path.splitext(file)
+                extension = '.nc' # rename to the netcdf4 extension
+                control_d[i] = name + extension
+                file = control_d[i]
+                cmd = '%(file)s -R0/360/-90/90 -S' % vars()
+                callgmt( 'grdedit', cmd ) # Make sure the longitude of the .nc file is consistent with everything else
+                # cmd = '%(file)s' % vars()
+                # callgmt( 'grdinfo', cmd )
+                # sys.exit()
         # ensure that these files exist
         for ifile in [ control_d['age1_file'], control_d['age2_file'], control_d['sub_file'] ]:
             if not os.path.exists( ifile ):
@@ -863,7 +875,20 @@ def no_assimilation_regions( master_d, age_grid, grd_res ):
     R = 'g' # by default for all age grid processing
     rm_list = func_d['rm_list']
 
-    if os.path.exists( no_ass_file ):
+    # Edit by Jono: skipping over empty topology files (for update to GMT6)
+    topologyContents=open(no_ass_file).readlines()
+    topologyPoints=[]
+    for line in topologyContents:
+        if line[0] != ">" and line[0] != "#":
+            topologyPoints.append(line)
+    
+    if len(topologyPoints) < 3:
+        # turn off no assimilation regions
+        print( now(), 'WARNING: file exists but there are not enough points to make a polygon: %(no_ass_file)s' % vars())
+        print( now(), 'WARNING: aborting no assimilation regions')
+    # End of Jono's edit (except the below 'elif' has been changed from originally being 'if')
+
+    elif os.path.exists( no_ass_file ):
         no_ass_file2 = preprocess_gplates_line_data( master_d, no_ass_file )
         # interior of polygon
         no_ass_mask1 = grid_dir + '/no_ass_mask1.grd'
@@ -1639,7 +1664,7 @@ def make_tracer_summary_postscript( master_d ):
 
     # overlay subduction zones
     G = 'black'
-    W = '3/black'
+    W = '3p,black'
     if sub_file_left:
         cmd = sub_file_left + ' -Sf0.2i/0.05ilt -G%(G)s -W%(W)s -m \
 -Xa0.5 -Ya8' % vars()
@@ -1649,7 +1674,7 @@ def make_tracer_summary_postscript( master_d ):
 -Xa0.5 -Ya8' % vars()
         callgmt( 'psxy', cmd, gmt_base_options, '>>', ps )
 
-    cmd = '-C%(stencil_cpt)s -D1.5/7.6/1.5/0.125h -K -O \
+    cmd = '-C%(stencil_cpt)s -Dx1.5c/7.6c+w1.5c/0.125c+h+jTC -K -O \
         -B1:"Stencil value":' % vars() # psscale
     callgmt( 'psscale', cmd, '', '>>', ps )
 
@@ -1751,7 +1776,7 @@ S 0.125 v 0.25/0.015/0.06/0.05 0/0/0 1,black 0.27i %(velocity_scale).0f cm/yr\nE
 
     # overlay subduction zones
     G = 'black'
-    W = '3/black'
+    W = '3p,black'
     if sub_file_left:
         cmd = sub_file_left + ' -Sf0.2i/0.05ilt -G%(G)s -W%(W)s -m \
 -Xa0.5 -Ya8' % vars()
@@ -1763,10 +1788,10 @@ S 0.125 v 0.25/0.015/0.06/0.05 0/0/0 1,black 0.27i %(velocity_scale).0f cm/yr\nE
 
     if age_grid:
         if SYNTHETIC:
-            cmd = '-C%(age_cpt)s -D1.5/7.6/1.5/0.125h -K -O \
+            cmd = '-C%(age_cpt)s -Dx1.5c/7.6c+w1.5c/0.125c+h+jTC -K -O \
 -B30:"Seafloor age (Ma)":' % vars() # psscale
         else:
-            cmd = '-C%(age_cpt)s -D1.5/7.6/1.5/0.125h -K -O \
+            cmd = '-C%(age_cpt)s -Dx1.5c/7.6c+w1.5c/0.125c+h+jTC -K -O \
 -B50:"Thermal age":/:"Ma":' % vars() # psscale
         callgmt( 'psscale', cmd, '', '>>', ps )
 
@@ -1779,7 +1804,7 @@ S 0.125 v 0.25/0.015/0.06/0.05 0/0/0 1,black 0.27i %(velocity_scale).0f cm/yr\nE
     if not temp_cpt in rm_list: rm_list.append( temp_cpt )
     cmd = '-Cjet -D -T%f/%f/0.025' % (temperature_min, temperature_max)
     callgmt( 'makecpt', cmd, '', '>', temp_cpt )
-    cmd = '-C%(temp_cpt)s -D6.75/5.1/1.5/0.125h -K -O \
+    cmd = '-C%(temp_cpt)s -Dx6.75c/5.1c+w1.5c/0.125c+h+jTC -K -O \
  -B0.2:"Temperature":/:"Non-dim":' % vars() # psscale
     callgmt( 'psscale', cmd, '', '>>', ps )
 
@@ -1800,7 +1825,7 @@ S 0.125 v 0.25/0.015/0.06/0.05 0/0/0 1,black 0.27i %(velocity_scale).0f cm/yr\nE
     if slab_grid:
         cmd = slab_grid + ' -C%(temp_cpt)s -B%(B)s -Xa0.5 -Ya3.0' % vars()
         callgmt( 'grdimage', cmd, gmt_base_options, '>>', ps )
-        W = '2/black'
+        W = '2p,black'
         if sub_file_left:
             cmd = sub_file_left + ' -W%(W)s -m \
 -Xa0.5 -Ya3' % vars()
