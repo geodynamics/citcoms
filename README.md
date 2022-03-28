@@ -245,7 +245,7 @@ These parts of the code are commented with 'DJB TOPO' or "RC"
 
 1. Restart_citcoms.py -e provides an example of config.cfg file for the restart_citcoms.py. This includes the updated ```remove_buoyancy_above_znode``` (int) parameter to remove buoyancy above a given znode for computing dynamic topography.
 1. Restart_citcoms.py requires config.cfg and output PID.cfg to be set consistently and made available
-1. Fixed pid overwritten topograophy entries during restart
+1. Fixed pid overwritten topograpphy entries during restart
 1. Fixed time-stepping loop
 1. The restart outputs can be post-process by taping grid_maker.py grid_maker.cfg 
 
