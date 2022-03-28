@@ -241,7 +241,7 @@ These parts of the code are commented with 'DJB OUT'
 1. Fixed various valgrind uninitialised variable warnings relating to the writing of the pid file
 
 ### Topography
-These parts of the code are commented with 'DJB TOPO' & RC
+These parts of the code are commented with 'DJB TOPO' or "RC"
 
 1. Restart_citcoms.py -e provides an example of config.cfg file for the restart_citcoms.py. This includes the updated ```remove_buoyancy_above_znode``` (int) parameter to remove buoyancy above a given znode for computing dynamic topography.
 1. Restart_citcoms.py requires config.cfg and output PID.cfg to be set consistently and made available
