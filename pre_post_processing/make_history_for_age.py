@@ -609,9 +609,6 @@ def check_input_parameters( master_d ):
                 file = control_d[i]
                 cmd = '%(file)s -R0/360/-90/90 -S' % vars()
                 callgmt( 'grdedit', cmd ) # Make sure the longitude of the .nc file is consistent with everything else
-                # cmd = '%(file)s' % vars()
-                # callgmt( 'grdinfo', cmd )
-                # sys.exit()
         # ensure that these files exist
         for ifile in [ control_d['age1_file'], control_d['age2_file'], control_d['sub_file'] ]:
             if not os.path.exists( ifile ):
@@ -1674,7 +1671,7 @@ def make_tracer_summary_postscript( master_d ):
 -Xa0.5 -Ya8' % vars()
         callgmt( 'psxy', cmd, gmt_base_options, '>>', ps )
 
-    cmd = '-C%(stencil_cpt)s -Dx1.5c/7.6c+w1.5c/0.125c+h+jTC -K -O \
+    cmd = '-C%(stencil_cpt)s -D1.5/7.6/1.5/0.125h -K -O \
         -B1:"Stencil value":' % vars() # psscale
     callgmt( 'psscale', cmd, '', '>>', ps )
 
@@ -1788,10 +1785,10 @@ S 0.125 v 0.25/0.015/0.06/0.05 0/0/0 1,black 0.27i %(velocity_scale).0f cm/yr\nE
 
     if age_grid:
         if SYNTHETIC:
-            cmd = '-C%(age_cpt)s -Dx1.5c/7.6c+w1.5c/0.125c+h+jTC -K -O \
+            cmd = '-C%(age_cpt)s -D1.5/7.6/1.5/0.125h -K -O \
 -B30:"Seafloor age (Ma)":' % vars() # psscale
         else:
-            cmd = '-C%(age_cpt)s -Dx1.5c/7.6c+w1.5c/0.125c+h+jTC -K -O \
+            cmd = '-C%(age_cpt)s -D1.5/7.6/1.5/0.125h -K -O \
 -B50:"Thermal age":/:"Ma":' % vars() # psscale
         callgmt( 'psscale', cmd, '', '>>', ps )
 
@@ -1804,7 +1801,7 @@ S 0.125 v 0.25/0.015/0.06/0.05 0/0/0 1,black 0.27i %(velocity_scale).0f cm/yr\nE
     if not temp_cpt in rm_list: rm_list.append( temp_cpt )
     cmd = '-Cjet -D -T%f/%f/0.025' % (temperature_min, temperature_max)
     callgmt( 'makecpt', cmd, '', '>', temp_cpt )
-    cmd = '-C%(temp_cpt)s -Dx6.75c/5.1c+w1.5c/0.125c+h+jTC -K -O \
+    cmd = '-C%(temp_cpt)s -D1.5/7.6/1.5/0.125h -K -O \
  -B0.2:"Temperature":/:"Non-dim":' % vars() # psscale
     callgmt( 'psscale', cmd, '', '>>', ps )
 
