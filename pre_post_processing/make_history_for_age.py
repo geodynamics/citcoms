@@ -1801,7 +1801,7 @@ S 0.125 v 0.25/0.015/0.06/0.05 0/0/0 1,black 0.27i %(velocity_scale).0f cm/yr\nE
     if not temp_cpt in rm_list: rm_list.append( temp_cpt )
     cmd = '-Cjet -D -T%f/%f/0.025' % (temperature_min, temperature_max)
     callgmt( 'makecpt', cmd, '', '>', temp_cpt )
-    cmd = '-C%(temp_cpt)s -D1.5/7.6/1.5/0.125h -K -O \
+    cmd = '-C%(temp_cpt)s -D6.75/5.1/1.5/0.125h -K -O \
  -B0.2:"Temperature":/:"Non-dim":' % vars() # psscale
     callgmt( 'psscale', cmd, '', '>>', ps )
 
