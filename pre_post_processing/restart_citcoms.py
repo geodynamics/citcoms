@@ -441,9 +441,9 @@ def create_no_lith_temp(control_d, master_run_d, rs_replace_d, rs_dir, rs_inp_cf
     ic_dir = rs_dir + '/ic_dir'
     Core_Util.make_dir( ic_dir )
     
-    # make the output name consistent with routine for /Data - RC
-    out_name = ic_dir + '/' + datafile + '.velo.#.'  + str(timestep)
+    # make the output name in ic_dir consistent with routine for Data output - RC
     #out_name = ic_dir + '/' + rs_datafile + '.velo.#.' + str(timestep)
+    out_name = ic_dir + '/' + datafile + '.velo.#.'  + str(0)
     print( now(), 'create_no_lith_temp: out_name =', out_name )
     
     # now write out data to processor files (with header, necessary for restart)
