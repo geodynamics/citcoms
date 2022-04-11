@@ -416,13 +416,13 @@ def get_T_from_grdinfo(grid_filename):
 
     return T
 #====================================================================
-def plot_grid( grid_filename, xy_filename = None, R_value = 'g', T_value = '-T0/1/.1' ):
+def plot_grid( grid_filename, xy_filename = None, R_value = 'g', T_value = '-T0/1/.1', J_value = 'X8/5', C_value = 'polar' ):
     '''simple function to make a test plot'''
     global verbose
     verbose = True 
 
     # postscript name
-    ps = grid_filename.rstrip('.grd') + '.ps'
+    ps = grid_filename.rstrip('.nc') + '.ps'
 
     # page orientation must be set before start_postscript()
     arg = 'PAGE_ORIENTATION landscape'
@@ -441,7 +441,7 @@ def plot_grid( grid_filename, xy_filename = None, R_value = 'g', T_value = '-T0/
     callgmt( 'psbasemap', '', opts, '>>', ps )
 
     # create a cpt for this grid
-    cpt_file = grid_filename.replace('.grd', '.cpt')
+    cpt_file = grid_filename.replace('.nc', '.cpt')
     
     cmd = '-Cpolar ' + T_value 
     callgmt( 'makecpt', cmd, '', '>', cpt_file )
