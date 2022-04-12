@@ -432,7 +432,7 @@ def main():
                    
 
                     # create the grid
-                    grid_filename = xyz_filename.rstrip('xyz') + 'grd'
+                    grid_filename = xyz_filename.rstrip('xyz') + 'nc'
 
                     surface_I = control_d[s].get('surface_I', '0.25')
                     cmd = median_xyz_filename + ' -I' + str(surface_I) + ' -R' + grid_R 
@@ -457,7 +457,7 @@ def main():
 
                     if control_d[s].get('dimensional'):
                         print( now(), 'grid_maker.py: dimensional = ', control_d[s]['dimensional'])
-                        dim_grid_name = grid_filename.replace('.grd', '.dimensional.grd')
+                        dim_grid_name = grid_filename.replace('.nc', '.dimensional.nc')
                         Core_Citcom.dimensionalize_grid(pid_file, field_name, grid_filename, dim_grid_name)
 
                         # FIXME: for dynamic topo remove  mean 
@@ -510,13 +510,13 @@ def main():
                     # also plot dimensional grid 
                     if control_d[s].get('dimensional') :
                         print( now(), 'grid_maker.py: plotting dimensional = ', control_d[s]['dimensional'])
-                        dim_grid_name = grid_filename.replace('.grd', '.dimensional.grd')
+                        dim_grid_name = grid_filename.replace('.nc', '.dimensional.nc')
                         T = Core_GMT.get_T_from_grdinfo( dim_grid_name )
                         Core_GMT.plot_grid( dim_grid_name, xy_filename, grid_R, T, J)
 
                     # plot plate frame grid 
                     if 'make_plate_frame_grid' in control_d :
-                        plateframe_grid_name = grid_filename.replace('.grd', '-plateframe.grd')
+                        plateframe_grid_name = grid_filename.replace('.nc', '-plateframe.nc')
                         xy_filename = ''
                         xy_path = master_d['geoframe_d']['gplates_line_dir']
                         # present day plate outlines : use '0' 
