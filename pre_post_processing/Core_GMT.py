@@ -139,8 +139,13 @@ def plot_age_grid_mask( opts_d, ps, age ):
 
     arg = age_grid_dir + '/' + age_grid_prefix
     arg += '%(age)s.grd' % vars()
+    # Jono edit: check for a .nc grid if the .grd grid doesn't exist
+    if not os.path.exists( arg ):
+        arg += '%(age)s.nc' % vars()
+    
     if os.path.exists( arg ):
         callgmt( 'grdimage', arg, opts_d, '>>', ps )
+
 
 #====================================================================
 #====================================================================
@@ -154,6 +159,10 @@ def plot_age_grid_no_mask( opts_d, ps, age ):
 
     arg = age_grid_dir + '/' + age_grid_prefix
     arg += '%(age)s.grd' % vars()
+    # Jono edit: check for a .nc grid if the .grd grid doesn't exist
+    if not os.path.exists( arg ):
+        arg += '%(age)s.nc' % vars()
+
     if os.path.exists( arg ):
         callgmt( 'grdimage', arg, opts_d, '>>', ps )
 
@@ -169,6 +178,10 @@ def plot_age_grid_continent( opts_d, ps, age ):
 
     arg = age_grid_dir + '/' + age_grid_prefix
     arg += '%(age)s.grd' % vars()
+    # Jono edit: check for a .nc grid if the .grd grid doesn't exist
+    if not os.path.exists( arg ):
+        arg += '%(age)s.nc' % vars()
+
     if os.path.exists( arg ):
         callgmt( 'grdimage', arg, opts_d, '>>', ps )
 
