@@ -1295,7 +1295,6 @@ def read_citcom_time_file(pid_d):
     datafile      = pid_d['datafile']
     start_age     = pid_d['start_age']
     output_format = pid_d['output_format']
-
     # compute temperature scale factor
     layer_km = pid_d['radius_km']
     scalet   = pid_d['scalet']
@@ -1340,7 +1339,11 @@ def read_citcom_time_file(pid_d):
         # parse the data line and append the step
         step, t, dt, CPUtime, CPUdt = line.split()
         step_l.append( int(step) )
-
+        
+        # Fix for RS post-processing - RC
+        if start_age == 'RS_AGE':
+           start_age = int(''.join(filter(str.isdigit, datadir)))
+           
         # compute age in Ma and append it
         age = start_age - ( float(t) * scale_t)
         age_l.append( float(age) )
