@@ -2263,7 +2263,6 @@ and 'make_example_config_file()'
 
     # loop over lines and set up default entries in the type dict
     for line in in_file:
-
         # skip past comments and blank lines
         if line.startswith('#'):
             continue # to next line
@@ -2273,16 +2272,24 @@ and 'make_example_config_file()'
         # skip section lines
         if '[' in line:
             continue # to next line
-
+               # skip section lines
+        
         # split data line into variable, value and comment:
         var, val = line.split('=')
-
+        
         # split value from comment 
         com = ''
+                
         if ';' in val:
             val, com = val.split(';')
+            
         elif '#' in val:
-            val, com = val.split('#')
+    
+            # Fix for RS post-processing - RC
+            val,com = val.split('#', 2)[:2]
+            #val, com = val.split('#')
+            
+            
         # clean up white space
         var = var.strip() 
         var = var.rstrip() 
@@ -2557,8 +2564,12 @@ def parse_configuration_file( filename, update_top_level_dict_from_section=False
         com = ''
         if ';' in val:
             val, com = val.split(';')
+            
         elif '#' in val:
-            val, com = val.split('#') #the '#' also can be used in front of the comments
+    
+            #val, com = val.split('#') #the '#' also can be used in front of the comments
+            # Fix for RS post-processing - RC
+            val,com = val.split('#', 2)[:2]
 
         # clean up white space
         var = var.strip() 

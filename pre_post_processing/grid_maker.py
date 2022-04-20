@@ -79,8 +79,7 @@ def main():
 
     # set the pid file 
     pid_file = control_d['pid_file']
-
-
+    
     # get the master dictionary and define aliases
     master_d = Core_Citcom.get_all_pid_data( pid_file )
     coor_d = master_d['coor_d']
@@ -282,8 +281,9 @@ def main():
                 # create the total citcoms data filenames to read 
                 file_format = ''
                 
-                # check for various data dirs 
+                # check for various data dirs
                 if os.path.exists( datadir + '/0/') :
+                    
                     print( now(), 'grid_maker.py: path found = ', datadir + '/0/' )
                     file_format = datadir + '/#/' + datafile + '.' + file_name_component + '.#.' + str(timestep)
 
@@ -299,10 +299,15 @@ def main():
                     print( now(), 'grid_maker.py: path found = ', 'Data' )
                     file_format = './Data/#/' + datafile + '.' + file_name_component + '.#.' + str(timestep)
                     
-                # Added path to dynamic topography restart data - RC
-                elif os.path.exists('Age'+str(start_age)+'Ma') :
-                    print( now(), 'grid_maker.py: path found = ', 'Age'+str(start_age)+'Ma' )
-                    file_format = './Age'+str(start_age)+'Ma/#/' + datafile + '.' + file_name_component + '.#.'+ str(timestep)
+                # Added path to dynamic topography restart data - to be tested and cleaned up in RS pre-processing
+                # elif os.path.exists('Age'+str(start_age)+'Ma') :
+                #print( now(), 'grid_maker.py: path found = ', 'Age'+str(start_age)+'Ma' )
+                #file_format = './Age'+str(start_age)+'Ma/#/' + datafile + '.' + file_name_component + '.#.'+ str(timestep)
+                
+                # Added path to dynamic topography post-processing - RC
+                elif os.path.exists('Age'+str(age_Ma)+'Ma') :
+                    print( now(), 'grid_maker.py: path found = ', datadir )
+                    file_format = './Age'+str(age_Ma)+'Ma/#/' + datafile + '.' + file_name_component + '.#.'+ str(timestep)
                   
                 # report error 
                 else :
@@ -470,7 +475,6 @@ def main():
                         grid_list.append( (grid_filename, age_Ma) )
 
 
-
                     # Optional step to transform grid to plate frame
                     if 'make_plate_frame_grid' in control_d :
                         cmd = 'frame_change_pygplates.py %(age_Ma)s %(grid_filename)s %(grid_R)s' % vars()
@@ -556,6 +560,9 @@ def make_example_config_file( ):
 
 # set path to the model pid file 
 pid_file = pid18637.cfg 
+
+# For RS set path
+pid = model_restart_age.cfg
 
 # CitcomS coordinate files by processor (i.e. [datafile].coord.[proc])
 # first, look in this user-specified directory for all files
