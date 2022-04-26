@@ -41,3 +41,5 @@ src/visual/Makefile.in
 src/visual/OpenDXMacro/Makefile
 src/visual/OpenDXMacro/Makefile.in
 src/visual/project_geoid
+.DS_store
+
