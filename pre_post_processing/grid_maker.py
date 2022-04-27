@@ -217,13 +217,16 @@ def main():
 
             # convert the found age to an int
             age_Ma = int(np.around( found_d['found_age'] ) )
-
+            
             # make a string and pad with zeros 
             age_Ma = '%03d' % age_Ma
+            
+        # output dir add - RC
+        output_dir_age = int(np.around(found_d['found_age']))
 
         # report on integer age
         print( now(), '  age_Ma =', age_Ma)
-
+        
         # empty file_data
         file_data = []
    
@@ -280,7 +283,7 @@ def main():
 
                 # create the total citcoms data filenames to read 
                 file_format = ''
-                
+                        
                 # check for various data dirs
                 if os.path.exists( datadir + '/0/') :
                     
@@ -304,10 +307,16 @@ def main():
                 #print( now(), 'grid_maker.py: path found = ', 'Age'+str(start_age)+'Ma' )
                 #file_format = './Age'+str(start_age)+'Ma/#/' + datafile + '.' + file_name_component + '.#.'+ str(timestep)
                 
-                # Added path to dynamic topography post-processing - RC
+                    # Added path to dynamic topography post-processing - RC
                 elif os.path.exists('Age'+str(age_Ma)+'Ma') :
                     print( now(), 'grid_maker.py: path found = ', datadir )
                     file_format = './Age'+str(age_Ma)+'Ma/#/' + datafile + '.' + file_name_component + '.#.'+ str(timestep)
+                
+                # Added path to dynamic topography post-processing - RC
+                elif os.path.exists('Age'+str(output_dir_age)+'Ma') :
+                    print( now(), 'grid_maker.py: path found = ', datadir )
+                    file_format = './Age'+str(output_dir_age)+'Ma/#/' + datafile + '.' + file_name_component + '.#.'+ str(timestep)
+                
                   
                 # report error 
                 else :
