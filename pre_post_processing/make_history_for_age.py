@@ -607,7 +607,7 @@ def check_input_parameters( master_d ):
                 extension = '.nc' # rename to the netcdf4 extension
                 control_d[i] = name + extension
                 file = control_d[i]
-                cmd = '%(file)s -R0/360/-90/90 -S' % vars()
+                cmd = '%(file)s -Rg -S' % vars()
                 callgmt( 'grdedit', cmd ) # Make sure the longitude of the .nc file is consistent with everything else
         # ensure that these files exist
         for ifile in [ control_d['age1_file'], control_d['age2_file'], control_d['sub_file'] ]:
