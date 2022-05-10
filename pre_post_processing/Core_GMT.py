@@ -412,8 +412,13 @@ def get_T_from_minmax(xyz_filename) :
     if   max >=  10000000 : dt =  1000000.
     elif max >=    100000 : dt =     1000.
     elif max >=      1000 : dt =      100.
-    elif max >=         1 : dt =         .01
+    elif max >=       0.1 : dt =         .01 # Jono changed the >= value from 1 to 0.1
     else                  : dt =        1.0
+
+    # Jono edit: make sure the min and max values aren't the same
+    if max == min :
+        max = max + dt 
+        min = min - dt 
 
     T = '-T%(min)s/%(max)s/%(dt)s' % vars()
     if verbose: print( Core_Util.now(), 'T =', T )
@@ -434,8 +439,13 @@ def get_T_from_grdinfo(grid_filename):
     if   max >=  10000000 : dt =  1000000.
     elif max >=    100000 : dt =     1000.
     elif max >=      1000 : dt =      100.
-    elif max >=         1 : dt =         .01
+    elif max >=       0.1 : dt =         .01 # Jono changed the >= value from 1 to 0.1
     else                  : dt =        1.0
+
+    # Jono edit: make sure the min and max values aren't the same
+    if max == min :
+        max = max + dt 
+        min = min - dt 
 
     T = '-T%(min)s/%(max)s/%(dt)s' % vars()
     if verbose: print( Core_Util.now(), 'T =', T )
@@ -479,7 +489,10 @@ def plot_grid( grid_filename, xy_filename = None, R_value = 'g', T_value = '-T0/
     # psxy
     del opts['C']
     opts['m'] = ' ' 
-    callgmt( 'psxy', xy_filename, opts, '>>', ps )
+    try:
+        callgmt( 'psxy', xy_filename, opts, '>>', ps )
+    except:
+        print("the xy file in plot_grid was not plotted")
 
     # end postscript
     end_postscript( ps )
