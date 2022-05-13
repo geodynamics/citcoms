@@ -435,8 +435,10 @@ def main():
 
                     # get a T value for median file 
                     if not 'Ll' in control_d[s] or not 'Lu' in control_d[s]:
+                        print('Using get minmax')
                         T = Core_GMT.get_T_from_minmax( median_xyz_filename )
                     else:
+                        print('Using this Lu or Ll thingy')
                         dt = (control_d[s]['Lu']-control_d[s]['Ll'])/10
                         T = '-T' + str(control_d[s]['Ll']) + '/'
                         T += str(control_d[s]['Lu']) + '/' + str(dt)
