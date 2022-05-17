@@ -416,7 +416,7 @@ def get_T_from_minmax(xyz_filename) :
     else                  : dt =        1.0
 
     # Jono edit: make sure the min and max values aren't the same
-    if max == min :
+    if max - min <= dt :
         max = max + dt 
         min = min - dt 
 
