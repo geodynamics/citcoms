@@ -139,10 +139,15 @@ def plot_age_grid_mask( opts_d, ps, age ):
 
     arg = age_grid_dir + '/' + age_grid_prefix
     arg += '%(age)s.grd' % vars()
+    cmd = '%(arg)s -Rg -S' % vars()
+    callgmt( 'grdedit', cmd ) # Make sure the longitude is 0/360
     # Jono edit: check for a .nc grid if the .grd grid doesn't exist
     if not os.path.exists( arg ):
         arg += '%(age)s.nc' % vars()
-    
+        cmd = '%(arg)s -Rg -S' % vars()
+        callgmt( 'grdedit', cmd ) # Make sure the longitude is 0/360
+
+
     if os.path.exists( arg ):
         callgmt( 'grdimage', arg, opts_d, '>>', ps )
 
@@ -159,9 +164,13 @@ def plot_age_grid_no_mask( opts_d, ps, age ):
 
     arg = age_grid_dir + '/' + age_grid_prefix
     arg += '%(age)s.grd' % vars()
+    cmd = '%(arg)s -Rg -S' % vars()
+    callgmt( 'grdedit', cmd ) # Make sure the longitude is 0/360
     # Jono edit: check for a .nc grid if the .grd grid doesn't exist
     if not os.path.exists( arg ):
         arg += '%(age)s.nc' % vars()
+        cmd = '%(arg)s -Rg -S' % vars()
+        callgmt( 'grdedit', cmd ) # Make sure the longitude is 0/360
 
     if os.path.exists( arg ):
         callgmt( 'grdimage', arg, opts_d, '>>', ps )
@@ -178,9 +187,13 @@ def plot_age_grid_continent( opts_d, ps, age ):
 
     arg = age_grid_dir + '/' + age_grid_prefix
     arg += '%(age)s.grd' % vars()
+    cmd = '%(arg)s -Rg -S' % vars()
+    callgmt( 'grdedit', cmd ) # Make sure the longitude is 0/360
     # Jono edit: check for a .nc grid if the .grd grid doesn't exist
     if not os.path.exists( arg ):
         arg += '%(age)s.nc' % vars()
+        cmd = '%(arg)s -Rg -S' % vars()
+        callgmt( 'grdedit', cmd ) # Make sure the longitude is 0/360
 
     if os.path.exists( arg ):
         callgmt( 'grdimage', arg, opts_d, '>>', ps )
@@ -399,8 +412,13 @@ def get_T_from_minmax(xyz_filename) :
     if   max >=  10000000 : dt =  1000000.
     elif max >=    100000 : dt =     1000.
     elif max >=      1000 : dt =      100.
-    elif max >=         1 : dt =         .01
+    elif max >=       0.1 : dt =         .01 # Jono changed the >= value from 1 to 0.1
     else                  : dt =        1.0
+
+    # Jono edit: make sure the min and max values aren't the same
+    if max - min <= dt :
+        max = max + dt 
+        min = min - dt 
 
     T = '-T%(min)s/%(max)s/%(dt)s' % vars()
     if verbose: print( Core_Util.now(), 'T =', T )
@@ -421,8 +439,13 @@ def get_T_from_grdinfo(grid_filename):
     if   max >=  10000000 : dt =  1000000.
     elif max >=    100000 : dt =     1000.
     elif max >=      1000 : dt =      100.
-    elif max >=         1 : dt =         .01
+    elif max >=       0.1 : dt =         .01 # Jono changed the >= value from 1 to 0.1
     else                  : dt =        1.0
+
+    # Jono edit: make sure the min and max values aren't the same
+    if max == min :
+        max = max + dt 
+        min = min - dt 
 
     T = '-T%(min)s/%(max)s/%(dt)s' % vars()
     if verbose: print( Core_Util.now(), 'T =', T )
@@ -466,7 +489,10 @@ def plot_grid( grid_filename, xy_filename = None, R_value = 'g', T_value = '-T0/
     # psxy
     del opts['C']
     opts['m'] = ' ' 
-    callgmt( 'psxy', xy_filename, opts, '>>', ps )
+    try:
+        callgmt( 'psxy', xy_filename, opts, '>>', ps )
+    except:
+        print("the xy file in plot_grid was not plotted")
 
     # end postscript
     end_postscript( ps )
