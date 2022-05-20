@@ -502,7 +502,8 @@ def main():
                     # truncate to nearest int and make a string for the gplates .xy file name 
                     if age_float < 0: age_float = 0.0
                     xy_path = master_d['geoframe_d']['gplates_line_dir']
-                    xy_filename = xy_path + '/' + 'topology_platepolygons_' + str(int(age_float)) + '.00Ma.xy' 
+                    #xy_filename = xy_path + '/' + 'topology_platepolygons_' + str(int(age_float)) + '.00Ma.xy'
+                    xy_filename = xy_path + '/' + 'topology_platepolygons_' + str(int(age_Ma)) + '.00Ma.xy'
                     print( now(), 'grid_maker.py: xy_filename = ', xy_filename)
     
 

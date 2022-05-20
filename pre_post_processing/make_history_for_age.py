@@ -602,9 +602,10 @@ def check_input_parameters( master_d ):
         # JONO edit: if the .grd files don't exist, try .nc file extension
         for i in [ 'age1_file', 'age2_file' ]:
             file = control_d[i]
+            
             if not os.path.exists( file ): # Check if the existing file with .grd extension exists
                 name, extension = os.path.splitext(file)
-                extension = '.nc' # rename to the netcdf4 extension
+                extension = '.0Ma.nc' # rename to the netcdf4 extension
                 control_d[i] = name + extension
                 file = control_d[i]
                 cmd = '%(file)s -Rg -S' % vars()

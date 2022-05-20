@@ -143,7 +143,12 @@ def plot_age_grid_mask( opts_d, ps, age ):
     callgmt( 'grdedit', cmd ) # Make sure the longitude is 0/360
     # Jono edit: check for a .nc grid if the .grd grid doesn't exist
     if not os.path.exists( arg ):
+        #arg += '%(age)s.0Ma.nc' % vars()
         arg += '%(age)s.nc' % vars()
+        cmd = '%(arg)s -Rg -S' % vars()
+        callgmt( 'grdedit', cmd ) # Make sure the longitude is 0/360
+    if not os.path.exists( arg ):
+        arg += '%(age)s.0Ma.nc' % vars()
         cmd = '%(arg)s -Rg -S' % vars()
         callgmt( 'grdedit', cmd ) # Make sure the longitude is 0/360
 
