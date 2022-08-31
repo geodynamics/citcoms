@@ -207,12 +207,14 @@ void compute_horiz_avg(struct All_variables *E)
     void return_horiz_ave_f();
 
     int m, n, i;
-    float *S1[NCS],*S2[NCS],*S3[NCS];
+    int lev = E->mesh.levmax;
+    float *S1[NCS],*S2[NCS],*S3[NCS],*S4[NCS];
 
     for(m=1;m<=E->sphere.caps_per_proc;m++)      {
 	S1[m] = (float *)malloc((E->lmesh.nno+1)*sizeof(float));
 	S2[m] = (float *)malloc((E->lmesh.nno+1)*sizeof(float));
 	S3[m] = (float *)malloc((E->lmesh.nno+1)*sizeof(float));
+	S4[m] = (float *)malloc((E->lmesh.nno+1)*sizeof(float));
     }
 
     for(m=1;m<=E->sphere.caps_per_proc;m++) {
@@ -221,12 +223,14 @@ void compute_horiz_avg(struct All_variables *E)
 	    S2[m][i] = E->sphere.cap[m].V[1][i]*E->sphere.cap[m].V[1][i]
           	+ E->sphere.cap[m].V[2][i]*E->sphere.cap[m].V[2][i];
 	    S3[m][i] = E->sphere.cap[m].V[3][i]*E->sphere.cap[m].V[3][i];
+	    S4[m][i] = E->VI[lev][m][i];
 	}
     }
 
     return_horiz_ave_f(E,S1,E->Have.T);
     return_horiz_ave_f(E,S2,E->Have.V[1]);
     return_horiz_ave_f(E,S3,E->Have.V[2]);
+    return_horiz_ave_f(E,S4,E->Have.E);
 
     if (E->composition.on) {
         for(n=0; n<E->composition.ncomp; n++) {
@@ -238,10 +242,19 @@ void compute_horiz_avg(struct All_variables *E)
         }
     }
 
+    if (E->trace.track_strain){
+        for(m=1;m<=E->sphere.caps_per_proc;m++){
+	    for(i=1;i<=E->lmesh.nno;i++)
+		S1[m][i] = E->trace.strain_node[m][i];
+	}
+	return_horiz_ave_f(E,S1,E->Have.gamma);
+    }
+
     for(m=1;m<=E->sphere.caps_per_proc;m++) {
 	free((void *)S1[m]);
 	free((void *)S2[m]);
 	free((void *)S3[m]);
+	free((void *)S4[m]);
     }
 
     for (i=1;i<=E->lmesh.noz;i++) {

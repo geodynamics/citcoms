@@ -117,7 +117,7 @@ void read_checkpoint(struct All_variables *E)
     /* read momentum information in the checkpoint file */
     read_momentum_checkpoint(E, fp);
 
-    /* read tracer/composition information in the checkpoint file */
+    /* read tracer/composition/strain information in the checkpoint file */
     if(E->control.tracer) {
       if(E->trace.ic_method_for_flavors == 99){
 	if(E->parallel.me == 0)
@@ -282,6 +282,8 @@ static void read_tracer_checkpoint(struct All_variables *E, FILE *fp)
 {
     void count_tracers_of_flavors(struct All_variables *E);
     void allocate_tracer_arrays();
+    void init_tracer_strain();
+    void init_strain();
 
     int m, i, itmp;
 
@@ -340,6 +342,15 @@ static void read_tracer_checkpoint(struct All_variables *E, FILE *fp)
 
     /* init E->trace.ntracer_flavor */
     count_tracers_of_flavors(E);
+
+    /* In case strain needs to be erased */
+    if(E->trace.erase_strain)
+       init_tracer_strain(E);
+
+    /* In case strain is tracked */
+    /* Average strain from tracers to elements and map on nodes */
+    if(E->trace.track_strain)
+       init_strain(E);
 
     return;
 }

@@ -40,6 +40,7 @@
 */
 
 #include <math.h>
+#include <string.h>
 #include "global_defs.h"
 #include "parsing.h"
 #include "parallel_related.h"
@@ -71,6 +72,7 @@ int regional_icheck_cap(struct All_variables *E, int icap,
 static void find_tracers(struct All_variables *E);
 static void predict_tracers(struct All_variables *E);
 static void correct_tracers(struct All_variables *E);
+static void strain_tracers(struct All_variables *E);
 static void make_tracer_array(struct All_variables *E);
 static void generate_random_tracers(struct All_variables *E,
                                     int tracers_cap, int j);
@@ -82,6 +84,9 @@ static void init_tracer_flavors(struct All_variables *E);
 static void reduce_tracer_arrays(struct All_variables *E);
 static void put_away_later(struct All_variables *E, int j, int it);
 static void eject_tracer(struct All_variables *E, int j, int it);
+static void compute_elemental_strain(struct All_variables *E);
+static void fill_strain(struct All_variables *E);
+static void map_strain_to_nodes(struct All_variables *E);
 int read_double_vector(FILE *, int , double *);
 void cart_to_sphere(struct All_variables *,
                     double , double , double ,
@@ -203,6 +208,19 @@ void tracer_input(struct All_variables *E)
             }
         }
 
+
+        /* Switch to track strain with tracers */
+        input_boolean("tracer_track_strain",&(E->trace.track_strain),"off",m);
+	input_boolean("tracer_erase_strain",&(E->trace.erase_strain),"off",m);
+	input_boolean("tracer_nm_strain",&(E->trace.nm_strain),"off",m);
+        input_boolean("tracer_plastic_strain",&(E->trace.plastic_strain),"off",m);
+	input_boolean("tracer_s_heal",&(E->trace.s_heal),"off",m);
+	input_boolean("tracer_s_limit",&(E->trace.s_limit),"off",m); 
+	input_float("tracer_B_heal",&(E->trace.B_heal),"4.06e6",m); 
+	input_float("tracer_T_act",&(E->trace.T_act),"23.03",m);
+        input_float("tracer_Tmweak",&(E->trace.Tmweak),"1.0",m);
+
+
         /* Warning level */
         input_boolean("itracer_warnings",&(E->trace.itracer_warnings),"on",m);
 
@@ -263,6 +281,11 @@ void tracer_advection(struct All_variables *E)
     double CPU_time0();
     double begin_time = CPU_time0();
 
+    /* Track strain */
+    if (E->trace.track_strain){
+       strain_tracers(E);
+    }
+
     /* advect tracers */
     predict_tracers(E);
     correct_tracers(E);
@@ -273,6 +296,11 @@ void tracer_advection(struct All_variables *E)
     /* count # of tracers of each flavor */
     if (E->trace.nflavors > 0)
         count_tracers_of_flavors(E);
+
+    /* update strain field */
+    if (E->trace.track_strain){
+       fill_strain(E);
+    }
 
     /* update the composition field */
     if (E->composition.on) {
@@ -286,6 +314,131 @@ void tracer_advection(struct All_variables *E)
     return;
 }
 
+/*************************** TRACER STRAIN ****************************/ 
+
+static void strain_tracers(struct All_variables *E)
+
+{
+  float *eedot,*etemp,*eyield;
+  float min_strain,max_strain,H,eta1,zcrit,ra,eps,yfac,zzz,dr,tsol;
+  int i,j,m,numtracers,nelem,l;
+  const int nel = E->lmesh.nel;
+  double dt; 
+
+  dt=E->advection.timestep;
+
+  eedot = (float *) malloc((2+nel)*sizeof(float));
+  etemp = (float *) malloc((2+nel)*sizeof(float));
+  if(E->trace.plastic_strain){
+	eyield = (float *) malloc((2+nel)*sizeof(float));
+  }
+
+  for (m=1;m<=E->sphere.caps_per_proc;m++) {
+
+    numtracers=E->trace.ntracers[m];
+   
+    /* 
+      calculate the second invariant of strain rate
+      for each element a the original position 
+    */
+    strain_rate_2_inv(E,m,eedot,1);
+
+    /* get element temperature */
+    get_element_temperature(E,etemp,m); 
+
+    /* Define whether element is yielding or not */
+    if((E->viscosity.PDEPV) && (E->trace.plastic_strain)){
+	get_element_yield(E,eyield,m);
+    }
+
+    max_strain = -1e20;
+    min_strain = 1e20;
+
+    for(i=1;i<=nel;i++){
+      if(eedot[i] < min_strain)
+        min_strain = eedot[i];
+      if(eedot[i] > max_strain)
+        max_strain = eedot[i];
+    }
+
+    if(E->parallel.me == 0)
+      fprintf(stderr,"evolving strain with dt %g, min/max strain-rate: %g/%g \n",
+              dt,min_strain,max_strain);
+
+    for(j=1;j<=numtracers;j++) {
+
+      zzz=0.0;      
+
+      nelem=E->trace.ielement[m][j];
+
+      l = E->mat[m][nelem] - 1;
+
+      yfac = 1.0; 
+
+	      if((E->trace.plastic_strain) && (eyield[nelem] < 1.0)){
+		/* if this is switched on we only calculate the plastic strain
+ 		 i.e. the strain accumulation only takes place if the material 
+		 is yielding. If the yield viscosity is larger then the 
+		 temperature tempendent viscosity, i.e. material deforming 
+		 viscously, we switch off strain accumulation. Healing still 
+		 takes place. */
+			yfac = 0.0; 
+	      }
+
+	      if(E->trace.s_heal){
+		H = 0.0;
+		if(!E->viscosity.TDEPV){
+		   eta1 = 0.0; 
+		}else{
+		   eta1 = E->trace.T_act; // E->viscosity.E[l];	  
+		}
+		H = E->trace.B_heal * exp( - eta1/2 * ( 1.0/(etemp[nelem] + 1.0) - 0.5) );
+		E->trace.extraq[m][1][j] = eedot[nelem] * dt * yfac +
+			   E->trace.extraq[m][1][j] * (1.0 - H * dt); 
+
+		if(E->trace.s_limit){
+		   /* Changes made by Lukas Fuchs. 
+ 		      Apply an upper strain limit for strain dependent weakening. This 
+		      enables instant hardening as soon as the strain rate decreases again. 
+		      Before, the strain would be able to increase above the critical strain, 
+		      which results in longer healing times. 
+		   */
+		   E->trace.extraq[m][1][j] = min(E->trace.extraq[m][1][j],E->viscosity.gamma_cr);
+		}
+
+		if(E->trace.extraq[m][1][j] < 0){
+		   E->trace.extraq[m][1][j] = 0.0;
+		}
+	      }else{
+		/* increment strain */
+		E->trace.extraq[m][1][j] += eedot[nelem] * dt * yfac;
+	      }
+	       
+	      if(E->trace.nm_strain){
+		zcrit = 1.0-E->viscosity.zlm;
+		ra = E->trace.basicq[m][2][j];
+		if(ra < zcrit){
+		  E->trace.extraq[m][1][j] = 0.0;    
+		}
+	      }
+
+	      if(E->viscosity.RHEOL == 10){
+		dr = E->sphere.ro - E->sphere.ri;
+		zzz = (E->trace.basicq[m][2][j]-E->sphere.ri)/dr;
+		tsol = E->viscosity.T_sol0 + 2.*(1.-zzz);
+		if(etemp[nelem] > tsol){
+		  E->trace.extraq[m][1][j] = 0.0; 
+		}
+	      }
+	    }
+	  } /* End caps loop */
+
+  free ((void *)eedot);
+  free ((void *)etemp); 
+  if(E->trace.plastic_strain){
+	free ((void *)eyield);
+  }
+}
 
 
 /********* TRACER POST PROCESSING ****************************************/
@@ -758,6 +911,7 @@ static void make_tracer_array(struct All_variables *E)
 
     void generate_random_tracers();
     void init_tracer_flavors();
+    void init_tracer_strain();
 
     if (E->parallel.me==0) fprintf(stderr,"Making Tracer Array\n");
 
@@ -780,6 +934,9 @@ static void make_tracer_array(struct All_variables *E)
 
     /* Initialize tracer flavors */
     if (E->trace.nflavors) init_tracer_flavors(E);
+
+    /* Initialize tracer strain */
+    if (E->trace.track_strain) init_tracer_strain(E);
 
     return;
 }
@@ -1325,6 +1482,22 @@ static void init_tracer_flavors(struct All_variables *E)
     return;
 }
 
+void init_tracer_strain(struct All_variables *E)
+{
+    int j, kk, number_of_tracers;
+    int i;
+
+    for (j=1;j<=E->sphere.caps_per_proc;j++) {
+
+      number_of_tracers = E->trace.ntracers[j];
+      for (kk=1;kk<=number_of_tracers;kk++) {
+        E->trace.extraq[j][1][kk] = 0.0;
+      }
+    }
+
+    return;
+}
+
 
 /******************* get_neighboring_caps ************************************/
 /*                                                                           */
@@ -1498,6 +1671,19 @@ void allocate_tracer_arrays(struct All_variables *E,
         }
     }
 
+    if (E->trace.track_strain) {
+      if ((E->trace.strain_el[j]=(double *)malloc((E->lmesh.nel+1)*sizeof(double)))==NULL) {
+        fprintf(E->trace.fpt,"ERROR(initialize tracer arrays-no memory 1c\n");
+        fflush(E->trace.fpt);
+        exit(10);
+      }
+
+      if ((E->trace.strain_node[j]=(double *)malloc((E->lmesh.nno+1)*sizeof(double)))==NULL) {
+        fprintf(E->trace.fpt,"ERROR(initialize tracer arrays)-no memory 1c\n");
+        fflush(E->trace.fpt);
+        exit(10);
+      }
+    }
 
     fprintf(E->trace.fpt,"Physical size of tracer arrays (max_ntracers): %d\n",
             E->trace.max_ntracers[j]);
@@ -1818,3 +2004,117 @@ int icheck_that_processor_shell(struct All_variables *E,
 }
 
 
+void init_strain(struct All_variables *E)
+{
+
+    compute_elemental_strain(E);
+
+
+    /* Map elemental strain to nodal points */
+    map_strain_to_nodes(E);
+
+    return;
+}
+
+/********************************************************/
+static void fill_strain(struct All_variables *E)
+{
+
+    compute_elemental_strain(E);
+
+    /* Map elemental composition to nodal points */
+    map_strain_to_nodes(E);
+
+    return;
+}
+
+/********** MAP STRAIN TO NODES *********************/
+/* Map strain from element to nodes                 */
+
+
+static void map_strain_to_nodes(struct All_variables *E)
+{
+    double *tmp[NCS];
+    int n, kk;
+    int nelem, nodenum;
+    int j;
+
+
+    for (j=1;j<=E->sphere.caps_per_proc;j++) {
+
+        /* first, initialize node array */
+        for (kk=1;kk<=E->lmesh.nno;kk++)
+          E->trace.strain_node[j][kk]=0.0;
+        
+        /* Loop through all elements */
+        for (nelem=1;nelem<=E->lmesh.nel;nelem++) {
+
+            /* for each element, loop through element nodes */
+            /* weight composition */
+
+            for (nodenum=1;nodenum<=8;nodenum++) {
+                n = E->ien[j][nelem].node[nodenum];
+
+                E->trace.strain_node[j][n] +=
+                    E->trace.strain_el[j][nelem]*
+                    E->TWW[E->mesh.levmax][j][nelem].node[nodenum];
+            }
+
+        } /* end nelem */
+    } /* end j */
+
+    for (j=1;j<=E->sphere.caps_per_proc;j++)
+        tmp[j] = E->trace.strain_node[j];
+
+    (E->exchange_node_d)(E,tmp,E->mesh.levmax);
+
+    /* Divide by nodal volume */
+    for (j=1;j<=E->sphere.caps_per_proc;j++) {
+        for (kk=1;kk<=E->lmesh.nno;kk++)
+            E->trace.strain_node[j][kk] *= E->MASS[E->mesh.levmax][j][kk];
+
+    } /* end j */
+
+    return;
+}
+
+/*********** COMPUTE ELEMENTAL STRAIN *********************/
+/* Calculate strain on elements from tracers              */
+
+static void compute_elemental_strain(struct All_variables *E)
+{
+
+    int j, e, kk;
+    int numtracers;
+    int *element_count; 
+
+    element_count = (int *)calloc((E->lmesh.nel + 1),sizeof(int));
+
+    for (j=1; j<=E->sphere.caps_per_proc; j++) {
+
+        /* first zero arrays */
+        for (e=1; e<=E->lmesh.nel; e++){
+            E->trace.strain_el[j][e] = 0.0;
+	    element_count[e]=0;
+	}
+
+        numtracers=E->trace.ntracers[j];
+
+        /* Fill arrays */
+        for (kk=1; kk<=numtracers; kk++) {
+            e = E->trace.ielement[j][kk];
+            E->trace.strain_el[j][e] += E->trace.extraq[j][1][kk];
+	    element_count[e]++;
+        }
+
+        for(e=1;e<=E->lmesh.nel;e++){
+          if(element_count[e])
+            E->trace.strain_el[j][e] /= (float)element_count[e];
+        }
+    }
+
+    free((void *)element_count);
+
+    return;
+}
+                                                       

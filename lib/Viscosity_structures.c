@@ -44,6 +44,7 @@ void read_visc_layer_file(struct All_variables *E);
 void read_visc_param_from_file(struct All_variables *E,
                                const char *param, float *var,
                                FILE *fp);
+float compute_nodal_stress_state_factor(struct All_variables *,int,int);
 static void apply_low_visc_wedge_channel(struct All_variables *E, float **evisc);
 static void low_viscosity_channel_factor(struct All_variables *E, float *F);
 static void low_viscosity_wedge_factor(struct All_variables *E, float *F);
@@ -127,11 +128,13 @@ void viscosity_system_input(struct All_variables *E)
             E->viscosity.T[i] = 0.0;
             E->viscosity.Z[i] = 0.0;
             E->viscosity.E[i] = 0.0;
+	    E->viscosity.Te[i] = 0.0;
         }
 
         input_float_vector("viscT",E->viscosity.num_mat,(E->viscosity.T),m);
         input_float_vector("viscE",E->viscosity.num_mat,(E->viscosity.E),m);
         input_float_vector("viscZ",E->viscosity.num_mat,(E->viscosity.Z),m);
+        input_float_vector("viscTe",E->viscosity.num_mat,(E->viscosity.Te),m);
 
         /* for viscosity 8 */
         input_float("T_sol0",&(E->viscosity.T_sol0),"0.6",m);
@@ -155,7 +158,13 @@ void viscosity_system_input(struct All_variables *E)
 									       if this should be simply unity, or maybe something like 0.95 */
     
     input_boolean("PDEPV",&(E->viscosity.PDEPV),"off",m); /* plasticity addition by TWB */
+    /* Choose weakening, i.e., 0 - off; 1 - PSS; 2 - VSS; 3 - VSS^power */
+    input_int("strain_dep_plasticity",&(E->viscosity.strain_dep_plasticity),"0",m);
     if (E->viscosity.PDEPV) {
+      /* strain dependent plasticity addition by LF */
+      /* The following two lines have been changed!*/
+      input_float("gamma_cr",&(E->viscosity.gamma_cr),"10",m);
+      input_float("maxD",&(E->viscosity.maxD),"0.9",m); 
       E->viscosity.pdepv_visited = 0;
       for(i=0;i < E->viscosity.num_mat;i++) {
           E->viscosity.pdepv_a[i] = 1.e20; /* \sigma_y = min(a + b * (1-r),y) */
@@ -173,7 +182,14 @@ void viscosity_system_input(struct All_variables *E)
       input_float_vector("pdepv_y",E->viscosity.num_mat,(E->viscosity.pdepv_y),m);
 
       input_float("pdepv_offset",&(E->viscosity.pdepv_offset),"0.0",m);
+
+      input_boolean("higher_cont_yield",&(E->control.stiff_cont),"off",m);
+      input_float("cont_sig_y",&(E->viscosity.sig_c),"1e7",m);
     }
+
+    /* stress state dependent weakening? 1: for damage 2: for plasticity */
+    input_int("p_stress_state_dependent",&(E->viscosity.p_stress_state_dependent),"0",m); 
+
     input_float("sdepv_misfit",&(E->viscosity.sdepv_misfit),"0.001",m);	/* there should be no harm in having 
 									   this parameter read in regardless of 
 									   rheology (activated it for anisotropic viscosity)
@@ -261,6 +277,7 @@ void allocate_visc_vars(struct All_variables *E)
   E->viscosity.N0 = (float*) malloc(i*sizeof(float));
   E->viscosity.E = (float*) malloc(i*sizeof(float));
   E->viscosity.T = (float*) malloc(i*sizeof(float));
+  E->viscosity.Te = (float*) malloc(i*sizeof(float));
   E->viscosity.Z = (float*) malloc(i*sizeof(float));
   E->viscosity.pdepv_a = (float*) malloc(i*sizeof(float));
   E->viscosity.pdepv_b = (float*) malloc(i*sizeof(float));
@@ -271,6 +288,7 @@ void allocate_visc_vars(struct All_variables *E)
   if(E->viscosity.N0 == NULL ||
      E->viscosity.E == NULL ||
      E->viscosity.T == NULL ||
+     E->viscosity.Te == NULL ||
      E->viscosity.Z == NULL ||
      E->viscosity.pdepv_a == NULL ||
      E->viscosity.pdepv_b == NULL ||
@@ -307,12 +325,14 @@ void get_system_viscosity(E,propogate,evisc,visc)
 
     void apply_viscosity_smoother();
     void visc_from_gint_to_nodes();
-    void  visc_from_nodes_to_gint();
-
+    void visc_from_nodes_to_gint();
+    void viscy_from_element_to_nodes();
 
     int i,j,m;
     float temp1,temp2,*vvvis;
     double *TG;
+    float *SXX[NCS],*SYY[NCS],*SXY[NCS],*SXZ[NCS],*SZY[NCS],*SZZ[NCS];
+    float *divv[NCS],*vorv[NCS];
 
     const int vpts = vpoints[E->mesh.nsd];
 #ifdef CITCOM_ALLOW_ANISOTROPIC_VISC
@@ -326,7 +346,7 @@ void get_system_viscosity(E,propogate,evisc,visc)
 
 
     if(E->viscosity.TDEPV)
-        visc_from_T(E,evisc);
+        visc_from_T(E,evisc,propogate);
     else
         visc_from_mat(E,evisc);
 
@@ -334,7 +354,7 @@ void get_system_viscosity(E,propogate,evisc,visc)
       visc_from_C(E,evisc);
 
     if(E->viscosity.SDEPV)
-      visc_from_S(E,evisc);
+      visc_from_S(E,evisc,propogate);
 
     if(E->viscosity.PDEPV)	/* "plasticity" */
       visc_from_P(E,evisc);
@@ -408,6 +428,13 @@ void get_system_viscosity(E,propogate,evisc,visc)
       }
     }
 #endif
+
+    if(E->viscosity.p_stress_state_dependent){
+      /* compute nodal stress for next time around */
+      allocate_STD_mem(E, SXX, SYY, SZZ, SXY, SXZ, SZY, divv, vorv);
+      compute_nodal_stress(E, SXX, SYY, SZZ, SXY, SXZ, SZY, divv, vorv);
+      free_STD_mem(E, SXX, SYY, SZZ, SXY, SXZ, SZY, divv, vorv);
+    }
     return;
 }
 
@@ -540,6 +567,7 @@ void read_visc_layer_file(struct All_variables *E)
         E->viscosity.N0[i] =
             E->viscosity.E[i] =
             E->viscosity.T[i] =
+  	    E->viscosity.Te[i] =
             E->viscosity.Z[i] =
             E->viscosity.pdepv_a[i] =
             E->viscosity.pdepv_b[i] =
@@ -551,6 +579,7 @@ void read_visc_layer_file(struct All_variables *E)
     if(E->viscosity.TDEPV) {
         read_visc_param_from_file(E, "viscE", E->viscosity.E, fp);
         read_visc_param_from_file(E, "viscT", E->viscosity.T, fp);
+	read_visc_param_from_file(E, "viscTe", E->viscosity.Te, fp);
         read_visc_param_from_file(E, "viscZ", E->viscosity.Z, fp);
     }
 
@@ -568,9 +597,10 @@ void read_visc_layer_file(struct All_variables *E)
 }
 
 
-void visc_from_T(E,EEta)
+void visc_from_T(E,EEta,propogate)
      struct All_variables *E;
      float **EEta;
+     int propogate;
 {
     int m,i,k,l,z,jj,kk;
     float zero,one,eta0,temp,tempa,TT[9];
@@ -970,7 +1000,42 @@ void visc_from_T(E,EEta)
                 }
             }
         break;
-	
+
+    case 11:
+        /* eta = N_0 exp(E/(T+T_0) - E/(T_eta+T_0)) 
+ *		
+ *		where T_0 is the offset temperature
+ *		and T_eta the reference temperature for eta(T) = 1
+ *		where T is normalized to be within 0...1
+ *
+ *                     */
+        for(m=1;m<=E->sphere.caps_per_proc;m++)
+            for(i=1;i<=nel;i++)   {
+                l = E->mat[m][i] - 1;
+                if(E->control.mat_control) /* switch moved up here TWB */
+                  tempa = E->viscosity.N0[l] * E->VIP[m][i];
+                else
+                  tempa = E->viscosity.N0[l];
+
+                for(kk=1;kk<=ends;kk++) {
+                  TT[kk] = E->T[m][E->ien[m][i].node[kk]];
+                }
+
+                for(jj=1;jj<=vpts;jj++) {
+                    temp=0.0;
+                    for(kk=1;kk<=ends;kk++)   { /* took out
+                                                   computation of
+                                                   depth, not needed
+                                                   TWB */
+                      TT[kk]=max(TT[kk],zero);
+                      temp += min(TT[kk],one) * E->N.vpt[GNVINDEX(kk,jj)];
+                    }
+                    EEta[m][ (i-1)*vpts + jj ] = tempa*
+                      exp( E->viscosity.E[l]/(temp+E->viscosity.T[l])
+                           - E->viscosity.E[l]/(E->viscosity.Te[l]+E->viscosity.T[l]) );
+                }
+            }
+        break;	
 
     case 100:
         /* user-defined viscosity law goes here */
@@ -1004,9 +1069,10 @@ void calc_radial_strain_rate_averages(struct All_variables *E, float *edot)
    free(eedot);
 }
 
-void visc_from_S(E,EEta)
+void visc_from_S(E,EEta,propogate)
      struct All_variables *E;
      float **EEta;
+     int propogate;
 {
   float scale,exponent1;
   float *eedot;
@@ -1014,7 +1080,7 @@ void visc_from_S(E,EEta)
 
   const int vpts = vpoints[E->mesh.nsd];
   const int nel = E->lmesh.nel;
-
+  
   eedot = (float *) malloc((2+nel)*sizeof(float));
   
   for(m=1;m<=E->sphere.caps_per_proc;m++)  {
@@ -1056,15 +1122,18 @@ void visc_from_S(E,EEta)
 	      EEta[m][(e - 1) * vpts + jj] / (1.0 + scale * pow(EEta[m][(e - 1) * vpts + jj], exponent1));
 	  }
 	}
-	
-	break;
-      default:
-	myerror(E,"stress dependent rheology mode undefined");
 	break;
       }
+      /* get second invariant for all elements */
+      strain_rate_2_inv(E,m,eedot,1);
+    }else{
+      for(e=1;e<=nel;e++)	/* initialize with unity if no velocities around */
+	eedot[e] = 1.0;
+      E->viscosity.sdepv_visited = 1;
+      
     }
+   
   }
-
   free ((void *)eedot);
   return;
 }
@@ -1117,19 +1186,38 @@ void visc_from_P(E,EEta) /* "plasticity" implementation
      struct All_variables *E;
      float **EEta;
 {
-  float *eedot,zz[9],zzz,tau,eta_p,eta_new,tau2,eta_old,eta_old2;
+  float *eedot,zz[9],zzz,tau,eta_p,eta_new,tau2,eta_old,eta_old2,ss[9],sss;
+  float fac;
+  double estrain,maxD_over_gamma_cr,peak_strain_rate,scaled_strain_rate;
   int m,e,l,z,jj,kk;
-
+  float *eetty[NCS], *esigY[NCS]; 
+  int check_stress_state;
   const int vpts = vpoints[E->mesh.nsd];
   const int nel = E->lmesh.nel;
   const int ends = enodes[E->mesh.nsd];
   
   void strain_rate_2_inv();
+
+  maxD_over_gamma_cr = E->viscosity.maxD/E->viscosity.gamma_cr;
   
+  if(E->viscosity.p_stress_state_dependent && E->computed_gstress){
+    check_stress_state = E->viscosity.p_stress_state_dependent; /* 1: for weakening 2: for plasticity */
+  }else{
+    check_stress_state = 0;
+  }
   
   eedot = (float *) malloc((2+nel)*sizeof(float));
-  
-  for(m=1;m<=E->sphere.caps_per_proc;m++)  {
+
+  for(m=1;m<=E->sphere.caps_per_proc;m++) {
+    eetty[m] = (float *) malloc((2+nel)*sizeof(float));
+    esigY[m] = (float *) malloc((2+nel)*sizeof(float));
+  }
+
+  if(E->control.restart) {
+     E->viscosity.pdepv_visited = 1;
+  }
+
+  for(m=1;m<=E->sphere.caps_per_proc;m++) {
     
     if(E->viscosity.pdepv_visited){
       if(E->viscosity.psrw)
@@ -1155,23 +1243,96 @@ void visc_from_P(E,EEta) /* "plasticity" implementation
 	
 	l = E->mat[m][e] -1 ;	/* material of this element */
 	
-	for(kk=1;kk <= ends;kk++) /* nodal depths */
+	for(kk=1;kk <= ends;kk++) {
+	  /* nodal depths */
 	  zz[kk] = (1.0 - E->sx[m][3][E->ien[m][e].node[kk]]); /* for depth, zz = 1 - r */
-	
+	  /* how strike slip is this node? 1: pure 0: normal/extensional */ 
+	  if(check_stress_state){
+	    ss[kk] = compute_nodal_stress_state_factor(E,m,E->ien[m][e].node[kk]); 
+	  }
+	}
+        eetty[m][e]=0.0;
+        esigY[m][e]=0.0; 
+
 	for(jj=1;jj <= vpts;jj++){ /* loop through integration points */
 	  
 	  zzz = 0.0;		/* get mean depth of integration point */
-	  for(kk=1;kk<=ends;kk++)
+	  if(check_stress_state)
+	    sss = 0.0;
+	  else
+	    sss = 1.0;		/* default, use full damage */
+	  for(kk=1;kk<=ends;kk++){
 	    zzz += zz[kk] * E->N.vpt[GNVINDEX(kk,jj)];
+	    if(check_stress_state){
+	      sss += ss[kk] * E->N.vpt[GNVINDEX(kk,jj)]; /* state, if > 0.5, will weaken */
+	    }
+	  }
 	  
 	  /* depth dependent yield stress */
 	  tau = E->viscosity.pdepv_a[l] + zzz * E->viscosity.pdepv_b[l];
 	  
 	  /* min of depth dep. and constant yield stress */
 	  tau = min(tau,  E->viscosity.pdepv_y[l]);
-	  
+
+	  if(check_stress_state == 2){
+	    /* 
+	       apply stress state to regular plasticity . 2....0.5
+
+	     */
+	    tau *= pow(10,tanh((0.5-sss)*7)/5);
+	    sss = 1;		/* make sure all the other weakening
+				   applies */
+	  }
+
+
+          /* Add compositional contribution? */
+          if(E->control.stiff_cont){
+             /* Tau = tau for C = 0, tau = tau_c for C = 1, and linearly in
+                between  */
+             tau *= (1.0 - E->composition.comp_el[m][0][e]);
+             tau += E->composition.comp_el[m][0][e] * E->viscosity.sig_c;
+	  }
+
+	  /* 
+	     Add strain dependent plasticity function 
+	  */
+          if(E->viscosity.strain_dep_plasticity == 1){
+	    // "Get" strain from element
+	    estrain = E->trace.strain_el[m][e] * sss;
+	    // Weakening term 
+	    fac = 1.0 - estrain * maxD_over_gamma_cr;
+	    if(fac < (1.0-E->viscosity.maxD))
+	      fac = (1.0-E->viscosity.maxD);
+	    // Reduced yield stress
+	    tau *= fac;
+	  }
+
+	  esigY[m][e]=tau;
+
 	  /* yield viscosity */
 	  eta_p = tau/(2.0 * eedot[e] + 1e-7) + E->viscosity.pdepv_offset;
+
+	  /* calculate and store yield viscosity ratio 
+		y_fac = eta(T)/eta_p
+          */
+
+          if(EEta[m][ (e-1)*vpts + jj ] > E->viscosity.max_value){
+            eetty[m][e] += E->viscosity.max_value/eta_p;
+          }else if(EEta[m][ (e-1)*vpts + jj ] < E->viscosity.min_value){
+            eetty[m][e] += E->viscosity.min_value/eta_p;
+          }else{
+            eetty[m][e] += EEta[m][ (e-1)*vpts + jj ]/eta_p;
+          }
+          
+          if(E->viscosity.strain_dep_plasticity == 2){
+	    estrain = E->trace.strain_el[m][e] * sss;
+	    // Weakening term
+	    fac = 1.0 - estrain * maxD_over_gamma_cr;
+	    if(fac < (1.0-E->viscosity.maxD))
+	      fac = (1.0-E->viscosity.maxD);
+	    EEta[m][ (e-1)*vpts + jj ] *= fac;
+	  }
+
 	  if(E->viscosity.pdepv_eff){
 	    /* two dashpots in series */
 	    eta_new  = 1.0/(1.0/EEta[m][ (e-1)*vpts + jj ] + 1.0/eta_p);
@@ -1179,14 +1340,32 @@ void visc_from_P(E,EEta) /* "plasticity" implementation
 	    /* min viscosities*/
 	    eta_new  = min(EEta[m][ (e-1)*vpts + jj ], eta_p);
 	  }
+
+          if(E->viscosity.strain_dep_plasticity == 3){
+	    estrain = E->trace.strain_el[m][e] * sss;
+	    // Weakening term
+	    fac = 1.0 - estrain * maxD_over_gamma_cr;
+	    if(fac < (1.0-E->viscosity.maxD))
+	      fac = (1.0-E->viscosity.maxD);
+	    // eta_eff = eta_eff * (1-D)^Delta_etaT; 
+	    eta_new *= pow(fac,exp( E->viscosity.E[l]/2.0));
+	  }
+          
 	  //fprintf(stderr,"z: %11g mat: %i a: %11g b: %11g y: %11g ee: %11g tau: %11g eta_p: %11g eta_new: %11g eta_old: %11g\n",
 	  //	  zzz,l,E->viscosity.pdepv_a[l], E->viscosity.pdepv_b[l],E->viscosity.pdepv_y[l],
 	  //	  eedot[e],tau,eta_p,eta_new,EEta[m][(e-1)*vpts + jj]);
 	  EEta[m][(e-1)*vpts + jj] = eta_new;
 	} /* end integration point loop */
+        eetty[m][e]/=vpts; 
       }	/* end element loop */
     }else{
-      /* strain-rate weakening, steady state solution */
+      /* strain-rate weakening, steady state solution 
+
+	 \tau = 2/e_c (e/(1+(e/e_c)^2))
+	 
+	 where e_c is the strain-rate at maximum stress, here \sigma_y, hence e_c = \sigma_y/(2\eta_T)
+	 
+       */
       for(e=1;e <= nel;e++)   {	/* loop through all elements */
 	
 	l = E->mat[m][e] -1 ;	
@@ -1199,23 +1378,33 @@ void visc_from_P(E,EEta) /* "plasticity" implementation
 	  /* compute sigma_y as above */
 	  tau = E->viscosity.pdepv_a[l] + zzz * E->viscosity.pdepv_b[l];
 	  tau = min(tau,  E->viscosity.pdepv_y[l]);
-	  tau2 = tau * tau;
-	  if(tau < 1e10){
-	    /*  */
-	    eta_old = EEta[m][ (e-1)*vpts + jj ];
-	    eta_old2 = eta_old * eta_old;
-	    /* effectiev viscosity */
-	    eta_new = (tau2 * eta_old)/(tau2 + 2.0 * eta_old2 * eedot[e]);
-	    //fprintf(stderr,"SRW: a %11g b %11g y %11g z %11g sy: %11g e2: %11g eold: %11g enew: %11g logr: %.3f\n",
-	    //	    E->viscosity.pdepv_a[l],E->viscosity.pdepv_b[l],E->viscosity.pdepv_y[l],zzz,tau,eedot[e],eta_old,eta_new,
-	    //	    log10(eta_new/eta_old));
-	    EEta[m][(e-1)*vpts + jj] = eta_new;
-	  }
+	  /*  */
+	  eta_old = EEta[m][ (e-1)*vpts + jj ];
+	  /*  */
+	  peak_strain_rate = tau / (2.0*eta_old+1e-15);
+	  /* effective viscosity */
+	  scaled_strain_rate = eedot[e]/peak_strain_rate;
+	  
+	  eta_new = eta_old / (peak_strain_rate * (1.0 +  scaled_strain_rate *  scaled_strain_rate));
+
+	  //fprintf(stderr,"SRW: a %11g b %11g y %11g z %11g sy: %11g e2: %11g eold: %11g enew: %11g logr: %.3f\n",
+	  //	    E->viscosity.pdepv_a[l],E->viscosity.pdepv_b[l],E->viscosity.pdepv_y[l],zzz,tau,eedot[e],eta_old,eta_new,
+	  //	    log10(eta_new/eta_old));
+	  EEta[m][(e-1)*vpts + jj] = min(eta_new, eta_old);
 	}
       }
     }
   } /* end caps loop */
+  /* project yield viscosity from element to nodes */
+  viscy_from_element_to_nodes(E,eetty,E->VIY[E->mesh.levmax],E->mesh.levmax);
+  viscy_from_element_to_nodes(E,esigY,E->SIGY[E->mesh.levmax],E->mesh.levmax);
+  
   free ((void *)eedot);
+
+  for(m=1;m<=E->sphere.caps_per_proc;m++){
+    free ((void *)eetty[m]); 
+    free ((void *)esigY[m]); 
+  }
   return;
 }
 
@@ -1274,6 +1463,39 @@ void visc_from_C( E, EEta)
         } /* end jj loop */
     } /* end el loop */
   } /* end cap */
+}
+
+/* 
+
+   compute the stress state that determines how much of the damage applies
+
+*/
+float compute_nodal_stress_state_factor(struct All_variables *E, int m, int node)
+{
+  float a[3][3],tnorm,state,meanh;
+  int i,j;
+  a[0][0]=E->gstress[m][(node-1)*6+3]; /*  srr */
+  a[1][1]=E->gstress[m][(node-1)*6+1]; /*  stt */
+  a[2][2]=E->gstress[m][(node-1)*6+2]; /*  spp */
+  a[0][1]=a[1][0]=E->gstress[m][(node-1)*6+5]; /*  str */
+  a[0][2]=a[2][0]=E->gstress[m][(node-1)*6+6]; /* srp */
+  a[1][2]=a[2][1]=E->gstress[m][(node-1)*6+4]; /*  stp */
+
+
+  tnorm = 0;				       /* tensor norm */
+  for(i=0;i<3;i++)
+    for(j=0;j<3;j++)
+      tnorm += a[i][j] * a[i][j];
+  tnorm = sqrt(tnorm);
+  meanh = (a[1][1]+a[2][2])/2/tnorm; /* this goes from ~-0.71 = sqrt(2)/2
+					(compressional) to 0.71
+					(extensional) in the
+					horizontal */
+  state = 1-fabs(meanh)/0.35;
+  if(state<0)
+    state = 0;
+  return state;			/* 1=strike slip 0: compressional or extensional */
+  
 }
 
 void strain_rate_2_inv(E,m,EEDOT,SQRT)
@@ -1762,6 +1984,46 @@ void get_vgm_p(double VV[4][9],struct Shape_function *N,
 	l[i][j] /= (float)ppts;
   }
 
+}
+
+void get_element_temperature(struct All_variables *E, float *ETEMP, int m)
+{
+  int e,kk;
+  float TT[9];
+
+  const int ends = enodes[E->mesh.nsd];
+  const int nel = E->lmesh.nel;
+
+  for(e = 1; e <= nel; e++)
+  {
+     ETEMP[e] = 0.0;
+     for(kk = 1; kk <= ends; kk++)
+     {
+        TT[kk] = E->T[m][E->ien[m][e].node[kk]]; 
+        ETEMP[e] += TT[kk];
+     }
+     ETEMP[e] /= ends;
+  }
+}
+
+void get_element_yield(struct All_variables *E, float *EYIELD, int m)
+{
+  int e,kk;
+  float YIE[9];
+
+  const int ends = enodes[E->mesh.nsd];
+  const int nel = E->lmesh.nel;
+
+  for(e = 1; e <= nel; e++)
+  {
+     EYIELD[e] = 0.0;
+     for(kk = 1; kk <= ends; kk++)
+     {
+        YIE[kk] = E->VIY[E->mesh.levmax][m][E->ien[m][e].node[kk]];
+        EYIELD[e] += YIE[kk];
+     }
+     EYIELD[e] /= ends;
+  }
 }
 
 

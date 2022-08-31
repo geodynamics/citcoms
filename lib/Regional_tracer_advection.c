@@ -104,6 +104,9 @@ void regional_tracer_setup(struct All_variables *E)
     if (E->trace.nflavors > 0)
         E->trace.number_of_extra_quantities += 1;
 
+    /* Add extra quantity for strain */
+    if (E->trace.track_strain)
+        E->trace.number_of_extra_quantities += 1;
 
     E->trace.number_of_tracer_quantities =
         E->trace.number_of_basic_quantities +

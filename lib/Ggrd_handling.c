@@ -346,6 +346,10 @@ void ggrd_temp_init_general(struct All_variables *E,int is_geographic)
 	    E->T[m][node] = tmean + tadd * loc_scale;
 	  }
 
+	  if(E->control.ggrd_tinit_no_tomo){
+	    E->T[m][node] = tadd; 
+	  }
+
 	  if(E->control.ggrd.temp.limit_trange){
 	    /* limit to 0 < T < 1 ?*/
 	    E->T[m][node] = min(max(E->T[m][node], 0.0),1.0);
@@ -799,21 +803,21 @@ void ggrd_read_ray_from_file(struct All_variables *E, int is_geographic)
 
 
 /*  
-
-read surface boundary conditions from netcdf grd files
-
-if topvbc=1, will apply to velocities
-if topvbc=0, will apply to tractions
-
-if ggrd_allow_mixed_vbcs is true, will allow for a mix of prescribed
-and free mechanical BCs
-
-
-if ggrd_vtop_euler is true, will look for plate codes and rotation
-vector file and prescribe Euler vectors instead   
-
-if ggrd_read_age is on, will also expect ages
-
+    
+    read surface boundary conditions from netcdf grd files
+    
+    if topvbc=1, will apply to velocities
+    if topvbc=0, will apply to tractions
+    
+    if ggrd_allow_mixed_vbcs is true, will allow for a mix of prescribed
+    and free mechanical BCs
+    
+    
+    if ggrd_vtop_euler is true, will look for plate codes and rotation
+    vector file and prescribe Euler vectors instead   
+    
+    if ggrd_read_age is on, will also expect ages
+    
 
 */
 

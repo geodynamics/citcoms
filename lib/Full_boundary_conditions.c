@@ -36,6 +36,7 @@
 /* ========================================== */
 
 void horizontal_bc(struct All_variables *,float *[],int,int,float,unsigned int,char,int,int);
+void horizontal_bc_lat_dep(struct All_variables *,float *[],int,int,unsigned int,char,int,int); 
 void assign_internal_bc(struct All_variables * );
 void velocity_apply_periodic_bcs();
 void temperature_apply_periodic_bcs();
@@ -192,7 +193,7 @@ void full_temperature_boundary_conditions(E)
 /*  =========================================================  */
 
 void horizontal_bc(struct All_variables *E,float *BC[],int ROW,int dirn,float value,
-		   unsigned int mask,char onoff,int level,int m)
+			  unsigned int mask,char onoff,int level,int m)
 {
   int i,j,node,rowl;
 
@@ -233,10 +234,14 @@ void horizontal_bc(struct All_variables *E,float *BC[],int ROW,int dirn,float va
   return;
 }
 
-/* latitudinally dependent horizontal BC */
+/* latitudinally dependent horizontal BC 
+
+   for latitude dependent surface temperature 
+   
+*/
 
 void horizontal_bc_lat_dep(struct All_variables *E,float *BC[],int ROW,int dirn,
-			   unsigned int mask,char onoff,int level,int m)
+				  unsigned int mask,char onoff,int level,int m)
 {
   int i,j,node,rowl;
 
@@ -282,8 +287,9 @@ float lat_dep_temp(struct All_variables *E, int node)
 {
   float xp[3],fac;
   xyz2rtp(E->x[1][1][node],E->x[1][2][node],E->x[1][3][node],xp);
-  fac = sin(xp[1]);		/* sin(theta), 0 at pole, 1  equator */
-  return E->control.TBCtop_pole + fac* (E->control.TBCtopval - E->control.TBCtop_pole);
+  fac = sin(xp[1]);		/* sin(theta), 0 at pole, 1  equato: note cos(theta) returns hemispheric diff in temp [0 to 1] */ 
+  /*return E->control.TBCtop_pole + fac* (E->control.TBCtopval - E->control.TBCtop_pole);*/
+  return E->control.TBCtopval - fac* (E->control.TBCtopval - E->control.TBCtop_pole);
 }
 
 void velocity_apply_periodic_bcs(E)

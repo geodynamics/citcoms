@@ -261,6 +261,7 @@ void initial_conditions(struct All_variables *E)
     void initialize_tracers();
     void init_composition();
     void common_initial_fields();
+    void init_strain();
 
     initialize_material(E);
 
@@ -269,6 +270,9 @@ void initial_conditions(struct All_variables *E)
 
         if (E->composition.on)
             init_composition(E);
+
+	if (E->trace.track_strain)
+	    init_strain(E);
     }
 
     (E->problem_initial_fields)(E);   /* temperature/chemistry/melting etc */
@@ -640,6 +644,8 @@ void read_initial_settings(struct All_variables *E)
   input_boolean("ggrd_interpol_time_lin",&tmp_int_in,"off",m);
   E->control.ggrd.time_hist.interpol_time_lin = (ggrd_boolean)tmp_int_in;
 
+  if(E->control.ggrd.vtop_control) /* this will override mat_control setting */
+    E->control.vbcs_file = 1;
 
   /* if set, will check the theta velocities from grid input for
      scaled (internal non dim) values of > 1e9. if found, those nodes will
@@ -986,6 +992,8 @@ void allocate_common_vars(E)
   E->buoyancy[j] = (double *) malloc((nno+1)*sizeof(double));
 
   E->gstress[j] = (float *) malloc((6*nno+1)*sizeof(float));
+  E->computed_gstress = 0;
+  
   // TWB do we need this anymore XXX
   //E->stress[j]   = (float *) malloc((12*nsf+1)*sizeof(float));
 
@@ -1030,6 +1038,9 @@ void allocate_common_vars(E)
   E->Have.T         = (float *)malloc((E->lmesh.noz+2)*sizeof(float));
   E->Have.V[1]      = (float *)malloc((E->lmesh.noz+2)*sizeof(float));
   E->Have.V[2]      = (float *)malloc((E->lmesh.noz+2)*sizeof(float));
+  E->Have.E 	    = (float *)malloc((E->lmesh.noz+2)*sizeof(float));
+  if(E->trace.track_strain)
+     E->Have.gamma  = (float *)malloc((E->lmesh.noz+2)*sizeof(float));
 
   E->sphere.gr = (double *)malloc((E->mesh.noz+1)*sizeof(double));
 
@@ -1109,6 +1120,11 @@ void allocate_common_vars(E)
     E->ID[i][j]  = (struct ID *)    malloc((nno+1)*sizeof(struct ID));
     E->VI[i][j]  = (float *)        malloc((nno+1)*sizeof(float));
     E->NODE[i][j] = (unsigned int *)malloc((nno+1)*sizeof(unsigned int));
+
+    if(E->viscosity.PDEPV){
+      E->VIY[i][j]           = (float *)malloc((nno+1)*sizeof(float));
+      E->SIGY[i][j]          = (float *)malloc((nno+1)*sizeof(float));
+    }
 
     nxyz = max(nox*noz,nox*noy);
     nxyz = 2*max(nxyz,noz*noy);
@@ -1624,7 +1640,10 @@ static void output_parse_optional(struct  All_variables *E)
     E->output.tracer = 0;
     E->output.comp_el = 0;
     E->output.comp_nd = 0;
+    E->output.strain_nd = 0; 
+    E->output.strain_el = 0; 
     E->output.heating = 0;
+    E->output.viscy = 0; 
 
     while(1) {
         /* get next field */
@@ -1682,8 +1701,14 @@ static void output_parse_optional(struct  All_variables *E)
             E->output.comp_el = 1;
         else if(strcmp(prev, "comp_nd")==0)
             E->output.comp_nd = 1;
+        else if(strcmp(prev, "strain_nd")==0)
+            E->output.strain_nd = 1;
+        else if(strcmp(prev, "strain_el")==0)
+            E->output.strain_el = 1;
         else if(strcmp(prev, "heating")==0)
             E->output.heating = 1;
+        else if(strcmp(prev, "viscy")==0)
+            E->output.viscy = 1; 
         else
             if(E->parallel.me == 0)
                 fprintf(stderr, "Warning: unknown field for output_optional: %s\n", prev);
@@ -2192,16 +2217,20 @@ void print_all_config_parameters(struct All_variables *E)
     fprintf(fp, "tracer_file=%s\n", E->trace.tracer_file);
     fprintf(fp, "tracer_flavors=%d\n", E->trace.nflavors);
     fprintf(fp, "ic_method_for_flavors=%d\n", E->trace.ic_method_for_flavors);
-    fprintf(fp, "z_interface=");
-    if(E->trace.nflavors > 0)
-    {
-      for(i=0; i<E->trace.nflavors-1;i++)
-        fprintf(fp, "%g,", E->trace.z_interface[i]);
-      fprintf(fp, "%g\n", E->trace.z_interface[E->trace.nflavors-1]);
-    }
-    else
-    {
-      fprintf(fp, "\n");
+
+    if(E->trace.ic_method_for_flavors!=99){
+      fprintf(fp, "z_interface=");
+
+      if(E->trace.nflavors > 0)
+      {
+        for(i=0; i<E->trace.nflavors-1;i++)
+          fprintf(fp, "%g,", E->trace.z_interface[i]);
+        fprintf(fp, "%g\n", E->trace.z_interface[E->trace.nflavors-1]);
+      }
+      else
+      {
+        fprintf(fp, "\n");
+      }
     }
     fprintf(fp, "itracer_warnings=%d\n", E->trace.itracer_warnings);
     fprintf(fp, "regular_grid_deltheta=%g\n", E->trace.deltheta[0]);
@@ -2263,6 +2292,19 @@ void print_all_config_parameters(struct All_variables *E)
     {
       fprintf(fp, "\n");
     }
+
+    fprintf(fp, "viscTe=");
+    if(E->viscosity.num_mat > 0)
+    {
+      for(i=0; i<E->viscosity.num_mat-1;i++)
+        fprintf(fp, "%g,", E->viscosity.Te[i]);
+      fprintf(fp, "%g\n", E->viscosity.Te[E->viscosity.num_mat-1]);
+    }
+    else
+    {
+      fprintf(fp, "\n");
+    }
+
     fprintf(fp, "viscZ=");
     if(E->viscosity.num_mat > 0)
     {

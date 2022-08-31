@@ -68,6 +68,19 @@ struct TRACE{
     int nflavors;
     int **ntracer_flavor[13];
 
+    /* tracer strain */
+    int track_strain; 
+    int erase_strain;
+    int nm_strain;
+    int plastic_strain; 
+    int s_heal; 
+    int s_limit; 
+    float B_heal;
+    float T_act;
+    float Tmweak;
+    double *strain_node[13];
+    double *strain_el[13];
+
     int ic_method_for_flavors;
     double *z_interface;
 

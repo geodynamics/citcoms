@@ -490,7 +490,7 @@ void compute_nodal_stress(struct All_variables *E,
 
   /* replace boundary stresses with boundary conditions (if specified) */
   stress_conform_bcs(E);
-
+  E->computed_gstress = 1;
 }
 
 

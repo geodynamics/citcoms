@@ -89,7 +89,9 @@ gzFile gzdir_output_open(char *,char *);
 
 void gzdir_output(struct All_variables *, int );
 void gzdir_output_comp_nd(struct All_variables *, int);
+void gzdir_output_strain_nd(struct All_variables *, int);
 void gzdir_output_comp_el(struct All_variables *, int);
+void gzdir_output_strain_el(struct All_variables *, int);
 void gzdir_output_coord(struct All_variables *);
 void gzdir_output_mat(struct All_variables *);
 void gzdir_output_velo_temp(struct All_variables *, int);
@@ -102,6 +104,7 @@ void gzdir_output_horiz_avg(struct All_variables *, int);
 void gzdir_output_tracer(struct All_variables *, int);
 void gzdir_output_pressure(struct All_variables *, int);
 void gzdir_output_heating(struct All_variables *, int);
+void gzdir_output_visc_yield(struct All_variables *, int);
 
 
 void sub_netr(float, float, float, float *, float *, double *);
@@ -204,8 +207,18 @@ void gzdir_output(struct All_variables *E, int out_cycles)
   if (E->output.comp_el && E->composition.on)
       gzdir_output_comp_el(E, out_cycles);
 
+  if (E->output.strain_nd && E->trace.track_strain)
+      gzdir_output_strain_nd(E, out_cycles);
+
+  if (E->output.strain_el && E->trace.track_strain)
+      gzdir_output_strain_el(E, out_cycles);
+
   if(E->output.heating && E->control.disptn_number != 0)
       gzdir_output_heating(E, out_cycles);
+
+  if(E->output.viscy && E->viscosity.PDEPV){
+      gzdir_output_visc_yield(E, out_cycles);
+  }
 
   return;
 }
@@ -766,6 +779,73 @@ void gzdir_output_visc(struct All_variables *E, int cycles)
   return;
 }
 
+void gzdir_output_visc_yield(struct All_variables *E, int cycles)
+{
+  int i, j;
+  char output_file[255];
+  gzFile gz1,gz2;
+  FILE *fp1;
+  int lev = E->mesh.levmax;
+  float ftmp;
+  /* for dealing with several processors */
+  MPI_Status mpi_stat;
+  int mpi_rc;
+  int mpi_inmsg, mpi_success_message = 1;
+
+  if(E->output.gzdir.vtk_io < 2){
+  /* Yield Viscosity ratio */
+    snprintf(output_file,255,
+             "%s/%d/viscy.%d.%d.gz", E->control.data_dir,
+             cycles,E->parallel.me, cycles);
+    gz1 = gzdir_output_open(output_file,"w");
+    for(j=1;j<=E->sphere.caps_per_proc;j++) {
+      gzprintf(gz1,"%3d %7d\n",j,E->lmesh.nno);
+      for(i=1;i<=E->lmesh.nno;i++)
+        gzprintf(gz1,"%.4e\n",E->VIY[lev][j][i]);
+    }
+    gzclose(gz1); 
+//    if(E->viscosity.strain_dep_plasticity){
+        snprintf(output_file,255,
+                 "%s/%d/sigy.%d.%d.gz", E->control.data_dir,
+                 cycles,E->parallel.me, cycles);
+        gz2 = gzdir_output_open(output_file,"w");
+        for(j=1;j<=E->sphere.caps_per_proc;j++) {
+          gzprintf(gz2,"%3d %7d\n",j,E->lmesh.nno);
+          for(i=1;i<=E->lmesh.nno;i++)
+            gzprintf(gz2,"%.4e\n",E->SIGY[lev][j][i]);
+        }
+        gzclose(gz2); 
+//    }
+  }else{
+    if(E->output.gzdir.vtk_io == 2)
+      parallel_process_sync(E);
+      /* new legacy VTK */
+    get_vtk_filename(output_file,0,E,cycles);
+    if((E->parallel.me == 0) || (E->output.gzdir.vtk_io == 3)){
+      fp1 = output_open(output_file,"a");
+      myfprintf(fp1,"SCALARS log10(viscy) float 1\n");
+      myfprintf(fp1,"LOOKUP_TABLE default\n");
+    }else{
+      /* if not first, wait for previous */
+      mpi_rc = MPI_Recv(&mpi_inmsg, 1, MPI_INT, (E->parallel.me-1), 0, E->parallel.world, &mpi_stat);
+      /* open for append */
+      fp1 = output_open(output_file,"a");
+    }
+    for(j=1; j<= E->sphere.caps_per_proc;j++)
+      for(i=1;i<=E->lmesh.nno;i++){
+        ftmp = log10(E->VIY[lev][j][i]);
+        if(fabs(ftmp) < 5e-7)ftmp = 0.0;
+        if(be_write_float_to_file(&ftmp,1,fp1)!=1)BE_WERROR;
+      }
+    fclose(fp1);fflush(fp1);            /* close file and flush buffer */
+    if(E->output.gzdir.vtk_io == 2)
+      if(E->parallel.me <  E->parallel.nproc-1){
+        mpi_rc = MPI_Send(&mpi_success_message, 1, MPI_INT, (E->parallel.me+1), 0, E->parallel.world);
+      }
+  }
+  return;
+}
+
 #ifdef CITCOM_ALLOW_ANISOTROPIC_VISC
 
 /*
@@ -1027,7 +1107,12 @@ void gzdir_output_horiz_avg(struct All_variables *E, int cycles)
 	    cycles,E->parallel.me, cycles);
     fp1=gzdir_output_open(output_file,"w");
     for(j=1;j<=E->lmesh.noz;j++)  { /* format: r <T> <vh> <vr> (<C>) */
-        gzprintf(fp1,"%.4e %.4e %.4e %.4e",E->sx[1][3][j],E->Have.T[j],E->Have.V[1][j],E->Have.V[2][j]);
+        gzprintf(fp1,"%.4e %.4e %.4e %.4e %.4e",E->sx[1][3][j],E->Have.T[j],
+		E->Have.V[1][j],E->Have.V[2][j],E->Have.E[j]);
+
+        if (E->trace.track_strain){
+            gzprintf(fp1," %.4e", E->Have.gamma[j]);
+        }
 
         if (E->composition.on) {
             int n;
@@ -1236,6 +1321,86 @@ void gzdir_output_comp_el(struct All_variables *E, int cycles)
 	  for(k=0;k<E->composition.ncomp;k++)
             gzprintf(fp1,"%.6e ",E->composition.comp_el[j][k][i]);
 	  gzprintf(fp1,"\n");
+        }
+    }
+
+    gzclose(fp1);
+    return;
+}
+
+void gzdir_output_strain_nd(struct All_variables *E, int cycles)
+{
+  int i, j, k;
+  char output_file[255],message[255];
+  gzFile gz1;
+  FILE *fp1;
+  float ftmp;
+  /* for dealing with several processors */
+  MPI_Status mpi_stat;
+  int mpi_rc;
+  int mpi_inmsg, mpi_success_message = 1;
+
+  if(E->output.gzdir.vtk_io < 2){
+    snprintf(output_file,255,"%s/%d/strain_nd.%d.%d.gz",
+             E->control.data_dir,cycles,
+             E->parallel.me, cycles);
+    gz1 = gzdir_output_open(output_file,"w");
+    for(j=1;j<=E->sphere.caps_per_proc;j++) {
+      gzprintf(gz1,"%3d %7d\n",
+               j, E->lmesh.nno);
+      for(i=1;i<=E->lmesh.nno;i++) {
+          gzprintf(gz1,"%.6e ",E->trace.strain_node[j][i]);
+        gzprintf(gz1,"\n");
+      }
+    }
+    gzclose(gz1);
+  }else{/* new legacy VTK */
+    if(E->output.gzdir.vtk_io == 2)
+      parallel_process_sync(E);
+    get_vtk_filename(output_file,0,E,cycles);
+    if((E->output.gzdir.vtk_io==3) || (E->parallel.me == 0)){
+      fp1 = output_open(output_file,"a");
+      if(E->composition.ncomp > 4)
+        myerror(E,"vtk out error: ncomp out of bounds (needs to be < 4)");
+      sprintf(message,"SCALARS strain float\n");
+      myfprintf(fp1,message);
+      myfprintf(fp1,"LOOKUP_TABLE default\n");
+    }else{                      /* serial wait */
+      mpi_rc = MPI_Recv(&mpi_inmsg, 1, MPI_INT, (E->parallel.me-1), 0, E->parallel.world, &mpi_stat);
+      fp1 = output_open(output_file,"a");
+    }
+    for(j=1; j<= E->sphere.caps_per_proc;j++)
+      for(i=1;i<=E->lmesh.nno;i++){
+        ftmp = E->trace.strain_node[j][i];
+        if(be_write_float_to_file(&ftmp,1,fp1)!=1)BE_WERROR;
+      }
+    fclose(fp1);fflush(fp1);            /* close file and flush buffer */
+    if(E->output.gzdir.vtk_io == 2) /* serial */
+      if(E->parallel.me <  E->parallel.nproc-1){
+        mpi_rc = MPI_Send(&mpi_success_message, 1, MPI_INT, (E->parallel.me+1), 0, E->parallel.world);
+      }
+  }
+  return;
+}
+
+void gzdir_output_strain_el(struct All_variables *E, int cycles)
+{
+    int i, j, k;
+    char output_file[255];
+    gzFile fp1;
+
+    snprintf(output_file,255,"%s/%d/strain_el.%d.%d.gz", E->control.data_dir,
+            cycles,E->parallel.me, cycles);
+    fp1 = gzdir_output_open(output_file,"w");
+
+    for(j=1;j<=E->sphere.caps_per_proc;j++) {
+        gzprintf(fp1,"%3d %7d %.5e \n",
+                j, E->lmesh.nel,
+                E->monitor.elapsed_time);
+
+        for(i=1;i<=E->lmesh.nel;i++) {
+          gzprintf(fp1,"%.6e ",E->trace.strain_el[j][i]);
+          gzprintf(fp1,"\n");
         }
     }
 

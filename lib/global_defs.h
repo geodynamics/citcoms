@@ -369,6 +369,8 @@ struct HAVE {    /* horizontal averages */
     float *T;
     float *V[4];
     float **C;
+    float *E;
+    float *gamma;
 };
 
 struct SLICE {    /* horizontally sliced data, including topography */
@@ -538,7 +540,7 @@ struct CONTROL {
   struct ggrd_master ggrd;
   float *surface_rayleigh;
   int ggrd_allow_mixed_vbcs,ggrd_comp_smooth,ggrd_tinit_nl_scale;
-  int ggrd_vtop_euler,ggrd_smooth_stages;
+  int ggrd_vtop_euler,ggrd_smooth_stages, ggrd_tinit_no_tomo;
   char ggrd_mat_depth_file[1000];
   ggrd_boolean ggrd_mat_is_3d;
   int ggrd_mat_limit_prefactor,ggrd_mat_is_code;
@@ -563,6 +565,8 @@ struct CONTROL {
 
     int print_convergence;
     int sdepv_print_convergence;
+
+    int stiff_cont;
 
 };
 
@@ -664,7 +668,10 @@ struct Output {
     int tracer;       /* whether to output tracer coordinate */
     int comp_el;      /* whether to output composition at elements */
     int comp_nd;      /* whether to output composition at nodes */
+    int strain_nd;
+    int strain_el;
     int heating;      /* whether to output heating terms at elements */
+    int viscy; 	      /* whether to output yielding information */
 
 
   /* flags used by GZDIR */
@@ -793,6 +800,8 @@ struct All_variables {
     float *NP[NCS];
   //float *stress[NCS];
     float *gstress[NCS];
+  int computed_gstress;
+
     float *Fas670[NCS],*Fas410[NCS],*Fas670_b[NCS],*Fas410_b[NCS];
     float *Fascmb[NCS],*Fascmb_b[NCS];
 
@@ -806,6 +815,9 @@ struct All_variables {
     float *VIn3[MAX_LEVELS][NCS],*EVIn3[MAX_LEVELS][NCS];
     unsigned char *avmode[MAX_LEVELS][NCS];
 #endif
+
+    float *VIY[MAX_LEVELS][NCS]; /* yield viscosity per element */
+    float *SIGY[MAX_LEVELS][NCS]; /* yield stress per element */
 
 
     int num_zero_resid[MAX_LEVELS][NCS];

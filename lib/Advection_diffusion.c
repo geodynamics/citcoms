@@ -64,7 +64,7 @@ static void element_residual(struct All_variables *E, int el,
 static void filter(struct All_variables *E);
 static void process_heating(struct All_variables *E, int psc_pass);
 
-/* =========================================
+/* ============================================
    Generic adv-diffusion for temperature field.
    ============================================ */
 

@@ -198,6 +198,9 @@ void tic_input(struct All_variables *E)
 
       /* non-linear scaling, downweighing negative anomalies? */
       input_boolean("ggrd_tinit_nl_scale",&(E->control.ggrd_tinit_nl_scale),"off",E->parallel.me);
+
+      /* Don't assume the data is tomographic, use T-grd file from previous CitcomS model */
+      input_boolean("ggrd_tinit_no_tomo",&(E->control.ggrd_tinit_no_tomo),"off",E->parallel.me);
     
 #else
       fprintf(stderr,"tic_method 4 only works for USE_GGRD compiled code\n");

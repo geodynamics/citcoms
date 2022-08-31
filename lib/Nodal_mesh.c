@@ -272,6 +272,44 @@ void visc_from_gint_to_nodes(E,VE,VN,lev)
 
 /* 
 
+Interpolate viscosity for one cap to nodes 
+
+*/
+
+void viscy_from_element_to_nodes(E,VE,VN,lev)
+  struct All_variables *E;
+  float **VE,**VN;
+  int lev;
+{
+  int m,e,i,j,k,n,off,lim;
+  const int nsd=E->mesh.nsd;
+  const int vpts=vpoints[nsd];
+  const int ends=enodes[nsd];
+
+  for (m=1;m<=E->sphere.caps_per_proc;m++)
+    for(i=1;i<=E->lmesh.NNO[lev];i++)
+      VN[m][i] = 0.0;
+
+  for (m=1;m<=E->sphere.caps_per_proc;m++)
+    for(e=1;e<=E->lmesh.NEL[lev];e++)   {
+
+      for(j=1;j<=ends;j++)                {
+        n = E->IEN[lev][m][e].node[j];
+        VN[m][n] += E->TWW[lev][m][e].node[j] * VE[m][e];
+      }
+    }
+
+  (E->exchange_node_f)(E,VN,lev);
+
+  for(m=1;m<=E->sphere.caps_per_proc;m++)
+    for(n=1;n<=E->lmesh.NNO[lev];n++)
+      VN[m][n] *= E->MASS[lev][m][n];
+
+  return;
+}
+
+/* 
+
 interpolate viscosity from nodes to element integration points
 
  */

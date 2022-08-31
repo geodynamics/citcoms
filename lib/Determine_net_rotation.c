@@ -161,8 +161,7 @@ double determine_model_net_rotation(struct All_variables *E,double *omega)
   vw = 0.0;
   for (i=0;i < elz;i++) {	/* regular 0..n-1 loop */
     /* solve layer NR */
-    //lamp = determine_netr_tp(ddummy,ddummy,ddummy,ddummy,ddummy,2,(acoef+i*9),(lomega+i*3));
-    determine_netr_tp(ddummy,ddummy,ddummy,ddummy,ddummy,2,(acoef+i*9),(lomega+i*3));
+    lamp = determine_netr_tp(ddummy,ddummy,ddummy,ddummy,ddummy,2,(acoef+i*9),(lomega+i*3));
     r1 = E->sx[1][3][E->ien[1][i+1].node[1]]; /* nodal radii for the
 						 i-th element, this
 						 assumes that there
