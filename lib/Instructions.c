@@ -713,7 +713,7 @@ void read_initial_settings(struct All_variables *E)
 
   if(E->control.inv_gruneisen != 0) {
       /* which compressible solver to use: "cg" or "bicg" */
-      input_string("uzawa",E->control.uzawa,"cg",m);
+        input_string("uzawa",E->control.uzawa,"cg",m);
       if(strcmp(E->control.uzawa, "cg") == 0) {
           /* more convergence parameters for "cg" */
           input_int("compress_iter_maxstep",&(E->control.compress_iter_maxstep),"100",m);

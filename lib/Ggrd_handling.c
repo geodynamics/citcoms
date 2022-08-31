@@ -810,7 +810,7 @@ and free mechanical BCs
 
 
 if ggrd_vtop_euler is true, will look for plate codes and rotation
-vector file and prescribe Euler vectors instead
+vector file and prescribe Euler vectors instead   
 
 if ggrd_read_age is on, will also expect ages
 
