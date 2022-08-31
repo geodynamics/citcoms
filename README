@@ -3,7 +3,8 @@ See the file INSTALL and the Manual for building and installation instructions.
 See the file NEWS for new features and bug fixes of this release.
 
 The Manual can be downloaded at:
-http://www.geodynamics.org/cig/software/packages/mc/citcoms/citcoms.pdf
+
+https://github.com/geodynamics/citcoms/blob/master/doc/citcoms-manual.pdf
 
 Please send all bug reports by electronic mail to:
     cig-mc@geodynamics.org
