@@ -4,9 +4,20 @@ See the file NEWS for new features and bug fixes of this release.
 
 The Manual can be downloaded at:
 
-https://github.com/geodynamics/citcoms/blob/master/doc/citcoms-manual.pdf
+    https://github.com/geodynamics/citcoms/blob/master/doc/citcoms-manual.pdf
 
-Please send all bug reports by electronic mail to:
-    cig-mc@geodynamics.org
+For bug reports, please open an issue.
 
-CitcomS is free software.  See the file COPYING for copying conditions.
+For help, please post to the mantle convection forum:
+    https://community.geodynamics.org/c/mantle-convection/12
+    
+CitcomS v3.3.1 can be cited as:
+    Moresi, Louis, Zhong, Shijie, Han, Lijie, Conrad, Clint, Tan, Eh, Gurnis, Michael, Choi, Eunseo, Thoutireddy, 
+    Pururav, Manea, Vlad, McNamara, Allen, Becker, Thorsten, Leng, Wei, & Armendariz, Luis. (2014). CitcomS v3.3.1 (v3.3.1). 
+    Zenodo. https://doi.org/10.5281/zenodo.7271920
+
+Full citation information can be found on the CIG website:
+    https://geodynamics.org/resources/citcoms/howtocite
+
+CitcomS is free software published under the GPL2.0 license.  See the file COPYING for copying conditions.
+
