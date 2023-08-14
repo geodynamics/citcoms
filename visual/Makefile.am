@@ -137,9 +137,18 @@ project_geoid_SOURCES = project_geoid.c
 
 if COND_HDF5
     bin_PROGRAMS += h5tocap h5tovelo
+
     h5tocap_SOURCES = h5tocap.c h5util.c h5util.h
+    h5tocap_CFLAGS = $(HDF5_CFLAGS)
+    h5tocap_CPPFLAGS = $(HDF5_CPPFLAGS)
+    h5tocap_LDFLAGS = $(HDF5_LDFLAGS)
+    h5tocap_LDADD = $(HDF5_LIBS)
+
     h5tovelo_SOURCES = h5tovelo.c h5util.c h5util.h
-    h5tovelo_LDADD = $(LIBHDF5)
+    h5tovelo_CFLAGS = $(HDF5_CFLAGS)
+    h5tovelo_CPPFLAGS = $(HDF5_CPPFLAGS)
+    h5tovelo_LDFLAGS = $(HDF5_LDFLAGS)
+    h5tovelo_LDADD = $(HDF5_LIBS)
 endif
 
 CLEANFILES = $(nodist_visual_DATA)

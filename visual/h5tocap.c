@@ -119,7 +119,7 @@ int main(int argc, char *argv[])
      * Read model parameters from file
      */
 
-    input = H5Gopen(h5file, "input");
+    input = H5Gopen(h5file, "input", H5P_DEFAULT);
     if (input < 0)
     {
         fprintf(stderr, "Could not open /input group in \"%s\"\n", filename);

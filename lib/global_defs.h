@@ -49,7 +49,7 @@ to functions across the whole filespace of CITCOM.
 
 
 
-#ifdef USE_HDF5
+#ifdef HAVE_HDF5
 #include "hdf5.h"
 #endif
 
@@ -713,7 +713,7 @@ struct CITCOM_GNOMONIC {
 };
 
 
-#ifdef USE_HDF5
+#ifdef HAVE_HDF5
 #include "hdf5_related.h"
 #endif
 #include "tracer_defs.h"
@@ -729,7 +729,7 @@ struct All_variables {
     FILE *fptime;
     FILE *fp_out;
 
-#ifdef USE_HDF5
+#ifdef HAVE_HDF5
     struct HDF5_INFO hdf5;
 #endif
     struct HAVE Have;
