@@ -35,6 +35,8 @@ bin/CitcomSRegional
 bin/citcoms
 bin/mpipycitcoms
 bin/pycitcoms
+visual/h5tocap
+visual/h5tovelo
 visual/project_geoid
 Py2C/Py2C
 
