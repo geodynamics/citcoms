@@ -206,8 +206,9 @@ void horizontal_bc(struct All_variables *E,float *BC[],int ROW,int dirn,float va
   else
       rowl = E->lmesh.NOZ[level];
 
-  if ( ( (ROW==1) && (E->parallel.me_loc[3]==0) ) ||
-       ( (ROW==E->mesh.NOZ[level]) && (E->parallel.me_loc[3]==E->parallel.nprocz-1) ) ) {
+  //if ( ( (ROW==1) && (E->parallel.me_loc[3]==0) ) ||( (ROW==E->mesh.NOZ[level]) && (E->parallel.me_loc[3]==E->parallel.nprocz-1) ) ) {
+  /* this seems better? */
+  if ( ( (rowl==1) && (E->parallel.me_loc[3]==0) ) ||( (rowl==E->lmesh.NOZ[level]) && (E->parallel.me_loc[3]==E->parallel.nprocz-1) ) ) {
 
     /* turn bc marker to zero */
     if (onoff == 0)          {

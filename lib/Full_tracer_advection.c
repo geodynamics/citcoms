@@ -1101,7 +1101,7 @@ void full_get_velocity(struct All_variables *E,
     velocity_vector[2]=vy[1]*shape[1]+vy[2]*shape[2]+shape[3]*vy[3]+
         vy[4]*shape[4]+vy[5]*shape[5]+shape[6]*vy[6];
     velocity_vector[3]=vz[1]*shape[1]+vz[2]*shape[2]+shape[3]*vz[3]+
-        vz[4]*shape[4]+vz[5]*shape[5]+shape[6]*vz[6];
+      vz[4]*shape[4]+vz[5]*shape[5]+shape[6]*vz[6];
 
 
 
