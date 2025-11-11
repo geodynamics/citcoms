@@ -31,9 +31,6 @@ lib_LTLIBRARIES =
 noinst_LIBRARIES += libCitcomS.a
 
 AM_CPPFLAGS =
-if COND_HDF5
-    AM_CPPFLAGS += -DUSE_HDF5
-endif
 
 CUDA_SOURCES =
 
